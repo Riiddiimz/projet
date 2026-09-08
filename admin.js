@@ -25,9 +25,17 @@ function openAdmin(){
     renderAdmin();
 
 
-    adminModal.classList.add(
-        "visible"
-    );
+    const modal =
+        document.getElementById(
+            "adminModal"
+        );
+
+
+    if(modal){
+
+        modal.style.display =
+            "flex";
+    }
 }
 
 
@@ -37,9 +45,17 @@ function openAdmin(){
 
 function closeAdmin(){
 
-    adminModal.classList.remove(
-        "visible"
-    );
+    const modal =
+        document.getElementById(
+            "adminModal"
+        );
+
+
+    if(modal){
+
+        modal.style.display =
+            "none";
+    }
 }
 
 
@@ -64,8 +80,9 @@ function renderAdmin(){
 
     const container =
         document.getElementById(
-            "adminContent"
+            "adminList"
         );
+
 
     if(!container) return;
 
@@ -105,7 +122,10 @@ function renderAdminUsers(
     container.innerHTML = "";
 
 
-    if(!users || users.length === 0){
+    if(
+        !users ||
+        users.length === 0
+    ){
 
         container.innerHTML =
             `
@@ -147,10 +167,22 @@ function renderAdminUsers(
             avatar.className =
                 "admin-user-avatar";
 
-            avatar.innerHTML =
-                avatarInnerHtml(
-                    user
-                );
+
+            if(
+                typeof avatarInnerHtml ===
+                "function"
+            ){
+
+                avatar.innerHTML =
+                    avatarInnerHtml(
+                        user
+                    );
+
+            }else{
+
+                avatar.textContent =
+                    "👤";
+            }
 
 
             const text =
@@ -187,11 +219,22 @@ function renderAdminUsers(
                     : "Hors ligne";
 
 
-            text.appendChild(name);
-            text.appendChild(status);
+            text.appendChild(
+                name
+            );
 
-            info.appendChild(avatar);
-            info.appendChild(text);
+            text.appendChild(
+                status
+            );
+
+
+            info.appendChild(
+                avatar
+            );
+
+            info.appendChild(
+                text
+            );
 
 
             const actions =
@@ -205,13 +248,19 @@ function renderAdminUsers(
 
             /*
              * Ne pas afficher les actions
-             * contre le compte administrateur.
+             * contre le compte administrateur
+             * ou un autre administrateur.
              */
 
             if(
+                currentUser &&
                 user.id !== currentUser.id &&
                 !user.isAdmin
             ){
+
+                /* =========================
+                   MUTE
+                ========================= */
 
                 const muteButton =
                     document.createElement(
@@ -233,6 +282,10 @@ function renderAdminUsers(
                     );
 
 
+                /* =========================
+                   CAMERA
+                ========================= */
+
                 const cameraButton =
                     document.createElement(
                         "button"
@@ -252,6 +305,10 @@ function renderAdminUsers(
                         user.id
                     );
 
+
+                /* =========================
+                   EXPULSER
+                ========================= */
 
                 const kickButton =
                     document.createElement(
@@ -287,10 +344,18 @@ function renderAdminUsers(
             }
 
 
-            row.appendChild(info);
-            row.appendChild(actions);
+            row.appendChild(
+                info
+            );
 
-            container.appendChild(row);
+            row.appendChild(
+                actions
+            );
+
+
+            container.appendChild(
+                row
+            );
         }
     );
 }
@@ -383,21 +448,35 @@ function renderAdminRooms(
             count.className =
                 "admin-user-status";
 
+
+            const usersCount =
+                room.usersCount ??
+                room.userCount ??
+                room.users?.length ??
+                0;
+
+
             count.textContent =
-                (
-                    room.usersCount ??
-                    room.userCount ??
-                    room.users?.length ??
-                    0
-                ) +
+                usersCount +
                 " participant(s)";
 
 
-            text.appendChild(name);
-            text.appendChild(count);
+            text.appendChild(
+                name
+            );
 
-            info.appendChild(icon);
-            info.appendChild(text);
+            text.appendChild(
+                count
+            );
+
+
+            info.appendChild(
+                icon
+            );
+
+            info.appendChild(
+                text
+            );
 
 
             const actions =
@@ -435,10 +514,18 @@ function renderAdminRooms(
             );
 
 
-            row.appendChild(info);
-            row.appendChild(actions);
+            row.appendChild(
+                info
+            );
 
-            container.appendChild(row);
+            row.appendChild(
+                actions
+            );
+
+
+            container.appendChild(
+                row
+            );
         }
     );
 }
@@ -486,9 +573,12 @@ function adminKick(userId){
 
 
     const user =
-        findUserById(
-            userId
-        );
+        typeof findUserById ===
+        "function"
+            ? findUserById(
+                userId
+            )
+            : null;
 
 
     const username =
@@ -555,34 +645,111 @@ function adminDeleteRoom(roomId){
 
 
 /* =========================================================
-   FERMETURE DES MODALES EN CLIQUANT A L'EXTERIEUR
+   FERMETURE DES MODALES
 ========================================================= */
 
-function closeModalOutside(event){
+function closeModalOutside(
+    event,
+    modalId
+){
+
+    if(!event) return;
+
+
+    /*
+     * Si aucun modalId n'est fourni,
+     * on utilise l'ancien comportement.
+     */
+
+    if(!modalId){
+
+        if(
+            event.target ===
+            document.getElementById(
+                "profileModal"
+            )
+        ){
+
+            closeProfile();
+
+            return;
+        }
+
+
+        if(
+            event.target ===
+            document.getElementById(
+                "userProfileModal"
+            )
+        ){
+
+            closeUserProfile();
+
+            return;
+        }
+
+
+        if(
+            event.target ===
+            document.getElementById(
+                "adminModal"
+            )
+        ){
+
+            closeAdmin();
+
+            return;
+        }
+
+
+        return;
+    }
+
+
+    /*
+     * Nouveau fonctionnement :
+     * l'index.html transmet directement
+     * l'identifiant de la modale.
+     */
 
     if(
-        event.target ===
-        profileModal
+        event.target.id !==
+        modalId
+    ){
+
+        return;
+    }
+
+
+    if(
+        modalId ===
+        "profileModal"
     ){
 
         closeProfile();
+
+        return;
     }
 
 
     if(
-        event.target ===
-        otherUserProfileModal
+        modalId ===
+        "userProfileModal"
     ){
 
         closeUserProfile();
+
+        return;
     }
 
 
     if(
-        event.target ===
-        adminModal
+        modalId ===
+        "adminModal"
     ){
 
         closeAdmin();
+
+        return;
     }
 }
