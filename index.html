@@ -176,7 +176,7 @@ button{
 }
 
 /* =========================================================
-   TOPBAR
+   TOPBAR - COMMUN
 ========================================================= */
 
 .topbar{
@@ -258,7 +258,7 @@ button{
 }
 
 /* =========================================================
-   LOBBY
+   LOBBY - DESKTOP
 ========================================================= */
 
 .lobby,
@@ -337,7 +337,7 @@ button{
 }
 
 /* =========================================================
-   ROOM CARDS
+   ROOM CARDS - DESKTOP
 ========================================================= */
 
 .room-list{
@@ -502,7 +502,7 @@ button{
 }
 
 /* =========================================================
-   CHAT
+   CHAT - COMMUN
 ========================================================= */
 
 .chat-sidebar,
@@ -515,7 +515,7 @@ button{
     z-index:80;
     position:fixed;
     right:16px;
-    bottom:78px;
+    bottom:16px;
     left:auto;
     width:min(360px,calc(100vw - 28px));
     height:min(560px,72dvh);
@@ -626,28 +626,6 @@ button{
     color:white;
 }
 
-/* =========================================================
-   GENERAL CHAT BUTTON DESKTOP
-========================================================= */
-
-.general-chat-toggle{
-    position:fixed;
-    right:16px;
-    bottom:16px;
-    height:45px;
-    border:1px solid var(--border);
-    border-radius:23px;
-    background:rgba(17,21,33,.96);
-    color:white;
-    padding:0 16px;
-    z-index:81;
-    box-shadow:0 8px 30px rgba(0,0,0,.35);
-}
-
-.general-chat-toggle:hover{
-    background:var(--panel3);
-}
-
 .chat-badge{
     min-width:19px;
     height:19px;
@@ -672,7 +650,16 @@ button{
 }
 
 /* =========================================================
-   ROOM
+   GENERAL CHAT
+   PC : aucun bouton flottant
+========================================================= */
+
+.general-chat-toggle{
+    display:none !important;
+}
+
+/* =========================================================
+   ROOM - DESKTOP
 ========================================================= */
 
 .room-screen{
@@ -749,12 +736,8 @@ button{
     border-color:var(--danger);
 }
 
-.room-chat-mobile-button{
-    display:none;
-}
-
 /* =========================================================
-   ROOM BOTTOM CONTROLS
+   ROOM BOTTOM CONTROLS DESKTOP
 ========================================================= */
 
 .room-bottom-controls{
@@ -792,17 +775,14 @@ button{
     font-size:17px;
 }
 
+/* Chat salon PC : caché car pas de bouton demandé */
 .room-bottom-controls .chat-room-btn{
-    width:46px;
-    height:46px;
-    border:1px solid var(--border);
-    border-radius:50%;
-    background:var(--panel2);
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    position:relative;
+    display:none;
+}
+
+/* Bouton Chat mobile */
+.room-chat-mobile-button{
+    display:none;
 }
 
 /* =========================================================
@@ -1129,6 +1109,10 @@ button{
         overflow:hidden;
     }
 
+    /* =====================================================
+       TOPBAR MOBILE
+    ===================================================== */
+
     .topbar{
         flex:0 0 58px;
         height:58px;
@@ -1148,9 +1132,16 @@ button{
         padding:0 9px;
     }
 
-    /* =========================
-       LOBBY
-    ========================= */
+    .profile-name{
+        max-width:100px;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    /* =====================================================
+       LOBBY MOBILE
+    ===================================================== */
 
     .lobby{
         display:block;
@@ -1166,7 +1157,7 @@ button{
         min-height:0;
         overflow-y:auto;
         overflow-x:hidden;
-        padding:15px 12px 30px;
+        padding:15px 12px 90px;
         -webkit-overflow-scrolling:touch;
     }
 
@@ -1210,9 +1201,34 @@ button{
         display:none;
     }
 
-    /* =========================
+    /* =====================================================
+       BOUTON GENERAL MOBILE
+    ===================================================== */
+
+    .general-chat-toggle{
+        display:flex !important;
+        position:fixed;
+        right:12px;
+        bottom:max(12px,env(safe-area-inset-bottom));
+        height:45px;
+        border:1px solid var(--border);
+        border-radius:23px;
+        background:rgba(17,21,33,.97);
+        color:white;
+        padding:0 16px;
+        align-items:center;
+        justify-content:center;
+        z-index:81;
+        box-shadow:0 8px 30px rgba(0,0,0,.4);
+    }
+
+    .general-chat-toggle:hover{
+        background:var(--panel3);
+    }
+
+    /* =====================================================
        CHAT MOBILE
-    ========================= */
+    ===================================================== */
 
     .chat-sidebar,
     .room-chat{
@@ -1229,8 +1245,8 @@ button{
         border-radius:17px 17px 0 0;
         transform:translateY(105%);
         transition:transform .22s ease;
-        box-shadow:0 -15px 50px rgba(0,0,0,.55);
         pointer-events:none;
+        box-shadow:0 -15px 50px rgba(0,0,0,.55);
     }
 
     .chat-sidebar.mobile-open,
@@ -1251,14 +1267,9 @@ button{
         display:block;
     }
 
-    /* Le bouton général n'existe plus sur mobile */
-    .general-chat-toggle{
-        display:none !important;
-    }
-
-    /* =========================
-       ROOM
-    ========================= */
+    /* =====================================================
+       ROOM MOBILE
+    ===================================================== */
 
     .room-screen{
         height:calc(100dvh - 58px);
@@ -1280,7 +1291,7 @@ button{
 
     .room-title{
         min-width:0;
-        max-width:55%;
+        max-width:75%;
     }
 
     .room-name{
@@ -1291,10 +1302,14 @@ button{
         font-size:10px;
     }
 
-    /* On masque complètement les anciens contrôles du header */
+    /* On masque les anciens contrôles du header */
     .room-header .room-actions{
         display:none;
     }
+
+    /* =====================================================
+       VIDEO MOBILE
+    ===================================================== */
 
     .video-grid{
         padding:8px;
@@ -1331,9 +1346,12 @@ button{
         font-size:17px;
     }
 
-    /* =========================
-       CONTROLES BAS
-    ========================= */
+    /* =====================================================
+       CONTROLES MOBILE
+       
+       Micro + caméra + quitter ensemble.
+       Aucun chat dans ce groupe.
+    ===================================================== */
 
     .room-bottom-controls{
         left:50%;
@@ -1343,15 +1361,49 @@ button{
     }
 
     .room-bottom-controls .media-btn,
-    .room-bottom-controls .leave-btn,
-    .room-bottom-controls .chat-room-btn{
+    .room-bottom-controls .leave-btn{
         width:42px;
         height:42px;
     }
 
-    /* =========================
-       MODALS
-    ========================= */
+    /* Ancien bouton chat central supprimé */
+    .room-bottom-controls .chat-room-btn{
+        display:none !important;
+    }
+
+    /* =====================================================
+       BOUTON CHAT SALON MOBILE
+       
+       Unique bouton chat, en bas à droite.
+    ===================================================== */
+
+    .room-chat-mobile-button{
+        position:fixed;
+        right:12px;
+        bottom:max(12px,env(safe-area-inset-bottom));
+        width:auto;
+        min-width:45px;
+        height:45px;
+        padding:0 14px;
+        border:1px solid var(--border);
+        border-radius:23px;
+        background:rgba(17,21,33,.97);
+        color:white;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:4px;
+        z-index:81;
+        box-shadow:0 8px 30px rgba(0,0,0,.4);
+    }
+
+    .room-chat-mobile-button:hover{
+        background:var(--panel3);
+    }
+
+    /* =====================================================
+       MODALS MOBILE
+    ===================================================== */
 
     .modal{
         padding:10px;
@@ -1680,7 +1732,7 @@ button{
                 class="video-grid"
             ></div>
 
-            <!-- CONTROLES EN BAS -->
+            <!-- CONTROLES BAS -->
 
             <div class="room-bottom-controls">
 
@@ -1703,23 +1755,6 @@ button{
                 </button>
 
                 <button
-                    id="roomBottomChatButton"
-                    class="chat-room-btn"
-                    onclick="toggleRoomChat()"
-                    title="Chat du salon"
-                >
-                    💬
-
-                    <span
-                        id="roomChatUnread"
-                        class="chat-badge"
-                    >
-                        0
-                    </span>
-
-                </button>
-
-                <button
                     class="leave-btn"
                     onclick="leaveCurrentRoom()"
                     title="Quitter"
@@ -1730,6 +1765,27 @@ button{
             </div>
 
         </div>
+
+        <!-- =================================================
+             BOUTON CHAT MOBILE
+        ================================================== -->
+
+        <button
+            id="roomChatMobileButton"
+            class="room-chat-mobile-button"
+            onclick="toggleRoomChat()"
+            title="Chat du salon"
+        >
+            💬 Chat
+
+            <span
+                id="roomChatUnread"
+                class="chat-badge"
+            >
+                0
+            </span>
+
+        </button>
 
         <!-- CHAT SALON -->
 
@@ -1798,7 +1854,7 @@ button{
 ></div>
 
 <!-- =========================================================
-     BOUTON CHAT GENERAL PC
+     BOUTON CHAT GENERAL MOBILE
 ========================================================= -->
 
 <button
@@ -2077,6 +2133,15 @@ const videoGrid =
 
 const roomChatUnread =
     document.getElementById("roomChatUnread");
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+function isMobile(){
+
+    return window.innerWidth <= 700;
+}
 
 /* =========================================================
    UTILS
@@ -2710,12 +2775,16 @@ function showLobby(){
     roomScreen.style.display =
         "none";
 
-    document.getElementById(
-        "generalChatToggle"
-    ).style.display =
-        window.innerWidth > 700
-            ? "block"
-            : "none";
+    const generalButton =
+        document.getElementById(
+            "generalChatToggle"
+        );
+
+    if(generalButton){
+
+        generalButton.style.display =
+            "flex";
+    }
 
     renderRooms();
     renderOnlineUsers();
@@ -2842,7 +2911,10 @@ async function joinRoom(roomId){
 
     closeMobileChat();
 
-    await prepareLocalMedia();
+    const ready =
+        await prepareLocalMedia();
+
+    if(!ready) return;
 
     send({
         type:"join-room",
@@ -3957,12 +4029,15 @@ function leaveCurrentRoom(){
     lobbyScreen.style.display =
         "flex";
 
-    document.getElementById(
-        "generalChatToggle"
-    ).style.display =
-        window.innerWidth > 700
-            ? "block"
-            : "none";
+    const generalButton =
+        document.getElementById(
+            "generalChatToggle"
+        );
+
+    if(generalButton){
+        generalButton.style.display =
+            "flex";
+    }
 
     renderRooms();
 }
@@ -3994,12 +4069,15 @@ function forceLeaveRoom(message){
     lobbyScreen.style.display =
         "flex";
 
-    document.getElementById(
-        "generalChatToggle"
-    ).style.display =
-        window.innerWidth > 700
-            ? "block"
-            : "none";
+    const generalButton =
+        document.getElementById(
+            "generalChatToggle"
+        );
+
+    if(generalButton){
+        generalButton.style.display =
+            "flex";
+    }
 
     if(message?.message){
 
@@ -4205,12 +4283,6 @@ function updateRoomUnreadBadge(){
 
 function toggleLobbyChat(){
 
-    if(
-        window.innerWidth <= 700
-    ){
-        return;
-    }
-
     const isOpen =
         lobbyChat.classList.contains(
             "mobile-open"
@@ -4223,6 +4295,26 @@ function toggleLobbyChat(){
         lobbyChat.classList.add(
             "mobile-open"
         );
+
+        if(isMobile()){
+
+            mobileChatBackdrop.classList.add(
+                "visible"
+            );
+        }
+
+        setTimeout(() => {
+
+            const input =
+                document.getElementById(
+                    "lobbyChatInput"
+                );
+
+            if(input){
+                input.focus();
+            }
+
+        },80);
     }
 }
 
@@ -4243,6 +4335,8 @@ function closeGeneralChat(){
 
 function toggleRoomChat(){
 
+    if(!currentRoom) return;
+
     const isOpen =
         roomChat.classList.contains(
             "mobile-open"
@@ -4256,9 +4350,7 @@ function toggleRoomChat(){
             "mobile-open"
         );
 
-        if(
-            window.innerWidth <= 700
-        ){
+        if(isMobile()){
 
             mobileChatBackdrop.classList.add(
                 "visible"
@@ -5086,25 +5178,37 @@ window.addEventListener(
 
         if(!currentUser) return;
 
-        if(
-            !currentRoom &&
-            window.innerWidth > 700
-        ){
+        updateVideoGridLayout();
 
-            document.getElementById(
-                "generalChatToggle"
-            ).style.display =
-                "block";
+        /*
+         * On reste dans la même configuration de page.
+         * Le CSS gère entièrement la différence PC/mobile.
+         */
+
+        if(!currentRoom){
+
+            const generalButton =
+                document.getElementById(
+                    "generalChatToggle"
+                );
+
+            if(generalButton){
+                generalButton.style.display =
+                    "flex";
+            }
 
         }else{
 
-            document.getElementById(
-                "generalChatToggle"
-            ).style.display =
-                "none";
-        }
+            const generalButton =
+                document.getElementById(
+                    "generalChatToggle"
+                );
 
-        updateVideoGridLayout();
+            if(generalButton){
+                generalButton.style.display =
+                    "none";
+            }
+        }
     }
 );
 
