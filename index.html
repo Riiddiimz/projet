@@ -1,12 +1,401 @@
+```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Vercel</title>
+    <title>ASCII Camera</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 25px;
+        }
+
+        .camera-container {
+            background: #111;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+
+        video {
+            width: 100%;
+            max-height: 500px;
+            display: block;
+            object-fit: cover;
+            background: #000;
+        }
+
+        canvas {
+            display: none;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 14px 22px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #fff;
+            color: #000;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.04);
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        .secondary {
+            background: #222;
+            color: white;
+            border: 1px solid #444;
+        }
+
+        .ascii-container {
+            margin-top: 25px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 15px;
+            overflow: auto;
+            text-align: left;
+            min-height: 100px;
+        }
+
+        #ascii {
+            margin: 0;
+            color: #fff;
+            font-family: "Courier New", monospace;
+            font-size: 5px;
+            line-height: 5px;
+            white-space: pre;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status {
+            color: #888;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 25px;
+            }
+
+            #ascii {
+                font-size: 3px;
+                line-height: 3px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>TEST OK 🚀</h1>
-    <p>Mon site fonctionne correctement avec GitHub et Vercel.</p>
+
+<div class="app">
+
+    <h1>📷 ASCII Camera</h1>
+
+    <div class="subtitle">
+        Prends une photo et transforme-la en dessin ASCII
+    </div>
+
+    <div class="camera-container">
+        <video id="video" autoplay playsinline></video>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="buttons">
+
+        <button id="startCamera">
+            📷 Ouvrir la caméra
+        </button>
+
+        <button id="takePhoto" class="hidden">
+            ✨ Prendre la photo
+        </button>
+
+        <button id="switchCamera" class="secondary hidden">
+            🔄 Changer de caméra
+        </button>
+
+    </div>
+
+    <div class="status" id="status">
+        Caméra inactive
+    </div>
+
+    <div class="ascii-container">
+        <pre id="ascii"></pre>
+    </div>
+
+</div>
+
+
+<script>
+
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ascii = document.getElementById("ascii");
+
+    const startCamera = document.getElementById("startCamera");
+    const takePhoto = document.getElementById("takePhoto");
+    const switchCamera = document.getElementById("switchCamera");
+    const status = document.getElementById("status");
+
+    let stream = null;
+    let currentFacingMode = "environment";
+
+
+    // ==========================================
+    // OUVRIR LA CAMERA
+    // ==========================================
+
+    async function openCamera() {
+
+        try {
+
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+
+            stream = await navigator.mediaDevices.getUserMedia({
+
+                video: {
+                    facingMode: currentFacingMode,
+                    width: {
+                        ideal: 1280
+                    },
+                    height: {
+                        ideal: 720
+                    }
+                },
+
+                audio: false
+
+            });
+
+            video.srcObject = stream;
+
+            takePhoto.classList.remove("hidden");
+            switchCamera.classList.remove("hidden");
+
+            status.textContent = "Caméra active";
+
+        } catch (error) {
+
+            console.error(error);
+
+            status.textContent =
+                "Impossible d'accéder à la caméra.";
+
+            alert(
+                "Impossible d'accéder à la caméra. " +
+                "Vérifie que ton navigateur a l'autorisation."
+            );
+
+        }
+
+    }
+
+
+    // ==========================================
+    // CHANGER CAMERA AVANT / ARRIERE
+    // ==========================================
+
+    switchCamera.addEventListener("click", async () => {
+
+        currentFacingMode =
+            currentFacingMode === "environment"
+            ? "user"
+            : "environment";
+
+        await openCamera();
+
+    });
+
+
+    // ==========================================
+    // PRENDRE LA PHOTO
+    // ==========================================
+
+    takePhoto.addEventListener("click", () => {
+
+        if (!video.videoWidth) {
+            return;
+        }
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext("2d");
+
+        ctx.drawImage(
+            video,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        convertToASCII();
+
+    });
+
+
+    // ==========================================
+    // CONVERSION IMAGE → ASCII
+    // ==========================================
+
+    function convertToASCII() {
+
+        const ctx = canvas.getContext("2d");
+
+        // Taille du dessin ASCII
+        const width = 120;
+
+        // Ratio de l'image
+        const ratio =
+            canvas.height / canvas.width;
+
+        // Les caractères sont plus hauts que larges
+        const height =
+            Math.floor(width * ratio * 0.5);
+
+        const tempCanvas =
+            document.createElement("canvas");
+
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+
+        const tempCtx =
+            tempCanvas.getContext("2d");
+
+        tempCtx.drawImage(
+            canvas,
+            0,
+            0,
+            width,
+            height
+        );
+
+        const imageData =
+            tempCtx.getImageData(
+                0,
+                0,
+                width,
+                height
+            );
+
+        const pixels = imageData.data;
+
+        // Caractères du plus sombre au plus clair
+        const chars =
+            "@%#*+=-:. ";
+
+        let result = "";
+
+        for (let y = 0; y < height; y++) {
+
+            for (let x = 0; x < width; x++) {
+
+                const index =
+                    (y * width + x) * 4;
+
+                const r = pixels[index];
+                const g = pixels[index + 1];
+                const b = pixels[index + 2];
+
+                // Luminosité
+                const brightness =
+                    0.299 * r +
+                    0.587 * g +
+                    0.114 * b;
+
+                const charIndex =
+                    Math.floor(
+                        (brightness / 255) *
+                        (chars.length - 1)
+                    );
+
+                result += chars[charIndex];
+
+            }
+
+            result += "\n";
+        }
+
+        ascii.textContent = result;
+
+        status.textContent =
+            "Photo transformée en ASCII ✨";
+
+    }
+
+
+    // ==========================================
+    // DEMARRER
+    // ==========================================
+
+    startCamera.addEventListener(
+        "click",
+        openCamera
+    );
+
+
+</script>
+
 </body>
 </html>
+```
