@@ -2,10 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Col'inCall</title>
 
 <style>
@@ -13,12 +10,15 @@
     --bg:#080a10;
     --panel:#111521;
     --panel2:#181d2a;
+    --panel3:#202637;
     --border:#293143;
     --text:#f4f7fb;
     --muted:#8993a7;
     --accent:#6c63ff;
+    --accent2:#827bff;
     --danger:#e5484d;
     --success:#28c76f;
+    --warning:#f5a623;
 }
 
 *{
@@ -28,13 +28,15 @@
 html,
 body{
     margin:0;
-    padding:0;
     width:100%;
     height:100%;
-    overflow:hidden;
     background:var(--bg);
     color:var(--text);
     font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    overflow:hidden;
 }
 
 button,
@@ -48,75 +50,78 @@ button{
 
 .app{
     width:100%;
-    height:100vh;
+    height:100dvh;
     display:flex;
     flex-direction:column;
     overflow:hidden;
 }
 
-/* ============================================================
+/* =========================
    AUTH
-============================================================ */
+========================= */
 
 .auth-screen{
     width:100%;
-    height:100vh;
+    height:100dvh;
     display:flex;
     align-items:center;
     justify-content:center;
+    padding:20px;
     background:
-        radial-gradient(
-            circle at top,
-            rgba(108,99,255,.18),
-            transparent 40%
-        ),
+        radial-gradient(circle at top right,rgba(108,99,255,.16),transparent 35%),
+        radial-gradient(circle at bottom left,rgba(40,199,111,.08),transparent 30%),
         var(--bg);
 }
 
-.auth-box{
-    width:min(420px,calc(100% - 30px));
-    background:var(--panel);
+.auth-card{
+    width:min(420px,100%);
+    background:rgba(17,21,33,.96);
     border:1px solid var(--border);
     border-radius:20px;
     padding:30px;
-    box-shadow:0 20px 60px rgba(0,0,0,.4);
+    box-shadow:0 25px 80px rgba(0,0,0,.45);
 }
 
 .logo{
     text-align:center;
-    font-size:32px;
-    font-weight:800;
-    margin-bottom:8px;
-}
-
-.logo span{
-    color:var(--accent);
-}
-
-.auth-subtitle{
-    text-align:center;
-    color:var(--muted);
     margin-bottom:25px;
+}
+
+.logo-title{
+    font-size:30px;
+    font-weight:800;
+}
+
+.logo-title span{
+    color:var(--accent2);
+}
+
+.logo-subtitle{
+    color:var(--muted);
+    margin-top:7px;
+    font-size:14px;
 }
 
 .auth-tabs{
     display:flex;
+    gap:6px;
     background:var(--panel2);
+    padding:5px;
     border-radius:12px;
-    padding:4px;
     margin-bottom:20px;
 }
 
-.auth-tabs button{
+.auth-tab{
     flex:1;
     border:0;
     background:transparent;
     color:var(--muted);
     padding:11px;
     border-radius:9px;
+    font-weight:700;
 }
 
-.auth-tabs button.active{
+.auth-tab.active{
     background:var(--accent);
     color:white;
 }
@@ -127,92 +132,71 @@ button{
 
 .form-group label{
     display:block;
-    margin-bottom:7px;
+    font-size:13px;
     color:var(--muted);
-    font-size:14px;
+    margin-bottom:7px;
 }
 
-input{
+.input{
     width:100%;
+    height:45px;
+    padding:0 13px;
     border:1px solid var(--border);
-    background:#0d111a;
+    background:var(--panel2);
     color:var(--text);
     border-radius:10px;
-    padding:12px 14px;
     outline:none;
 }
 
-input:focus{
+.input:focus{
     border-color:var(--accent);
 }
 
 .primary-btn{
     width:100%;
+    height:46px;
     border:0;
     border-radius:10px;
-    padding:12px;
     background:var(--accent);
     color:white;
     font-weight:700;
 }
 
-.error{
-    color:#ff7075;
-    margin-top:12px;
-    text-align:center;
-    min-height:20px;
-    font-size:14px;
+.primary-btn:hover{
+    background:var(--accent2);
 }
 
-/* ============================================================
+.error{
+    color:#ff7478;
+    font-size:13px;
+    margin-top:10px;
+    min-height:18px;
+}
+
+/* =========================
    TOPBAR
-============================================================ */
+========================= */
 
 .topbar{
+    flex:0 0 64px;
     height:64px;
-    min-height:64px;
+    background:rgba(17,21,33,.97);
+    border-bottom:1px solid var(--border);
     display:flex;
     align-items:center;
     justify-content:space-between;
     padding:0 18px;
-    background:var(--panel);
-    border-bottom:1px solid var(--border);
-    z-index:100;
+    position:relative;
+    z-index:50;
 }
 
-.top-left{
-    display:flex;
-    align-items:center;
-    gap:12px;
-}
-
-.top-logo{
-    font-size:21px;
+.brand{
     font-weight:800;
+    font-size:20px;
 }
 
-.top-logo span{
-    color:var(--accent);
-}
-
-.top-user{
-    display:flex;
-    align-items:center;
-    gap:9px;
-    color:var(--muted);
-    font-size:14px;
-}
-
-.avatar{
-    width:34px;
-    height:34px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:var(--accent);
-    color:white;
-    font-weight:700;
+.brand span{
+    color:var(--accent2);
 }
 
 .top-actions{
@@ -221,40 +205,60 @@ input:focus{
     gap:8px;
 }
 
-.icon-btn,
-.secondary-btn,
-.danger-btn{
+.top-btn{
+    height:38px;
+    padding:0 12px;
     border:1px solid var(--border);
+    border-radius:9px;
     background:var(--panel2);
     color:var(--text);
-    border-radius:9px;
-    padding:9px 12px;
+    display:flex;
+    align-items:center;
+    gap:7px;
 }
 
-.icon-btn:hover,
-.secondary-btn:hover{
-    border-color:var(--accent);
+.top-btn:hover{
+    background:var(--panel3);
 }
 
-.danger-btn{
-    background:rgba(229,72,77,.12);
-    border-color:rgba(229,72,77,.4);
-    color:#ff7b80;
+.profile-top{
+    display:flex;
+    align-items:center;
+    gap:8px;
 }
 
-.admin-btn{
-    background:rgba(108,99,255,.15);
-    border-color:rgba(108,99,255,.5);
-    color:#aaa5ff;
+.avatar{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),#9c96ff);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:800;
+    flex:0 0 32px;
 }
 
-/* ============================================================
-   LOBBY
-============================================================ */
+.profile-name{
+    color:var(--text);
+    font-size:14px;
+    font-weight:600;
+}
 
-.lobby{
+/* =========================
+   MAIN
+========================= */
+
+.lobby,
+.room-screen{
     flex:1;
     min-height:0;
+    width:100%;
+}
+
+.lobby{
     display:flex;
     overflow:hidden;
 }
@@ -262,103 +266,161 @@ input:focus{
 .lobby-main{
     flex:1;
     min-width:0;
-    min-height:0;
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:22px;
 }
 
 .lobby-header{
-    padding:18px;
     display:flex;
     align-items:center;
+    justify-content:space-between;
     gap:12px;
-    border-bottom:1px solid var(--border);
+    margin-bottom:20px;
 }
 
-.lobby-header h2{
-    margin:0;
-    white-space:nowrap;
+.lobby-title{
+    font-size:25px;
+    font-weight:800;
+}
+
+.lobby-subtitle{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:5px;
+}
+
+.lobby-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
 }
 
 .search{
-    flex:1;
-    max-width:450px;
+    width:220px;
+    height:40px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    background:var(--panel);
+    color:var(--text);
+    padding:0 12px;
+    outline:none;
 }
 
+.search:focus{
+    border-color:var(--accent);
+}
+
+.small-btn{
+    height:40px;
+    padding:0 13px;
+    border-radius:9px;
+    border:1px solid var(--border);
+    background:var(--panel2);
+    color:var(--text);
+}
+
+.small-btn.primary{
+    border-color:transparent;
+    background:var(--accent);
+}
+
+/* =========================
+   ROOMS
+========================= */
+
 .room-list{
-    flex:1;
-    min-height:0;
-    overflow-y:auto;
-    padding:18px;
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-    gap:14px;
+    gap:12px;
 }
 
 .room-card{
     background:var(--panel);
     border:1px solid var(--border);
-    border-radius:14px;
-    padding:17px;
-    min-height:145px;
+    border-radius:13px;
+    padding:14px;
+    min-height:128px;
+    height:128px;
     display:flex;
     flex-direction:column;
     justify-content:space-between;
-    transition:.2s;
+    transition:.15s;
 }
 
 .room-card:hover{
-    border-color:var(--accent);
+    border-color:#414b63;
     transform:translateY(-1px);
 }
 
-.room-card h3{
-    margin:0 0 8px;
+.room-card-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
 }
 
-.room-count{
+.room-card-name{
+    font-weight:750;
+    font-size:16px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.room-card-count{
     color:var(--muted);
-    font-size:14px;
+    font-size:12px;
+    margin-top:4px;
 }
 
-.room-card button{
+.room-card-bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.join-room-btn{
     border:0;
-    border-radius:9px;
-    padding:10px;
     background:var(--accent);
     color:white;
+    border-radius:8px;
+    height:34px;
+    padding:0 13px;
+    font-size:13px;
     font-weight:700;
 }
 
-/* ============================================================
+/* =========================
    CHAT
-============================================================ */
+========================= */
 
 .chat-sidebar,
 .room-chat{
     width:340px;
-    min-width:340px;
-    display:flex;
-    flex-direction:column;
+    flex:0 0 340px;
     background:var(--panel);
     border-left:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
     min-height:0;
+    position:relative;
+    z-index:30;
 }
 
 .chat-header{
-    height:60px;
-    min-height:60px;
+    height:55px;
+    flex:0 0 55px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 15px;
+    padding:0 14px;
     border-bottom:1px solid var(--border);
 }
 
-.chat-header h3{
-    margin:0;
-    font-size:16px;
+.chat-title{
+    font-weight:750;
 }
 
 .chat-close{
@@ -373,120 +435,226 @@ input:focus{
     flex:1;
     min-height:0;
     overflow-y:auto;
-    padding:15px;
+    padding:12px;
 }
 
 .chat-message{
-    margin-bottom:12px;
+    margin-bottom:11px;
 }
 
-.chat-message .message-head{
-    display:flex;
-    gap:7px;
-    align-items:center;
+.chat-message-author{
+    font-size:11px;
+    color:var(--accent2);
     margin-bottom:3px;
-}
-
-.chat-message .message-user{
-    font-size:13px;
     font-weight:700;
 }
 
-.chat-message .message-time{
-    color:var(--muted);
-    font-size:11px;
-}
-
-.chat-message .message-text{
-    color:#dfe4ef;
-    font-size:14px;
+.chat-message-body{
+    display:inline-block;
+    max-width:90%;
+    padding:8px 10px;
+    background:var(--panel2);
+    border-radius:9px;
+    font-size:13px;
     line-height:1.4;
     word-break:break-word;
 }
 
-.chat-input{
-    padding:12px;
-    border-top:1px solid var(--border);
-    display:flex;
-    gap:8px;
+.chat-message.mine{
+    text-align:right;
 }
 
-.chat-input input{
+.chat-message.mine .chat-message-author{
+    color:var(--success);
+}
+
+.chat-input-area{
+    padding:10px;
+    border-top:1px solid var(--border);
+    display:flex;
+    gap:7px;
+}
+
+.chat-input{
     flex:1;
+    min-width:0;
+    height:40px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    background:var(--panel2);
+    color:var(--text);
+    padding:0 11px;
+    outline:none;
+}
+
+.chat-input:focus{
+    border-color:var(--accent);
 }
 
 .chat-send{
-    width:45px;
+    width:40px;
+    height:40px;
     border:0;
     border-radius:9px;
     background:var(--accent);
     color:white;
 }
 
-/* ============================================================
+/* =========================
+   MOBILE CHAT BUTTONS
+========================= */
+
+.mobile-chat-toggle{
+    display:none;
+    position:fixed;
+    z-index:45;
+    bottom:max(14px,env(safe-area-inset-bottom));
+    height:45px;
+    border:1px solid var(--border);
+    border-radius:22px;
+    background:rgba(17,21,33,.96);
+    color:white;
+    padding:0 15px;
+    box-shadow:0 8px 30px rgba(0,0,0,.35);
+}
+
+.mobile-chat-toggle.general{
+    left:14px;
+}
+
+.mobile-chat-toggle.room{
+    right:14px;
+}
+
+.chat-badge{
+    min-width:19px;
+    height:19px;
+    padding:0 5px;
+    border-radius:10px;
+    background:var(--danger);
+    color:white;
+    font-size:10px;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    margin-left:4px;
+}
+
+.chat-badge.visible{
+    display:flex;
+}
+
+.mobile-chat-backdrop{
+    display:none;
+}
+
+/* =========================
    ROOM
-============================================================ */
+========================= */
 
 .room-screen{
-    flex:1;
-    min-height:0;
-    display:flex;
+    display:none;
+    flex-direction:column;
+    position:relative;
     overflow:hidden;
 }
 
 .room-main{
     flex:1;
-    min-width:0;
     min-height:0;
     display:flex;
     flex-direction:column;
-    overflow:hidden;
+    background:#05070b;
 }
 
-.room-top{
-    height:60px;
-    min-height:60px;
+.room-header{
+    height:56px;
+    flex:0 0 56px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 16px;
+    padding:0 14px;
+    background:var(--panel);
     border-bottom:1px solid var(--border);
+    z-index:10;
 }
 
 .room-title{
     display:flex;
-    flex-direction:column;
-    gap:4px;
+    align-items:center;
+    gap:10px;
+    min-width:0;
 }
 
-.room-title strong{
-    font-size:17px;
+.room-name{
+    font-weight:800;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .room-status{
     color:var(--muted);
-    font-size:13px;
+    font-size:12px;
 }
+
+.room-actions{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.media-btn{
+    width:40px;
+    height:40px;
+    border:1px solid var(--border);
+    border-radius:50%;
+    background:var(--panel2);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.media-btn.active{
+    background:var(--success);
+    border-color:var(--success);
+}
+
+.media-btn.danger{
+    background:var(--danger);
+    border-color:var(--danger);
+}
+
+.room-chat-mobile-button{
+    display:none;
+}
+
+/* =========================
+   VIDEO GRID
+========================= */
 
 .video-grid{
     flex:1;
     min-height:0;
-    padding:12px;
+    width:100%;
+    padding:10px;
     display:grid;
-    gap:12px;
-    overflow:auto;
+    gap:10px;
     grid-template-columns:repeat(2,minmax(0,1fr));
-    grid-auto-rows:minmax(180px,1fr);
+    grid-auto-rows:minmax(0,1fr);
+    overflow:hidden;
 }
 
 .video-card{
     position:relative;
     min-width:0;
-    min-height:180px;
+    min-height:0;
     overflow:hidden;
-    background:#05070b;
+    background:#10141e;
     border:1px solid var(--border);
-    border-radius:14px;
+    border-radius:12px;
 }
 
 .video-card video{
@@ -497,15 +665,15 @@ input:focus{
     background:#05070b;
 }
 
-.video-name{
+.video-user-label{
     position:absolute;
     left:10px;
     bottom:10px;
-    padding:5px 9px;
-    background:rgba(0,0,0,.6);
+    padding:5px 8px;
     border-radius:7px;
+    background:rgba(0,0,0,.62);
     font-size:12px;
-    z-index:2;
+    z-index:3;
 }
 
 .camera-off{
@@ -514,171 +682,157 @@ input:focus{
     display:flex;
     align-items:center;
     justify-content:center;
-    background:
-        radial-gradient(
-            circle,
-            #222938,
-            #080a10
-        );
-    color:var(--muted);
-    font-size:34px;
-    z-index:1;
+    background:#111521;
+    z-index:2;
 }
 
-.room-controls{
-    height:76px;
-    min-height:76px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:12px;
-    border-top:1px solid var(--border);
-    background:var(--panel);
+.camera-off .avatar{
+    width:70px;
+    height:70px;
+    font-size:24px;
 }
 
-.media-btn{
-    width:48px;
-    height:48px;
-    border-radius:50%;
-    border:1px solid var(--border);
-    background:var(--panel2);
-    color:white;
-    font-size:19px;
+.video-grid.count-1{
+    grid-template-columns:1fr;
 }
 
-.media-btn.active{
-    background:var(--success);
-    border-color:var(--success);
+.video-grid.count-2{
+    grid-template-columns:repeat(2,minmax(0,1fr));
 }
 
-.leave-btn{
-    width:55px;
-    height:55px;
-    border-radius:50%;
-    border:0;
-    background:var(--danger);
-    color:white;
-    font-size:20px;
+.video-grid.count-3{
+    grid-template-columns:repeat(2,minmax(0,1fr));
 }
 
-/* ============================================================
-   MOBILE CHAT BUTTON
-============================================================ */
-
-.mobile-chat-toggle{
-    display:none;
+.video-grid.count-4{
+    grid-template-columns:repeat(2,minmax(0,1fr));
 }
 
-.unread-badge{
-    display:none;
-    min-width:19px;
-    height:19px;
-    padding:0 5px;
-    border-radius:20px;
-    background:var(--danger);
-    color:white;
-    font-size:11px;
-    font-weight:700;
-    align-items:center;
-    justify-content:center;
+.video-grid.count-many{
+    grid-template-columns:repeat(3,minmax(0,1fr));
 }
 
-.unread-badge.visible{
-    display:flex;
-}
-
-.mobile-chat-backdrop{
-    display:none;
-}
-
-/* ============================================================
+/* =========================
    MODALS
-============================================================ */
+========================= */
 
 .modal{
     position:fixed;
     inset:0;
-    z-index:1000;
-    background:rgba(0,0,0,.65);
+    z-index:100;
     display:none;
     align-items:center;
     justify-content:center;
     padding:20px;
+    background:rgba(0,0,0,.68);
 }
 
-.modal-box{
-    width:min(800px,100%);
-    max-height:90vh;
-    overflow:auto;
+.modal-card{
+    width:min(620px,100%);
+    max-height:min(700px,90dvh);
+    overflow:hidden;
     background:var(--panel);
     border:1px solid var(--border);
     border-radius:16px;
-    box-shadow:0 25px 80px rgba(0,0,0,.5);
+    box-shadow:0 30px 100px rgba(0,0,0,.55);
 }
 
 .modal-header{
+    height:58px;
     display:flex;
-    justify-content:space-between;
     align-items:center;
-    padding:18px;
+    justify-content:space-between;
+    padding:0 17px;
     border-bottom:1px solid var(--border);
 }
 
-.modal-header h3{
-    margin:0;
+.modal-title{
+    font-size:17px;
+    font-weight:800;
 }
 
-.close-modal{
+.modal-close{
     border:0;
     background:transparent;
     color:var(--muted);
-    font-size:24px;
+    font-size:23px;
 }
 
 .modal-body{
     padding:18px;
+    overflow-y:auto;
+    max-height:calc(min(700px,90dvh) - 58px);
 }
 
-.profile-row{
-    margin-bottom:14px;
+.profile-center{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
 }
 
-.profile-label{
+.profile-big-avatar{
+    width:78px;
+    height:78px;
+    border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),#9c96ff);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:27px;
+    font-weight:800;
+}
+
+.profile-id{
     color:var(--muted);
     font-size:12px;
-    margin-bottom:5px;
 }
+
+.logout-btn{
+    width:100%;
+    margin-top:20px;
+    height:43px;
+    border:1px solid rgba(229,72,77,.4);
+    border-radius:9px;
+    background:rgba(229,72,77,.1);
+    color:#ff7478;
+    font-weight:700;
+}
+
+/* =========================
+   ADMIN
+========================= */
 
 .admin-tabs{
     display:flex;
-    gap:8px;
-    margin-bottom:15px;
+    gap:6px;
+    margin-bottom:14px;
 }
 
-.admin-tabs button{
+.admin-tab{
     border:1px solid var(--border);
     background:var(--panel2);
     color:var(--muted);
+    padding:9px 13px;
     border-radius:8px;
-    padding:9px 12px;
 }
 
-.admin-tabs button.active{
+.admin-tab.active{
+    color:white;
     background:var(--accent);
     border-color:var(--accent);
-    color:white;
 }
 
 .admin-item{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:12px;
+    gap:10px;
     padding:12px;
     border:1px solid var(--border);
     border-radius:10px;
-    margin-bottom:9px;
-    background:#0d111a;
+    background:var(--panel2);
+    margin-bottom:8px;
 }
 
 .admin-info{
@@ -689,128 +843,135 @@ input:focus{
     font-weight:700;
 }
 
-.admin-meta{
+.admin-details{
     color:var(--muted);
-    font-size:12px;
-    margin-top:4px;
+    font-size:11px;
+    margin-top:3px;
 }
 
 .admin-actions{
     display:flex;
+    gap:5px;
     flex-wrap:wrap;
-    gap:6px;
+    justify-content:flex-end;
 }
 
-.admin-actions button{
+.admin-action{
+    height:32px;
+    padding:0 9px;
     border:1px solid var(--border);
-    background:var(--panel2);
-    color:white;
     border-radius:7px;
-    padding:7px 9px;
-    font-size:12px;
+    background:var(--panel3);
+    color:white;
+    font-size:11px;
 }
 
-/* ============================================================
-   NOTIFICATION GENERAL
-============================================================ */
-
-.chat-notification{
-    position:fixed;
-    top:78px;
-    right:20px;
-    z-index:9999;
-    max-width:330px;
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-left:4px solid var(--accent);
-    border-radius:10px;
-    padding:12px 14px;
-    box-shadow:0 15px 40px rgba(0,0,0,.4);
-    animation:notificationIn .25s ease;
+.admin-action.danger{
+    color:#ff7478;
 }
 
-.chat-notification strong{
-    display:block;
-    margin-bottom:4px;
-}
-
-.chat-notification span{
-    color:var(--muted);
-    font-size:13px;
-}
-
-@keyframes notificationIn{
-    from{
-        opacity:0;
-        transform:translateY(-10px);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
-}
-
-/* ============================================================
-   MOBILE
-============================================================ */
+/* =========================
+   RESPONSIVE MOBILE
+========================= */
 
 @media(max-width:700px){
 
+    html,
+    body{
+        height:100%;
+        overflow:hidden;
+    }
+
+    .app{
+        height:100dvh;
+        min-height:100dvh;
+        overflow:hidden;
+    }
+
     .topbar{
+        flex:0 0 58px;
+        height:58px;
         padding:0 10px;
     }
 
-    .top-logo{
+    .brand{
         font-size:18px;
-    }
-
-    .top-user{
-        display:none;
     }
 
     .top-actions{
         gap:5px;
     }
 
-    .admin-btn,
-    .secondary-btn{
-        padding:8px 9px;
-        font-size:12px;
+    .profile-name{
+        display:none;
+    }
+
+    .top-btn{
+        height:36px;
+        padding:0 9px;
     }
 
     .lobby{
-        flex-direction:column;
+        display:block;
+        height:calc(100dvh - 58px);
         min-height:0;
+        overflow:hidden;
+        position:relative;
     }
 
     .lobby-main{
+        width:100%;
+        height:100%;
         min-height:0;
+        overflow-y:auto;
+        overflow-x:hidden;
+        padding:15px 12px 80px;
+        -webkit-overflow-scrolling:touch;
     }
 
     .lobby-header{
-        flex-direction:column;
-        align-items:stretch;
-        padding:12px;
+        display:block;
+        margin-bottom:15px;
     }
 
-    .lobby-header h2{
-        font-size:18px;
+    .lobby-title{
+        font-size:22px;
+        margin-bottom:12px;
+    }
+
+    .lobby-actions{
+        width:100%;
+        display:flex;
     }
 
     .search{
-        width:100%;
-        max-width:none;
+        flex:1;
+        min-width:0;
+        width:auto;
+    }
+
+    .small-btn{
+        flex:0 0 auto;
     }
 
     .room-list{
         grid-template-columns:1fr;
+        gap:9px;
+        padding-bottom:20px;
+    }
+
+    .room-card{
+        height:110px;
+        min-height:110px;
         padding:12px;
     }
 
     /*
-     * Les chats ne prennent plus de place dans la page.
-     * Ils deviennent des panneaux coulissants depuis le bas.
-     */
+       IMPORTANT :
+       les chats ne prennent plus de place dans le layout mobile.
+       Le lobby peut donc défiler normalement.
+    */
+
     .chat-sidebar,
     .room-chat{
         position:fixed;
@@ -818,129 +979,171 @@ input:focus{
         right:0;
         bottom:0;
         width:100%;
-        min-width:0;
-        height:min(62vh,520px);
-        max-height:calc(100vh - 70px);
+        height:min(70dvh,520px);
+        max-height:70dvh;
+        z-index:80;
+        border:1px solid var(--border);
+        border-bottom:0;
+        border-radius:17px 17px 0 0;
         transform:translateY(105%);
-        opacity:0;
-        pointer-events:none;
-        z-index:850;
-        border-left:0;
-        border-top:1px solid var(--border);
-        border-radius:20px 20px 0 0;
-        box-shadow:0 -20px 60px rgba(0,0,0,.55);
-        transition:
-            transform .28s ease,
-            opacity .28s ease;
+        transition:transform .22s ease;
+        box-shadow:0 -15px 50px rgba(0,0,0,.55);
     }
 
     .chat-sidebar.mobile-open,
     .room-chat.mobile-open{
         transform:translateY(0);
-        opacity:1;
-        pointer-events:auto;
     }
 
     .chat-close{
         display:block;
     }
 
-    .mobile-chat-backdrop{
-        display:block;
-        position:fixed;
-        inset:0;
-        z-index:840;
-        background:rgba(0,0,0,.5);
-        opacity:0;
-        pointer-events:none;
-        transition:opacity .25s ease;
-    }
-
-    .mobile-chat-backdrop.active{
-        opacity:1;
-        pointer-events:auto;
-    }
-
     .mobile-chat-toggle{
-        position:fixed;
-        left:50%;
-        bottom:calc(12px + env(safe-area-inset-bottom));
-        transform:translateX(-50%);
-        z-index:800;
         display:flex;
         align-items:center;
         justify-content:center;
-        gap:7px;
-        border:1px solid var(--border);
-        border-radius:999px;
-        background:var(--panel);
-        color:var(--text);
-        padding:10px 15px;
-        box-shadow:0 10px 35px rgba(0,0,0,.45);
-        white-space:nowrap;
     }
 
-    .room-chat-toggle{
-        bottom:calc(87px + env(safe-area-inset-bottom));
+    .mobile-chat-backdrop{
+        position:fixed;
+        inset:0;
+        z-index:70;
+        background:rgba(0,0,0,.55);
+        display:none;
+    }
+
+    .mobile-chat-backdrop.visible{
+        display:block;
     }
 
     .room-screen{
-        position:relative;
+        height:calc(100dvh - 58px);
         min-height:0;
-        flex-direction:column;
+        display:none;
+        overflow:hidden;
     }
 
     .room-main{
-        min-height:0;
         height:100%;
+        min-height:0;
     }
 
-    .room-top{
-        padding:0 12px;
+    .room-header{
+        height:52px;
+        flex:0 0 52px;
+        padding:0 9px;
     }
 
-    .room-title strong{
-        font-size:15px;
+    .room-title{
+        min-width:0;
+        max-width:45%;
+    }
+
+    .room-name{
+        font-size:14px;
+    }
+
+    .room-status{
+        font-size:10px;
+    }
+
+    .room-actions{
+        gap:5px;
+    }
+
+    .media-btn{
+        width:35px;
+        height:35px;
+        font-size:14px;
+    }
+
+    .room-chat-mobile-button{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        width:35px;
+        height:35px;
+        border:1px solid var(--border);
+        border-radius:50%;
+        background:var(--panel2);
+        color:white;
+        position:relative;
     }
 
     /*
-     * 2 personnes et 3 personnes utilisent toutes les deux
-     * une grille de 2 colonnes.
-     */
+       2 personnes et 3 personnes :
+       même grille de 2 colonnes.
+       On ne force surtout PAS une colonne sur mobile.
+    */
+
     .video-grid{
+        padding:7px;
+        gap:7px;
         grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-        grid-auto-rows:minmax(150px,1fr);
-        padding:8px;
-        gap:8px;
+        grid-auto-rows:minmax(0,1fr);
+        overflow:hidden;
+    }
+
+    .video-grid.count-1{
+        grid-template-columns:1fr !important;
+    }
+
+    .video-grid.count-2,
+    .video-grid.count-3,
+    .video-grid.count-4,
+    .video-grid.count-many{
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
     }
 
     .video-card{
-        min-height:150px;
+        aspect-ratio:auto;
+        min-height:0;
     }
 
-    .room-controls{
-        height:76px;
-        min-height:76px;
-        padding-bottom:env(safe-area-inset-bottom);
+    .video-card video{
+        object-fit:cover;
     }
 
-    .chat-input{
-        padding-bottom:calc(12px + env(safe-area-inset-bottom));
+    .video-user-label{
+        left:6px;
+        bottom:6px;
+        font-size:10px;
+        padding:4px 6px;
     }
 
-    .chat-notification{
-        right:10px;
-        left:10px;
-        max-width:none;
+    .camera-off .avatar{
+        width:48px;
+        height:48px;
+        font-size:17px;
+    }
+
+    .modal{
+        padding:10px;
+        align-items:flex-end;
+    }
+
+    .modal-card{
+        max-height:90dvh;
+        border-radius:15px 15px 10px 10px;
     }
 
     .admin-item{
+        align-items:flex-start;
         flex-direction:column;
-        align-items:stretch;
     }
 
     .admin-actions{
         width:100%;
+        justify-content:flex-start;
+    }
+
+    .mobile-chat-toggle.general{
+        bottom:max(12px,env(safe-area-inset-bottom));
+    }
+
+    .mobile-chat-toggle.room{
+        bottom:max(12px,env(safe-area-inset-bottom));
     }
 }
 </style>
@@ -948,496 +1151,301 @@ input:focus{
 
 <body>
 
-<!-- ============================================================
-     AUTH
-============================================================ -->
-
+<!-- AUTH -->
 <div id="authScreen" class="auth-screen">
-
-    <div class="auth-box">
+    <div class="auth-card">
 
         <div class="logo">
-            Col'in<span>Call</span>
-        </div>
-
-        <div class="auth-subtitle">
-            Discussion vidéo et salons
+            <div class="logo-title">Col'in<span>Call</span></div>
+            <div class="logo-subtitle">Discutez, rencontrez, échangez.</div>
         </div>
 
         <div class="auth-tabs">
-            <button
-                id="userTab"
-                class="active"
-                type="button"
-            >
+            <button id="userTab" class="auth-tab active" onclick="switchLoginMode('user')">
                 Utilisateur
             </button>
-
-            <button
-                id="adminTab"
-                type="button"
-            >
-                Administrateur
+            <button id="adminTab" class="auth-tab" onclick="switchLoginMode('admin')">
+                Admin
             </button>
         </div>
 
         <div class="form-group">
-
-            <label for="usernameInput">
-                Nom d'utilisateur
-            </label>
-
+            <label for="usernameInput">Nom d'utilisateur</label>
             <input
                 id="usernameInput"
+                class="input"
                 type="text"
                 autocomplete="username"
                 maxlength="30"
-                placeholder="Votre pseudo"
             >
-
         </div>
 
-        <div
-            id="passwordField"
-            class="form-group"
-            style="display:none;"
-        >
-
-            <label for="passwordInput">
-                Code administrateur
-            </label>
-
+        <div id="passwordField" class="form-group" style="display:none;">
+            <label for="passwordInput">Code administrateur</label>
             <input
                 id="passwordInput"
+                class="input"
                 type="password"
                 autocomplete="current-password"
-                placeholder="Code"
             >
-
         </div>
 
-        <button
-            id="loginButton"
-            class="primary-btn"
-            type="button"
-        >
+        <button class="primary-btn" onclick="login()">
             Se connecter
         </button>
 
-        <div
-            id="loginError"
-            class="error"
-        ></div>
-
+        <div id="loginError" class="error"></div>
     </div>
-
 </div>
 
-<!-- ============================================================
-     APPLICATION
-============================================================ -->
+<!-- APPLICATION -->
+<div id="app" class="app" style="display:none;">
 
-<div
-    id="app"
-    class="app"
-    style="display:none;"
->
-
-    <!-- ========================================================
-         TOP BAR
-    ========================================================= -->
-
+    <!-- TOPBAR TOUJOURS VISIBLE -->
     <div class="topbar">
 
-        <div class="top-left">
-
-            <div class="top-logo">
-                Col'in<span>Call</span>
-            </div>
-
-            <div class="top-user">
-
-                <div
-                    id="topAvatar"
-                    class="avatar"
-                >
-                    ?
-                </div>
-
-                <span id="topUsername">
-                    -
-                </span>
-
-            </div>
-
+        <div class="brand">
+            Col'in<span>Call</span>
         </div>
 
         <div class="top-actions">
 
-            <!-- IMPORTANT :
-                 Ce bouton reste dans la topbar générale,
-                 donc il reste visible même dans un salon. -->
             <button
                 id="adminButton"
-                class="secondary-btn admin-btn"
-                type="button"
+                class="top-btn"
                 style="display:none;"
+                onclick="openAdmin()"
             >
-                ⚙ Admin
+                ⚙️ Admin
             </button>
 
-            <button
-                id="profileButton"
-                class="secondary-btn"
-                type="button"
-            >
-                Profil
+            <button class="top-btn profile-top" onclick="openProfile()">
+                <span id="topAvatar" class="avatar">?</span>
+                <span id="topUsername" class="profile-name">Profil</span>
             </button>
 
         </div>
-
     </div>
 
-    <!-- ========================================================
-         LOBBY
-    ========================================================= -->
+    <!-- LOBBY -->
+    <div id="lobbyScreen" class="lobby">
 
-    <div
-        id="lobbyScreen"
-        class="lobby"
-        style="display:none;"
-    >
-
-        <div class="lobby-main">
+        <main class="lobby-main">
 
             <div class="lobby-header">
 
-                <h2>
-                    Salons
-                </h2>
+                <div>
+                    <div class="lobby-title">Salons</div>
+                    <div class="lobby-subtitle">
+                        Rejoignez une discussion ou créez votre propre salon.
+                    </div>
+                </div>
 
-                <input
-                    id="roomSearch"
-                    class="search"
-                    type="text"
-                    autocomplete="off"
-                    placeholder="Rechercher un salon..."
-                >
+                <div class="lobby-actions">
 
-                <button
-                    id="createRoomButton"
-                    class="primary-btn"
-                    type="button"
-                    style="width:auto;"
-                >
-                    + Créer un salon
-                </button>
+                    <input
+                        id="roomSearch"
+                        class="search"
+                        type="text"
+                        placeholder="Rechercher un salon..."
+                        autocomplete="off"
+                    >
 
+                    <button class="small-btn primary" onclick="createRoom()">
+                        + Créer
+                    </button>
+
+                </div>
             </div>
 
-            <div
-                id="roomList"
-                class="room-list"
-            ></div>
+            <div id="roomList" class="room-list"></div>
 
-        </div>
+        </main>
 
-        <!-- DISCUSSION GENERALE -->
-
-        <div
-            id="lobbyChatSidebar"
-            class="chat-sidebar"
-        >
+        <!-- CHAT GENERAL DESKTOP -->
+        <aside id="lobbyChat" class="chat-sidebar">
 
             <div class="chat-header">
-
-                <h3>
-                    Discussion générale
-                </h3>
-
-                <button
-                    class="chat-close"
-                    type="button"
-                    onclick="closeMobileChat()"
-                >
-                    ×
-                </button>
-
+                <span class="chat-title">Discussion générale</span>
+                <button class="chat-close" onclick="closeMobileChat()">×</button>
             </div>
 
-            <div
-                id="lobbyChatMessages"
-                class="chat-messages"
-            ></div>
+            <div id="lobbyChatMessages" class="chat-messages"></div>
 
-            <div class="chat-input">
-
+            <div class="chat-input-area">
                 <input
                     id="lobbyChatInput"
+                    class="chat-input"
                     type="text"
-                    maxlength="1000"
+                    placeholder="Écrire un message..."
                     autocomplete="off"
                     autocorrect="off"
                     autocapitalize="sentences"
                     spellcheck="false"
-                    placeholder="Écrire un message..."
+                    name="lobby-message"
                 >
-
-                <button
-                    id="lobbyChatSend"
-                    class="chat-send"
-                    type="button"
-                >
-                    ➤
-                </button>
-
+                <button class="chat-send" onclick="sendLobbyChat()">➤</button>
             </div>
 
-        </div>
-
-        <button
-            id="lobbyChatToggle"
-            class="mobile-chat-toggle"
-            type="button"
-        >
-            💬 Discussion générale
-        </button>
-
+        </aside>
     </div>
 
-    <!-- ========================================================
-         ROOM
-    ========================================================= -->
-
-    <div
-        id="roomScreen"
-        class="room-screen"
-        style="display:none;"
-    >
+    <!-- ROOM -->
+    <div id="roomScreen" class="room-screen">
 
         <div class="room-main">
 
-            <div class="room-top">
+            <div class="room-header">
 
                 <div class="room-title">
+                    <button class="top-btn" onclick="leaveCurrentRoom()">
+                        ←
+                    </button>
 
-                    <strong id="roomName">
-                        Salon
-                    </strong>
-
-                    <span
-                        id="roomStatus"
-                        class="room-status"
-                    >
-                        0 personne
-                    </span>
-
+                    <div>
+                        <div id="roomName" class="room-name">Salon</div>
+                        <div id="roomStatus" class="room-status">Connexion...</div>
+                    </div>
                 </div>
 
+                <div class="room-actions">
+
+                    <button
+                        id="microBtn"
+                        class="media-btn"
+                        onclick="toggleMicro()"
+                        title="Micro"
+                    >
+                        🎙️
+                    </button>
+
+                    <button
+                        id="cameraBtn"
+                        class="media-btn"
+                        onclick="toggleCamera()"
+                        title="Caméra"
+                    >
+                        📷
+                    </button>
+
+                    <button
+                        class="room-chat-mobile-button"
+                        onclick="toggleRoomChat()"
+                        title="Chat du salon"
+                    >
+                        💬
+                        <span id="roomChatUnread" class="chat-badge">0</span>
+                    </button>
+
+                    <button
+                        class="media-btn danger"
+                        onclick="leaveCurrentRoom()"
+                        title="Quitter"
+                    >
+                        ☎
+                    </button>
+
+                </div>
             </div>
 
-            <div
-                id="videoGrid"
-                class="video-grid"
-            ></div>
-
-            <div class="room-controls">
-
-                <button
-                    id="microBtn"
-                    class="media-btn"
-                    type="button"
-                    title="Microphone"
-                >
-                    🎙️
-                </button>
-
-                <button
-                    id="cameraBtn"
-                    class="media-btn"
-                    type="button"
-                    title="Caméra"
-                >
-                    📷
-                </button>
-
-                <button
-                    id="leaveRoomButton"
-                    class="leave-btn"
-                    type="button"
-                    title="Quitter"
-                >
-                    ☎
-                </button>
-
-            </div>
+            <div id="videoGrid" class="video-grid"></div>
 
         </div>
 
         <!-- CHAT SALON -->
-
-        <div
-            id="roomChatSidebar"
-            class="room-chat"
-        >
+        <aside id="roomChat" class="room-chat">
 
             <div class="chat-header">
-
-                <h3>
-                    Chat du salon
-                </h3>
-
-                <button
-                    class="chat-close"
-                    type="button"
-                    onclick="closeMobileChat()"
-                >
-                    ×
-                </button>
-
+                <span class="chat-title">Chat du salon</span>
+                <button class="chat-close" onclick="closeMobileChat()">×</button>
             </div>
 
-            <div
-                id="roomChatMessages"
-                class="chat-messages"
-            ></div>
+            <div id="roomChatMessages" class="chat-messages"></div>
 
-            <div class="chat-input">
-
+            <div class="chat-input-area">
                 <input
                     id="roomChatInput"
+                    class="chat-input"
                     type="text"
-                    maxlength="1000"
+                    placeholder="Écrire un message..."
                     autocomplete="off"
                     autocorrect="off"
                     autocapitalize="sentences"
                     spellcheck="false"
-                    placeholder="Écrire un message..."
+                    name="room-message"
                 >
-
-                <button
-                    id="roomChatSend"
-                    class="chat-send"
-                    type="button"
-                >
-                    ➤
-                </button>
-
+                <button class="chat-send" onclick="sendRoomChat()">➤</button>
             </div>
 
-        </div>
-
-        <button
-            id="roomChatToggle"
-            class="mobile-chat-toggle room-chat-toggle"
-            type="button"
-        >
-            💬 Chat du salon
-            <span
-                id="roomUnreadBadge"
-                class="unread-badge"
-            >
-                0
-            </span>
-        </button>
-
+        </aside>
     </div>
 
 </div>
 
-<!-- ============================================================
-     MOBILE CHAT BACKDROP
-============================================================ -->
-
+<!-- MOBILE CHAT BACKDROP -->
 <div
     id="mobileChatBackdrop"
     class="mobile-chat-backdrop"
+    onclick="closeMobileChat()"
 ></div>
 
-<!-- ============================================================
-     PROFILE MODAL
-============================================================ -->
-
-<div
-    id="profileModal"
-    class="modal"
+<!-- BOUTON CHAT GENERAL MOBILE -->
+<button
+    id="generalChatToggle"
+    class="mobile-chat-toggle general"
+    onclick="toggleLobbyChat()"
 >
+    💬 Général
+</button>
 
-    <div class="modal-box">
+<!-- BOUTON CHAT SALON MOBILE -->
+<button
+    id="roomChatToggle"
+    class="mobile-chat-toggle room"
+    onclick="toggleRoomChat()"
+>
+    💬 Chat
+    <span id="roomChatUnreadMobile" class="chat-badge">0</span>
+</button>
+
+<!-- PROFILE -->
+<div id="profileModal" class="modal" onclick="closeModalOutside(event,'profileModal')">
+
+    <div class="modal-card">
 
         <div class="modal-header">
-
-            <h3>
-                Mon profil
-            </h3>
-
-            <button
-                class="close-modal"
-                type="button"
-                onclick="closeProfileModal()"
-            >
-                ×
-            </button>
-
+            <span class="modal-title">Profil</span>
+            <button class="modal-close" onclick="closeProfile()">×</button>
         </div>
 
         <div class="modal-body">
 
-            <div class="profile-row">
+            <div class="profile-center">
 
-                <div class="profile-label">
-                    Nom d'utilisateur
-                </div>
+                <div id="profileAvatar" class="profile-big-avatar">?</div>
 
-                <strong id="profileUsername">
-                    -
-                </strong>
+                <strong id="profileUsername">Utilisateur</strong>
+
+                <div id="profileId" class="profile-id"></div>
 
             </div>
 
-            <div class="profile-row">
-
-                <div class="profile-label">
-                    Identifiant
-                </div>
-
-                <strong id="profileId">
-                    -
-                </strong>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- ============================================================
-     ADMIN MODAL
-============================================================ -->
-
-<div
-    id="adminModal"
-    class="modal"
->
-
-    <div class="modal-box">
-
-        <div class="modal-header">
-
-            <h3>
-                Administration
-            </h3>
-
-            <button
-                class="close-modal"
-                type="button"
-                onclick="closeAdminModal()"
-            >
-                ×
+            <button class="logout-btn" onclick="logout()">
+                🚪 Se déconnecter
             </button>
 
+        </div>
+    </div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminModal" class="modal" onclick="closeModalOutside(event,'adminModal')">
+
+    <div class="modal-card">
+
+        <div class="modal-header">
+            <span class="modal-title">Administration</span>
+            <button class="modal-close" onclick="closeAdmin()">×</button>
         </div>
 
         <div class="modal-body">
@@ -1446,14 +1454,16 @@ input:focus{
 
                 <button
                     id="adminUsersTab"
-                    type="button"
+                    class="admin-tab active"
+                    onclick="switchAdminTab('users')"
                 >
                     Utilisateurs
                 </button>
 
                 <button
                     id="adminRoomsTab"
-                    type="button"
+                    class="admin-tab"
+                    onclick="switchAdminTab('rooms')"
                 >
                     Salons
                 </button>
@@ -1463,21 +1473,15 @@ input:focus{
             <div id="adminList"></div>
 
         </div>
-
     </div>
-
 </div>
 
 <script>
-/* ============================================================
-   CONFIGURATION
-============================================================ */
+/* =========================
+   CONFIG
+========================= */
 
-const SERVER_URL = "wss://projet-nz7b.onrender.com";
-
-/* ============================================================
-   STATE
-============================================================ */
+const WS_URL = "wss://projet-nz7b.onrender.com";
 
 let socket = null;
 let currentUser = null;
@@ -1495,399 +1499,239 @@ const peers = new Map();
 const pendingCandidates = new Map();
 
 let currentAdminTab = "users";
+let roomUnreadCount = 0;
 
-let roomUnreadMessages = 0;
-
-/* ============================================================
+/* =========================
    DOM
-============================================================ */
+========================= */
 
-const authScreen =
-    document.getElementById("authScreen");
+const authScreen = document.getElementById("authScreen");
+const app = document.getElementById("app");
 
-const app =
-    document.getElementById("app");
+const lobbyScreen = document.getElementById("lobbyScreen");
+const roomScreen = document.getElementById("roomScreen");
 
-const userTab =
-    document.getElementById("userTab");
+const lobbyChat = document.getElementById("lobbyChat");
+const roomChat = document.getElementById("roomChat");
 
-const adminTab =
-    document.getElementById("adminTab");
+const mobileChatBackdrop = document.getElementById("mobileChatBackdrop");
 
-const usernameInput =
-    document.getElementById("usernameInput");
+const roomChatUnread = document.getElementById("roomChatUnread");
+const roomChatUnreadMobile = document.getElementById("roomChatUnreadMobile");
 
-const passwordField =
-    document.getElementById("passwordField");
+const videoGrid = document.getElementById("videoGrid");
 
-const passwordInput =
-    document.getElementById("passwordInput");
-
-const loginButton =
-    document.getElementById("loginButton");
-
-const loginError =
-    document.getElementById("loginError");
-
-const adminButton =
-    document.getElementById("adminButton");
-
-const profileButton =
-    document.getElementById("profileButton");
-
-const topAvatar =
-    document.getElementById("topAvatar");
-
-const topUsername =
-    document.getElementById("topUsername");
-
-const lobbyScreen =
-    document.getElementById("lobbyScreen");
-
-const roomScreen =
-    document.getElementById("roomScreen");
-
-const roomList =
-    document.getElementById("roomList");
-
-const roomSearch =
-    document.getElementById("roomSearch");
-
-const createRoomButton =
-    document.getElementById("createRoomButton");
-
-const lobbyChatMessages =
-    document.getElementById("lobbyChatMessages");
-
-const lobbyChatInput =
-    document.getElementById("lobbyChatInput");
-
-const lobbyChatSend =
-    document.getElementById("lobbyChatSend");
-
-const roomName =
-    document.getElementById("roomName");
-
-const roomStatus =
-    document.getElementById("roomStatus");
-
-const videoGrid =
-    document.getElementById("videoGrid");
-
-const microBtn =
-    document.getElementById("microBtn");
-
-const cameraBtn =
-    document.getElementById("cameraBtn");
-
-const leaveRoomButton =
-    document.getElementById("leaveRoomButton");
-
-const roomChatMessages =
-    document.getElementById("roomChatMessages");
-
-const roomChatInput =
-    document.getElementById("roomChatInput");
-
-const roomChatSend =
-    document.getElementById("roomChatSend");
-
-const lobbyChatSidebar =
-    document.getElementById("lobbyChatSidebar");
-
-const roomChatSidebar =
-    document.getElementById("roomChatSidebar");
-
-const mobileChatBackdrop =
-    document.getElementById("mobileChatBackdrop");
-
-const lobbyChatToggle =
-    document.getElementById("lobbyChatToggle");
-
-const roomChatToggle =
-    document.getElementById("roomChatToggle");
-
-const roomUnreadBadge =
-    document.getElementById("roomUnreadBadge");
-
-const profileModal =
-    document.getElementById("profileModal");
-
-const profileUsername =
-    document.getElementById("profileUsername");
-
-const profileId =
-    document.getElementById("profileId");
-
-const adminModal =
-    document.getElementById("adminModal");
-
-const adminUsersTab =
-    document.getElementById("adminUsersTab");
-
-const adminRoomsTab =
-    document.getElementById("adminRoomsTab");
-
-const adminList =
-    document.getElementById("adminList");
-
-/* ============================================================
-   WEBSOCKET
-============================================================ */
-
-function connectSocket(){
-
-    if (
-        socket &&
-        (
-            socket.readyState === WebSocket.OPEN ||
-            socket.readyState === WebSocket.CONNECTING
-        )
-    ){
-        return;
-    }
-
-    socket =
-        new WebSocket(SERVER_URL);
-
-    socket.addEventListener(
-        "open",
-        () => {
-
-            const savedSession =
-                localStorage.getItem(
-                    "colincall_session"
-                );
-
-            if (savedSession){
-
-                try{
-
-                    const session =
-                        JSON.parse(
-                            savedSession
-                        );
-
-                    if (session.token){
-
-                        send({
-                            type:
-                                "restore-session",
-                            token:
-                                session.token
-                        });
-
-                        return;
-                    }
-
-                }catch(error){
-
-                    localStorage.removeItem(
-                        "colincall_session"
-                    );
-                }
-            }
-        }
-    );
-
-    socket.addEventListener(
-        "message",
-        event => {
-
-            let message;
-
-            try{
-
-                message =
-                    JSON.parse(
-                        event.data
-                    );
-
-            }catch(error){
-
-                return;
-            }
-
-            handleMessage(message);
-        }
-    );
-
-    socket.addEventListener(
-        "close",
-        () => {
-
-            /*
-             * On ne supprime pas la session.
-             * Une reconnexion pourra restaurer
-             * l'utilisateur.
-             */
-
-            setTimeout(
-                () => {
-
-                    if (
-                        currentUser
-                    ){
-                        connectSocket();
-                    }
-
-                },
-                1500
-            );
-        }
-    );
-}
+/* =========================
+   UTILS
+========================= */
 
 function send(data){
-
-    if (
-        !socket ||
-        socket.readyState !== WebSocket.OPEN
-    ){
-        return false;
+    if(socket && socket.readyState === WebSocket.OPEN){
+        socket.send(JSON.stringify(data));
     }
-
-    socket.send(
-        JSON.stringify(data)
-    );
-
-    return true;
 }
 
-/* ============================================================
-   AUTH
-============================================================ */
+function getInitial(username){
+    if(!username) return "?";
+    return username.trim().charAt(0).toUpperCase() || "?";
+}
 
-userTab.addEventListener(
-    "click",
-    () => {
+function escapeHtml(value){
+    return String(value ?? "");
+}
 
-        loginMode = "user";
+/* =========================
+   LOGIN
+========================= */
 
-        userTab.classList.add("active");
-        adminTab.classList.remove("active");
+function switchLoginMode(mode){
+    loginMode = mode;
 
-        passwordField.style.display =
-            "none";
+    document.getElementById("userTab").classList.toggle(
+        "active",
+        mode === "user"
+    );
 
-        passwordInput.value = "";
+    document.getElementById("adminTab").classList.toggle(
+        "active",
+        mode === "admin"
+    );
 
-        loginError.textContent = "";
-    }
-);
-
-adminTab.addEventListener(
-    "click",
-    () => {
-
-        loginMode = "admin";
-
-        adminTab.classList.add("active");
-        userTab.classList.remove("active");
-
-        passwordField.style.display =
-            "block";
-
-        loginError.textContent = "";
-    }
-);
-
-loginButton.addEventListener(
-    "click",
-    login
-);
-
-usernameInput.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key === "Enter"
-        ){
-
-            if (
-                loginMode === "admin"
-            ){
-
-                passwordInput.focus();
-
-            }else{
-
-                login();
-            }
-        }
-    }
-);
-
-passwordInput.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key === "Enter"
-        ){
-            login();
-        }
-    }
-);
+    document.getElementById("passwordField").style.display =
+        mode === "admin" ? "block" : "none";
+}
 
 function login(){
-
     const username =
-        usernameInput.value.trim();
+        document.getElementById("usernameInput").value.trim();
 
     const password =
-        passwordInput.value;
+        document.getElementById("passwordInput").value;
 
-    if (!username){
+    const error =
+        document.getElementById("loginError");
 
-        loginError.textContent =
-            "Nom d'utilisateur obligatoire.";
+    error.textContent = "";
 
+    if(!username){
+        error.textContent = "Veuillez entrer un nom d'utilisateur.";
         return;
     }
 
-    loginError.textContent = "";
+    if(loginMode === "admin" && !password){
+        error.textContent = "Veuillez entrer le code administrateur.";
+        return;
+    }
 
-    connectSocket();
-
-    const waitForSocket =
-        setInterval(
-            () => {
-
-                if (
-                    socket &&
-                    socket.readyState === WebSocket.OPEN
-                ){
-
-                    clearInterval(
-                        waitForSocket
-                    );
-
-                    send({
-                        type:"login",
-                        username,
-                        password
-                    });
-                }
-
-            },
-            100
-        );
-
-    setTimeout(
-        () => {
-            clearInterval(
-                waitForSocket
-            );
-        },
-        10000
-    );
+    connectSocket(() => {
+        send({
+            type:"login",
+            username,
+            password: loginMode === "admin" ? password : null,
+            isAdmin: loginMode === "admin"
+        });
+    });
 }
 
-/* ============================================================
-   HANDLE SERVER MESSAGE
-============================================================ */
+function connectSocket(callback){
+    if(socket && socket.readyState === WebSocket.OPEN){
+        callback();
+        return;
+    }
+
+    socket = new WebSocket(WS_URL);
+
+    socket.onopen = () => {
+        callback();
+    };
+
+    socket.onmessage = event => {
+        try{
+            const message = JSON.parse(event.data);
+            handleMessage(message);
+        }catch(error){
+            console.error("Message invalide",error);
+        }
+    };
+
+    socket.onerror = () => {
+        document.getElementById("loginError").textContent =
+            "Impossible de contacter le serveur.";
+    };
+
+    socket.onclose = () => {
+        socket = null;
+    };
+}
+
+/* =========================
+   SESSION
+========================= */
+
+function restoreSession(){
+    const token = localStorage.getItem("colincall_session");
+
+    if(!token) return;
+
+    connectSocket(() => {
+        send({
+            type:"restore-session",
+            sessionToken:token
+        });
+    });
+}
+
+function handleLoginSuccess(message){
+    currentUser = message.user;
+
+    if(message.sessionToken){
+        localStorage.setItem(
+            "colincall_session",
+            message.sessionToken
+        );
+    }
+
+    showApplication();
+}
+
+function handleSessionRestored(message){
+    currentUser = message.user;
+
+    showApplication();
+}
+
+function showApplication(){
+    authScreen.style.display = "none";
+    app.style.display = "flex";
+
+    updateTopProfile();
+
+    document.getElementById("adminButton").style.display =
+        currentUser && currentUser.isAdmin
+            ? "flex"
+            : "none";
+
+    showLobby();
+
+    closeMobileChat();
+}
+
+function updateTopProfile(){
+    if(!currentUser) return;
+
+    const initial = getInitial(currentUser.username);
+
+    document.getElementById("topAvatar").textContent = initial;
+    document.getElementById("topUsername").textContent =
+        currentUser.username;
+
+    document.getElementById("profileAvatar").textContent = initial;
+    document.getElementById("profileUsername").textContent =
+        currentUser.username;
+
+    document.getElementById("profileId").textContent =
+        currentUser.id
+            ? "ID : " + currentUser.id
+            : "";
+}
+
+function logout(){
+    localStorage.removeItem("colincall_session");
+
+    closeAllPeers();
+    stopLocalMedia();
+
+    currentUser = null;
+    currentRoom = null;
+
+    roomUnreadCount = 0;
+    updateRoomUnreadBadge();
+
+    if(socket){
+        try{
+            socket.close();
+        }catch(e){}
+    }
+
+    socket = null;
+
+    closeProfile();
+    closeAdmin();
+    closeMobileChat();
+
+    app.style.display = "none";
+    authScreen.style.display = "flex";
+
+    document.getElementById("usernameInput").value = "";
+    document.getElementById("passwordInput").value = "";
+    document.getElementById("loginError").textContent = "";
+
+    switchLoginMode("user");
+}
+
+/* =========================
+   SERVER MESSAGES
+========================= */
 
 function handleMessage(message){
 
@@ -1897,2467 +1741,1498 @@ function handleMessage(message){
             break;
 
         case "login-success":
-            handleLoginSuccess(
-                message
-            );
+            handleLoginSuccess(message);
             break;
 
         case "session-restored":
-            handleSessionRestored(
-                message
-            );
-            break;
-
-        case "session-invalid":
-
-            localStorage.removeItem(
-                "colincall_session"
-            );
-
-            currentUser = null;
-
-            showAuth();
-
+            handleSessionRestored(message);
             break;
 
         case "login-error":
-
-            loginError.textContent =
-                message.message ||
-                "Erreur de connexion.";
-
+            document.getElementById("loginError").textContent =
+                message.message || "Connexion refusée.";
             break;
 
         case "room-list":
-
-            rooms =
-                message.rooms || [];
-
+            rooms = message.rooms || [];
             renderRooms();
-
             break;
 
         case "user-list":
-
-            users =
-                message.users || [];
-
-            updateRoomStatus();
-
-            if (
-                adminModal.style.display ===
-                "flex"
-            ){
-                renderAdmin();
-            }
-
+            users = message.users || [];
+            renderAdmin();
+            updateRoomParticipants();
             break;
 
         case "room-created":
-
-            renderRooms();
-
             break;
 
         case "room-joined":
-
-            handleRoomJoined(
-                message
-            );
-
+            handleRoomJoined(message);
             break;
 
-        case "user-joined":
-
-            handleUserJoined(
-                message
-            );
-
+        case "room-left":
             break;
 
-        case "user-left":
-
-            handleUserLeft(
-                message
-            );
-
+        case "room-user-joined":
+            handleRoomUserJoined(message);
             break;
 
-        case "left-room":
-
+        case "room-user-left":
+            handleRoomUserLeft(message);
             break;
 
-        case "chat-message":
-
-            addChatMessage(
-                message
-            );
-
+        case "chat":
+            addChatMessage(message);
             break;
 
         case "offer":
-
-            receiveOffer(
-                message
-            );
-
+            handleOffer(message);
             break;
 
         case "answer":
-
-            receiveAnswer(
-                message
-            );
-
+            handleAnswer(message);
             break;
 
         case "candidate":
-
-            receiveCandidate(
-                message
-            );
-
+            handleCandidate(message);
             break;
 
+        case "media-state":
         case "remote-media-state":
-
-            handleRemoteMediaState(
-                message
-            );
-
+            handleRemoteMediaState(message);
             break;
 
         case "force-media-state":
-
-            handleForceMediaState(
-                message
-            );
-
-            break;
-
-        case "room-deleted":
-
-            handleRoomDeleted(
-                message
-            );
-
+            handleForceMediaState(message);
             break;
 
         case "force-lobby":
-
-            forceLobby();
-
+            forceLeaveRoom(message);
             break;
 
-        case "kicked":
-
-            alert(
-                message.message ||
-                "Vous avez été exclu."
-            );
-
+        case "room-deleted":
+            handleRoomDeleted(message);
             break;
 
         case "admin-data":
-
-            rooms =
-                message.rooms || [];
-
-            users =
-                message.users || [];
-
+            rooms = message.rooms || rooms;
+            users = message.users || users;
             renderAdmin();
-
+            renderRooms();
             break;
 
         case "admin-error":
-
-            alert(
-                message.message ||
-                "Erreur administrateur."
-            );
-
+            alert(message.message || "Action refusée.");
             break;
 
         case "error":
-
-            alert(
-                message.message ||
-                "Erreur."
-            );
-
+            console.error(message.message);
             break;
     }
 }
 
-/* ============================================================
-   LOGIN SUCCESS / RESTORE
-============================================================ */
-
-function handleLoginSuccess(message){
-
-    currentUser =
-        message.user;
-
-    currentUser.isAdmin =
-        !!message.isAdmin;
-
-    if (
-        message.sessionToken
-    ){
-
-        localStorage.setItem(
-            "colincall_session",
-            JSON.stringify({
-                token:
-                    message.sessionToken
-            })
-        );
-    }
-
-    showApplication();
-}
-
-function handleSessionRestored(message){
-
-    currentUser =
-        message.user;
-
-    currentUser.isAdmin =
-        !!message.isAdmin;
-
-    showApplication();
-}
-
-function showApplication(){
-
-    authScreen.style.display =
-        "none";
-
-    app.style.display =
-        "flex";
-
-    topUsername.textContent =
-        currentUser.username;
-
-    topAvatar.textContent =
-        currentUser.username
-            .charAt(0)
-            .toUpperCase();
-
-    /*
-     * Le bouton Admin dépend uniquement du compte,
-     * pas de l'écran actuel.
-     *
-     * Il reste donc visible dans le lobby ET dans un salon.
-     */
-    if (
-        currentUser.isAdmin
-    ){
-
-        adminButton.style.display =
-            "block";
-
-    }else{
-
-        adminButton.style.display =
-            "none";
-    }
-
-    showLobby();
-
-    /*
-     * Empêche un navigateur mobile de restaurer
-     * un ancien texte dans les champs de chat.
-     */
-    lobbyChatInput.value = "";
-    roomChatInput.value = "";
-}
-
-function showAuth(){
-
-    authScreen.style.display =
-        "flex";
-
-    app.style.display =
-        "none";
-
-    closeMobileChat();
-}
-
-/* ============================================================
+/* =========================
    LOBBY
-============================================================ */
+========================= */
 
 function showLobby(){
-
     closeMobileChat();
 
-    roomScreen.style.display =
-        "none";
+    lobbyScreen.style.display = "flex";
+    roomScreen.style.display = "none";
 
-    lobbyScreen.style.display =
-        "flex";
+    document.getElementById("generalChatToggle").style.display =
+        window.innerWidth <= 700 ? "flex" : "none";
 
-    currentRoom = null;
-
-    roomUnreadMessages = 0;
-
-    updateUnreadBadge();
+    document.getElementById("roomChatToggle").style.display = "none";
 
     renderRooms();
 }
 
 function renderRooms(){
 
-    const search =
-        roomSearch.value
-            .trim()
-            .toLowerCase();
+    const container = document.getElementById("roomList");
+    const search = document
+        .getElementById("roomSearch")
+        .value
+        .trim()
+        .toLowerCase();
 
-    roomList.innerHTML = "";
+    container.innerHTML = "";
 
-    const filtered =
-        rooms.filter(
-            room =>
-                room.name
-                    .toLowerCase()
-                    .includes(search)
-        );
+    const filtered = rooms.filter(room =>
+        !search ||
+        String(room.name || "").toLowerCase().includes(search)
+    );
 
-    if (!filtered.length){
-
-        const empty =
-            document.createElement("div");
-
-        empty.style.color =
-            "var(--muted)";
-
-        empty.textContent =
-            "Aucun salon trouvé.";
-
-        roomList.appendChild(
-            empty
-        );
-
+    if(!filtered.length){
+        container.innerHTML = `
+            <div style="
+                color:var(--muted);
+                padding:30px 10px;
+                text-align:center;
+                grid-column:1/-1;
+            ">
+                Aucun salon disponible.
+            </div>
+        `;
         return;
     }
 
-    filtered.forEach(
-        room => {
+    filtered.forEach(room => {
 
-            const card =
-                document.createElement("div");
+        const card = document.createElement("div");
+        card.className = "room-card";
 
-            card.className =
-                "room-card";
+        const count =
+            room.userCount ??
+            room.users?.length ??
+            0;
 
-            const content =
-                document.createElement("div");
+        card.innerHTML = `
+            <div class="room-card-top">
+                <div style="min-width:0;">
+                    <div class="room-card-name">
+                        ${escapeHtml(room.name)}
+                    </div>
+                    <div class="room-card-count">
+                        👥 ${count} participant${count > 1 ? "s" : ""}
+                    </div>
+                </div>
+            </div>
 
-            const title =
-                document.createElement("h3");
+            <div class="room-card-bottom">
+                <span style="color:var(--muted);font-size:11px;">
+                    Salon
+                </span>
 
-            title.textContent =
-                room.name;
+                <button
+                    class="join-room-btn"
+                    onclick="joinRoom('${room.id}')"
+                >
+                    Rejoindre
+                </button>
+            </div>
+        `;
 
-            const count =
-                document.createElement("div");
-
-            count.className =
-                "room-count";
-
-            count.textContent =
-                `${room.userCount} personne${
-                    room.userCount > 1
-                        ? "s"
-                        : ""
-                }`;
-
-            content.appendChild(
-                title
-            );
-
-            content.appendChild(
-                count
-            );
-
-            const button =
-                document.createElement("button");
-
-            button.type =
-                "button";
-
-            button.textContent =
-                "Rejoindre";
-
-            button.addEventListener(
-                "click",
-                () => joinRoom(room.id)
-            );
-
-            card.appendChild(
-                content
-            );
-
-            card.appendChild(
-                button
-            );
-
-            roomList.appendChild(
-                card
-            );
-        }
-    );
-}
-
-roomSearch.addEventListener(
-    "input",
-    renderRooms
-);
-
-createRoomButton.addEventListener(
-    "click",
-    createRoom
-);
-
-function createRoom(){
-
-    const name =
-        prompt(
-            "Nom du salon :"
-        );
-
-    if (!name)
-        return;
-
-    const cleanName =
-        name.trim();
-
-    if (!cleanName)
-        return;
-
-    send({
-        type:
-            "create-room",
-        name:
-            cleanName
+        container.appendChild(card);
     });
 }
 
-/* ============================================================
-   ROOM
-============================================================ */
+function createRoom(){
+
+    if(!currentUser) return;
+
+    const name = prompt("Nom du salon :");
+
+    if(!name) return;
+
+    const cleanName = name.trim();
+
+    if(!cleanName) return;
+
+    send({
+        type:"create-room",
+        name:cleanName
+    });
+}
 
 function joinRoom(roomId){
 
-    if (!roomId)
-        return;
+    if(!currentUser) return;
 
-    prepareLocalMedia()
-        .then(
-            () => {
+    closeMobileChat();
 
-                /*
-                 * Caméra et micro toujours désactivés
-                 * à l'entrée.
-                 */
-                if (localStream){
+    prepareLocalMedia();
 
-                    localStream
-                        .getAudioTracks()
-                        .forEach(
-                            track =>
-                                track.enabled =
-                                    false
-                        );
-
-                    localStream
-                        .getVideoTracks()
-                        .forEach(
-                            track =>
-                                track.enabled =
-                                    false
-                        );
-                }
-
-                microphoneEnabled =
-                    false;
-
-                cameraEnabled =
-                    false;
-
-                updateControlButton(
-                    microBtn,
-                    false
-                );
-
-                updateControlButton(
-                    cameraBtn,
-                    false
-                );
-
-                send({
-                    type:
-                        "join-room",
-                    roomId
-                });
-            }
-        )
-        .catch(
-            error => {
-
-                console.error(
-                    error
-                );
-
-                /*
-                 * Si l'accès caméra/micro est refusé,
-                 * on tente quand même d'entrer dans le salon.
-                 */
-                send({
-                    type:
-                        "join-room",
-                    roomId
-                });
-            }
-        );
+    send({
+        type:"join-room",
+        roomId
+    });
 }
+
+document
+    .getElementById("roomSearch")
+    .addEventListener("input",renderRooms);
+
+/* =========================
+   ROOM JOINED
+========================= */
 
 async function prepareLocalMedia(){
 
-    if (localStream)
-        return localStream;
+    if(localStream) return;
 
-    localStream =
-        await navigator.mediaDevices.getUserMedia({
-            video:true,
-            audio:true
-        });
+    try{
 
-    localStream
-        .getAudioTracks()
-        .forEach(
-            track =>
-                track.enabled = false
+        localStream =
+            await navigator.mediaDevices.getUserMedia({
+                video:true,
+                audio:true
+            });
+
+        localStream.getAudioTracks().forEach(
+            track => track.enabled = false
         );
 
-    localStream
-        .getVideoTracks()
-        .forEach(
-            track =>
-                track.enabled = false
+        localStream.getVideoTracks().forEach(
+            track => track.enabled = false
         );
 
-    return localStream;
+        microphoneEnabled = false;
+        cameraEnabled = false;
+
+        updateControlButton();
+
+    }catch(error){
+
+        console.error("Media error",error);
+
+        localStream = null;
+        microphoneEnabled = false;
+        cameraEnabled = false;
+
+        updateControlButton();
+    }
 }
 
 function handleRoomJoined(message){
 
-    currentRoom =
-        message.room;
+    currentRoom = message.room;
 
-    currentUser.roomId =
-        currentRoom.id;
-
-    currentUser.microphoneEnabled =
-        false;
-
-    currentUser.cameraEnabled =
-        false;
-
-    microphoneEnabled =
-        false;
-
-    cameraEnabled =
-        false;
-
-    roomUnreadMessages =
-        0;
-
-    updateUnreadBadge();
+    roomUnreadCount = 0;
+    updateRoomUnreadBadge();
 
     closeMobileChat();
 
-    lobbyScreen.style.display =
-        "none";
+    lobbyScreen.style.display = "none";
+    roomScreen.style.display = "flex";
 
-    roomScreen.style.display =
-        "flex";
+    document.getElementById("generalChatToggle").style.display = "none";
 
-    roomName.textContent =
-        currentRoom.name;
+    document.getElementById("roomChatToggle").style.display =
+        window.innerWidth <= 700 ? "flex" : "none";
 
-    roomStatus.textContent =
-        "1 personne";
+    document.getElementById("roomName").textContent =
+        currentRoom.name || "Salon";
 
-    /*
-     * On vide uniquement l'affichage du chat.
-     * Le champ de saisie est explicitement vidé.
-     */
-    roomChatMessages.innerHTML = "";
-    roomChatInput.value = "";
+    document.getElementById("roomStatus").textContent =
+        "Vous êtes connecté";
 
+    document.getElementById("roomChatMessages").innerHTML = "";
     videoGrid.innerHTML = "";
+
+    closeAllPeers();
 
     addLocalVideo();
 
     const participants =
-        message.participants || [];
+        message.users ||
+        message.participants ||
+        [];
 
-    participants.forEach(
-        user => {
+    participants.forEach(user => {
 
-            addVideoUser(
-                user
-            );
+        if(
+            currentUser &&
+            user.id === currentUser.id
+        ) return;
 
-            createConnectionToUser(
-                user,
-                true
-            );
-        }
-    );
+        addVideoUser(user);
 
-    updateVideoGrid();
+        createOfferForUser(user);
+    });
 
-    updateRoomStatus();
+    updateVideoGridLayout();
 }
 
 function addLocalVideo(){
 
-    const card =
-        document.createElement("div");
+    const card = document.createElement("div");
+    card.className = "video-card";
+    card.id = "video-user-local";
 
-    card.className =
-        "video-card";
+    const video = document.createElement("video");
 
-    card.dataset.userId =
-        currentUser.id;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.muted = true;
 
-    const video =
-        document.createElement("video");
-
-    video.autoplay =
-        true;
-
-    video.muted =
-        true;
-
-    video.playsInline =
-        true;
-
-    if (localStream){
-
-        video.srcObject =
-            localStream;
+    if(localStream){
+        video.srcObject = localStream;
     }
 
-    const off =
-        document.createElement("div");
+    const cameraOff = document.createElement("div");
+    cameraOff.className = "camera-off";
+    cameraOff.id = "camera-off-local";
 
-    off.className =
-        "camera-off";
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent =
+        getInitial(currentUser?.username);
 
-    off.textContent =
-        "📷";
+    cameraOff.appendChild(avatar);
 
-    off.dataset.cameraOff =
-        "true";
+    const label = document.createElement("div");
+    label.className = "video-user-label";
+    label.textContent =
+        currentUser?.username || "Vous";
 
-    const name =
-        document.createElement("div");
+    card.appendChild(video);
+    card.appendChild(cameraOff);
+    card.appendChild(label);
 
-    name.className =
-        "video-name";
-
-    name.textContent =
-        currentUser.username;
-
-    card.appendChild(
-        video
-    );
-
-    card.appendChild(
-        off
-    );
-
-    card.appendChild(
-        name
-    );
-
-    videoGrid.appendChild(
-        card
-    );
+    videoGrid.appendChild(card);
 
     updateLocalCameraDisplay();
 }
 
 function addVideoUser(user){
 
-    if (
-        document.querySelector(
-            `.video-card[data-user-id="${user.id}"]`
-        )
-    ){
+    if(document.getElementById("video-user-" + user.id)){
         return;
     }
 
-    const card =
-        document.createElement("div");
+    const card = document.createElement("div");
 
-    card.className =
-        "video-card";
+    card.className = "video-card";
+    card.id = "video-user-" + user.id;
 
-    card.dataset.userId =
-        user.id;
+    const video = document.createElement("video");
 
-    const video =
-        document.createElement("video");
+    video.autoplay = true;
+    video.playsInline = true;
 
-    video.autoplay =
-        true;
+    const cameraOff = document.createElement("div");
+    cameraOff.className = "camera-off";
+    cameraOff.id = "camera-off-" + user.id;
 
-    video.playsInline =
-        true;
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent =
+        getInitial(user.username);
 
-    const off =
-        document.createElement("div");
+    cameraOff.appendChild(avatar);
 
-    off.className =
-        "camera-off";
+    const label = document.createElement("div");
+    label.className = "video-user-label";
+    label.textContent = user.username;
 
-    off.textContent =
-        "📷";
+    card.appendChild(video);
+    card.appendChild(cameraOff);
+    card.appendChild(label);
 
-    if (user.cameraEnabled){
+    videoGrid.appendChild(card);
 
-        off.style.display =
-            "none";
+    card.dataset.userId = user.id;
 
-    }else{
-
-        off.style.display =
-            "flex";
-    }
-
-    const name =
-        document.createElement("div");
-
-    name.className =
-        "video-name";
-
-    name.textContent =
-        user.username;
-
-    card.appendChild(
-        video
+    updateRemoteCameraDisplay(
+        user.id,
+        user.cameraEnabled
     );
 
-    card.appendChild(
-        off
-    );
-
-    card.appendChild(
-        name
-    );
-
-    videoGrid.appendChild(
-        card
-    );
-
-    updateVideoGrid();
+    updateVideoGridLayout();
 }
 
-function updateVideoGrid(){
+/* =========================
+   VIDEO LAYOUT
+========================= */
+
+function updateVideoGridLayout(){
 
     const count =
-        videoGrid.querySelectorAll(
-            ".video-card"
-        ).length;
+        videoGrid.querySelectorAll(".video-card").length;
 
-    /*
-     * 1 personne = 1 colonne
-     * 2 personnes = 2 colonnes
-     * 3 personnes = 2 colonnes
-     * 4 personnes = 2 colonnes
-     * 5+ = 3 colonnes
-     *
-     * Le point important est que 2 personnes
-     * utilisent la même grille de largeur que
-     * le mode 3 personnes.
-     */
+    videoGrid.classList.remove(
+        "count-1",
+        "count-2",
+        "count-3",
+        "count-4",
+        "count-many"
+    );
 
-    if (count <= 1){
-
-        videoGrid.style.gridTemplateColumns =
-            "1fr";
-
-    }else if (count <= 4){
-
-        videoGrid.style.gridTemplateColumns =
-            "repeat(2,minmax(0,1fr))";
-
+    if(count <= 1){
+        videoGrid.classList.add("count-1");
+    }else if(count === 2){
+        /*
+          2 personnes = même grille que 3.
+        */
+        videoGrid.classList.add("count-2");
+    }else if(count === 3){
+        videoGrid.classList.add("count-3");
+    }else if(count === 4){
+        videoGrid.classList.add("count-4");
     }else{
-
-        videoGrid.style.gridTemplateColumns =
-            "repeat(3,minmax(0,1fr))";
-    }
-}
-
-function updateRoomStatus(){
-
-    if (!currentRoom)
-        return;
-
-    const count =
-        users.filter(
-            user =>
-                user.roomId ===
-                currentRoom.id
-        ).length;
-
-    /*
-     * Le serveur peut ne pas encore avoir renvoyé
-     * le user-list actualisé. On garantit au minimum
-     * que l'utilisateur actuel est compté.
-     */
-    const finalCount =
-        Math.max(
-            count,
-            videoGrid.querySelectorAll(
-                ".video-card"
-            ).length
-        );
-
-    roomStatus.textContent =
-        `${finalCount} personne${
-            finalCount > 1
-                ? "s"
-                : ""
-        }`;
-}
-
-function handleUserJoined(message){
-
-    if (!currentRoom)
-        return;
-
-    const user =
-        message.user;
-
-    if (!user)
-        return;
-
-    if (
-        user.roomId !==
-        currentRoom.id
-    ){
-        return;
-    }
-
-    addVideoUser(
-        user
-    );
-
-    /*
-     * Le nouvel utilisateur créera normalement
-     * les offres vers les participants existants.
-     */
-    updateRoomStatus();
-}
-
-function handleUserLeft(message){
-
-    const card =
-        document.querySelector(
-            `.video-card[data-user-id="${message.userId}"]`
-        );
-
-    if (card)
-        card.remove();
-
-    closePeer(
-        message.userId
-    );
-
-    pendingCandidates.delete(
-        message.userId
-    );
-
-    updateVideoGrid();
-    updateRoomStatus();
-}
-
-/* ============================================================
-   MEDIA
-============================================================ */
-
-microBtn.addEventListener(
-    "click",
-    toggleMicro
-);
-
-cameraBtn.addEventListener(
-    "click",
-    toggleCamera
-);
-
-async function toggleMicro(){
-
-    if (!localStream){
-
-        try{
-            await prepareLocalMedia();
-        }catch(error){
-            alert(
-                "Impossible d'accéder au microphone."
-            );
-            return;
-        }
-    }
-
-    const tracks =
-        localStream.getAudioTracks();
-
-    if (!tracks.length){
-        return;
-    }
-
-    microphoneEnabled =
-        !microphoneEnabled;
-
-    tracks.forEach(
-        track =>
-            track.enabled =
-                microphoneEnabled
-    );
-
-    updateControlButton(
-        microBtn,
-        microphoneEnabled
-    );
-
-    send({
-        type:
-            "media-state",
-        microphoneEnabled,
-        cameraEnabled
-    });
-
-    if (currentUser){
-
-        currentUser.microphoneEnabled =
-            microphoneEnabled;
-    }
-}
-
-async function toggleCamera(){
-
-    if (!localStream){
-
-        try{
-            await prepareLocalMedia();
-        }catch(error){
-            alert(
-                "Impossible d'accéder à la caméra."
-            );
-            return;
-        }
-    }
-
-    const tracks =
-        localStream.getVideoTracks();
-
-    if (!tracks.length){
-        return;
-    }
-
-    cameraEnabled =
-        !cameraEnabled;
-
-    tracks.forEach(
-        track =>
-            track.enabled =
-                cameraEnabled
-    );
-
-    updateControlButton(
-        cameraBtn,
-        cameraEnabled
-    );
-
-    updateLocalCameraDisplay();
-
-    send({
-        type:
-            "media-state",
-        microphoneEnabled,
-        cameraEnabled
-    });
-
-    if (currentUser){
-
-        currentUser.cameraEnabled =
-            cameraEnabled;
-    }
-}
-
-function updateControlButton(
-    button,
-    enabled
-){
-
-    if (enabled){
-
-        button.classList.add(
-            "active"
-        );
-
-    }else{
-
-        button.classList.remove(
-            "active"
-        );
+        videoGrid.classList.add("count-many");
     }
 }
 
 function updateLocalCameraDisplay(){
 
-    const card =
-        document.querySelector(
-            `.video-card[data-user-id="${currentUser?.id}"]`
-        );
+    const overlay =
+        document.getElementById("camera-off-local");
 
-    if (!card)
-        return;
+    if(!overlay) return;
 
-    const off =
-        card.querySelector(
-            ".camera-off"
-        );
-
-    if (!off)
-        return;
-
-    off.style.display =
-        cameraEnabled
-            ? "none"
-            : "flex";
+    overlay.style.display =
+        cameraEnabled ? "none" : "flex";
 }
 
-function handleRemoteMediaState(message){
+function updateRemoteCameraDisplay(userId,enabled){
 
-    const card =
-        document.querySelector(
-            `.video-card[data-user-id="${message.userId}"]`
+    const overlay =
+        document.getElementById(
+            "camera-off-" + userId
         );
 
-    if (!card)
-        return;
+    if(!overlay) return;
 
-    const off =
-        card.querySelector(
-            ".camera-off"
-        );
-
-    if (!off)
-        return;
-
-    off.style.display =
-        message.cameraEnabled
-            ? "none"
-            : "flex";
+    overlay.style.display =
+        enabled ? "none" : "flex";
 }
 
-function handleForceMediaState(message){
+/* =========================
+   PARTICIPANTS
+========================= */
 
-    if (!localStream)
-        return;
+function updateRoomParticipants(){
 
-    if (
-        typeof message.microphoneEnabled ===
-        "boolean"
-    ){
+    if(!currentRoom) return;
 
-        microphoneEnabled =
-            message.microphoneEnabled;
-
-        localStream
-            .getAudioTracks()
-            .forEach(
-                track =>
-                    track.enabled =
-                        microphoneEnabled
-            );
-
-        updateControlButton(
-            microBtn,
-            microphoneEnabled
-        );
-    }
-
-    if (
-        typeof message.cameraEnabled ===
-        "boolean"
-    ){
-
-        cameraEnabled =
-            message.cameraEnabled;
-
-        localStream
-            .getVideoTracks()
-            .forEach(
-                track =>
-                    track.enabled =
-                        cameraEnabled
-            );
-
-        updateControlButton(
-            cameraBtn,
-            cameraEnabled
+    const participants =
+        users.filter(user =>
+            user.roomId === currentRoom.id
         );
 
-        updateLocalCameraDisplay();
-    }
+    participants.forEach(user => {
 
-    if (currentUser){
+        if(
+            currentUser &&
+            user.id === currentUser.id
+        ) return;
 
-        currentUser.microphoneEnabled =
-            microphoneEnabled;
-
-        currentUser.cameraEnabled =
-            cameraEnabled;
-    }
-}
-
-/* ============================================================
-   WEBRTC
-============================================================ */
-
-const rtcConfig = {
-    iceServers:[
-        {
-            urls:
-                "stun:stun.l.google.com:19302"
+        if(!document.getElementById("video-user-" + user.id)){
+            addVideoUser(user);
         }
-    ]
-};
 
-function createConnectionToUser(
-    user,
-    createOffer
-){
-
-    if (!user)
-        return;
-
-    if (
-        user.id ===
-        currentUser.id
-    ){
-        return;
-    }
-
-    if (
-        peers.has(user.id)
-    ){
-        return peers.get(user.id);
-    }
-
-    const pc =
-        new RTCPeerConnection(
-            rtcConfig
-        );
-
-    peers.set(
-        user.id,
-        pc
-    );
-
-    pendingCandidates.set(
-        user.id,
-        []
-    );
-
-    if (localStream){
-
-        localStream
-            .getTracks()
-            .forEach(
-                track => {
-
-                    pc.addTrack(
-                        track,
-                        localStream
-                    );
-                }
-            );
-    }
-
-    pc.onicecandidate =
-        event => {
-
-            if (
-                event.candidate
-            ){
-
-                send({
-                    type:
-                        "candidate",
-
-                    targetUserId:
-                        user.id,
-
-                    candidate:
-                        event.candidate
-                });
-            }
-        };
-
-    pc.ontrack =
-        event => {
-
-            const card =
-                document.querySelector(
-                    `.video-card[data-user-id="${user.id}"]`
-                );
-
-            if (!card)
-                return;
-
-            const video =
-                card.querySelector(
-                    "video"
-                );
-
-            if (!video)
-                return;
-
-            video.srcObject =
-                event.streams[0];
-        };
-
-    pc.onconnectionstatechange =
-        () => {
-
-            if (
-                pc.connectionState ===
-                    "failed" ||
-                pc.connectionState ===
-                    "closed" ||
-                pc.connectionState ===
-                    "disconnected"
-            ){
-
-                /*
-                 * On ne supprime pas immédiatement
-                 * pour éviter les faux déconnexions.
-                 */
-            }
-        };
-
-    if (createOffer){
-
-        pc.createOffer()
-            .then(
-                offer =>
-                    pc.setLocalDescription(
-                        offer
-                    )
-            )
-            .then(
-                () => {
-
-                    send({
-                        type:
-                            "offer",
-
-                        targetUserId:
-                            user.id,
-
-                        offer:
-                            pc.localDescription
-                    });
-                }
-            )
-            .catch(
-                console.error
-            );
-    }
-
-    return pc;
-}
-
-async function receiveOffer(message){
-
-    const user =
-        findUser(
-            message.fromUserId
-        );
-
-    if (!user)
-        return;
-
-    let pc =
-        peers.get(
-            user.id
-        );
-
-    if (!pc){
-
-        pc =
-            createConnectionToUser(
-                user,
-                false
-            );
-    }
-
-    await pc.setRemoteDescription(
-        new RTCSessionDescription(
-            message.offer
-        )
-    );
-
-    await flushPendingCandidates(
-        user.id
-    );
-
-    const answer =
-        await pc.createAnswer();
-
-    await pc.setLocalDescription(
-        answer
-    );
-
-    send({
-        type:
-            "answer",
-
-        targetUserId:
+        updateRemoteCameraDisplay(
             user.id,
-
-        answer:
-            pc.localDescription
+            user.cameraEnabled
+        );
     });
+
+    updateVideoGridLayout();
 }
 
-async function receiveAnswer(message){
+function handleRoomUserJoined(message){
 
-    const pc =
-        peers.get(
-            message.fromUserId
-        );
+    const user = message.user;
 
-    if (!pc)
-        return;
+    if(!user) return;
 
-    await pc.setRemoteDescription(
-        new RTCSessionDescription(
-            message.answer
-        )
-    );
+    if(
+        currentUser &&
+        user.id === currentUser.id
+    ) return;
 
-    await flushPendingCandidates(
-        message.fromUserId
-    );
+    addVideoUser(user);
+
+    createOfferForUser(user);
+
+    updateVideoGridLayout();
 }
 
-async function receiveCandidate(message){
+function handleRoomUserLeft(message){
 
-    const pc =
-        peers.get(
-            message.fromUserId
+    const userId =
+        message.userId ||
+        message.user?.id;
+
+    if(!userId) return;
+
+    const card =
+        document.getElementById(
+            "video-user-" + userId
         );
 
-    if (
-        !pc ||
-        !pc.remoteDescription
-    ){
+    if(card){
+        card.remove();
+    }
 
-        if (
-            !pendingCandidates.has(
-                message.fromUserId
-            )
-        ){
+    closePeer(userId);
 
-            pendingCandidates.set(
-                message.fromUserId,
-                []
+    updateVideoGridLayout();
+}
+
+/* =========================
+   WEBRTC
+========================= */
+
+function createPeerConnection(userId){
+
+    if(peers.has(userId)){
+        return peers.get(userId);
+    }
+
+    const peer =
+        new RTCPeerConnection({
+            iceServers:[
+                {
+                    urls:"stun:stun.l.google.com:19302"
+                }
+            ]
+        });
+
+    peers.set(userId,peer);
+
+    if(localStream){
+
+        localStream.getTracks().forEach(track => {
+            peer.addTrack(track,localStream);
+        });
+    }
+
+    peer.onicecandidate = event => {
+
+        if(event.candidate){
+
+            send({
+                type:"candidate",
+                targetId:userId,
+                candidate:event.candidate
+            });
+        }
+    };
+
+    peer.ontrack = event => {
+
+        const card =
+            document.getElementById(
+                "video-user-" + userId
             );
+
+        if(!card) return;
+
+        const video =
+            card.querySelector("video");
+
+        if(video){
+            video.srcObject = event.streams[0];
+        }
+    };
+
+    peer.onconnectionstatechange = () => {
+
+        if(
+            peer.connectionState === "failed" ||
+            peer.connectionState === "closed"
+        ){
+            closePeer(userId);
+        }
+    };
+
+    return peer;
+}
+
+async function createOfferForUser(user){
+
+    if(!user || !user.id) return;
+
+    const peer =
+        createPeerConnection(user.id);
+
+    try{
+
+        const offer =
+            await peer.createOffer();
+
+        await peer.setLocalDescription(offer);
+
+        send({
+            type:"offer",
+            targetId:user.id,
+            offer:peer.localDescription
+        });
+
+    }catch(error){
+        console.error("Offer error",error);
+    }
+}
+
+async function handleOffer(message){
+
+    const userId =
+        message.fromId ||
+        message.userId ||
+        message.senderId;
+
+    if(!userId || !message.offer) return;
+
+    const peer =
+        createPeerConnection(userId);
+
+    try{
+
+        await peer.setRemoteDescription(
+            new RTCSessionDescription(message.offer)
+        );
+
+        await flushCandidates(userId,peer);
+
+        const answer =
+            await peer.createAnswer();
+
+        await peer.setLocalDescription(answer);
+
+        send({
+            type:"answer",
+            targetId:userId,
+            answer:peer.localDescription
+        });
+
+    }catch(error){
+        console.error("Offer handling error",error);
+    }
+}
+
+async function handleAnswer(message){
+
+    const userId =
+        message.fromId ||
+        message.userId ||
+        message.senderId;
+
+    if(!userId || !message.answer) return;
+
+    const peer = peers.get(userId);
+
+    if(!peer) return;
+
+    try{
+
+        await peer.setRemoteDescription(
+            new RTCSessionDescription(message.answer)
+        );
+
+        await flushCandidates(userId,peer);
+
+    }catch(error){
+        console.error("Answer error",error);
+    }
+}
+
+async function handleCandidate(message){
+
+    const userId =
+        message.fromId ||
+        message.userId ||
+        message.senderId;
+
+    if(!userId || !message.candidate) return;
+
+    const peer = peers.get(userId);
+
+    if(!peer){
+        if(!pendingCandidates.has(userId)){
+            pendingCandidates.set(userId,[]);
         }
 
         pendingCandidates
-            .get(
-                message.fromUserId
-            )
-            .push(
-                message.candidate
-            );
+            .get(userId)
+            .push(message.candidate);
 
         return;
     }
 
     try{
 
-        await pc.addIceCandidate(
-            new RTCIceCandidate(
-                message.candidate
-            )
-        );
+        if(peer.remoteDescription){
+
+            await peer.addIceCandidate(
+                new RTCIceCandidate(message.candidate)
+            );
+
+        }else{
+
+            if(!pendingCandidates.has(userId)){
+                pendingCandidates.set(userId,[]);
+            }
+
+            pendingCandidates
+                .get(userId)
+                .push(message.candidate);
+        }
 
     }catch(error){
-
-        console.error(
-            "ICE error:",
-            error
-        );
+        console.error("Candidate error",error);
     }
 }
 
-async function flushPendingCandidates(
-    userId
-){
+async function flushCandidates(userId,peer){
 
-    const pc =
-        peers.get(
-            userId
-        );
+    const list =
+        pendingCandidates.get(userId);
 
-    const candidates =
-        pendingCandidates.get(
-            userId
-        ) || [];
+    if(!list) return;
 
-    if (
-        !pc ||
-        !pc.remoteDescription
-    ){
-        return;
-    }
-
-    for (
-        const candidate
-        of candidates
-    ){
+    for(const candidate of list){
 
         try{
 
-            await pc.addIceCandidate(
-                new RTCIceCandidate(
-                    candidate
-                )
+            await peer.addIceCandidate(
+                new RTCIceCandidate(candidate)
             );
 
         }catch(error){
-
-            console.error(
-                error
-            );
+            console.error(error);
         }
     }
 
-    pendingCandidates.set(
-        userId,
-        []
-    );
-}
-
-function findUser(userId){
-
-    return users.find(
-        user =>
-            user.id ===
-            userId
-    );
+    pendingCandidates.delete(userId);
 }
 
 function closePeer(userId){
 
-    const pc =
-        peers.get(
-            userId
-        );
+    const peer = peers.get(userId);
 
-    if (pc){
-
+    if(peer){
         try{
-            pc.close();
-        }catch(error){}
+            peer.close();
+        }catch(e){}
     }
 
-    peers.delete(
-        userId
-    );
-
-    pendingCandidates.delete(
-        userId
-    );
+    peers.delete(userId);
+    pendingCandidates.delete(userId);
 }
 
 function closeAllPeers(){
 
-    for (
-        const pc
-        of peers.values()
-    ){
-
+    peers.forEach(peer => {
         try{
-            pc.close();
-        }catch(error){}
-    }
+            peer.close();
+        }catch(e){}
+    });
 
     peers.clear();
     pendingCandidates.clear();
 }
 
-/* ============================================================
-   LEAVE ROOM
-============================================================ */
+/* =========================
+   MEDIA
+========================= */
 
-leaveRoomButton.addEventListener(
-    "click",
-    leaveCurrentRoom
-);
+function toggleMicro(){
+
+    if(!localStream) return;
+
+    const tracks =
+        localStream.getAudioTracks();
+
+    if(!tracks.length) return;
+
+    microphoneEnabled =
+        !microphoneEnabled;
+
+    tracks.forEach(
+        track => track.enabled = microphoneEnabled
+    );
+
+    send({
+        type:"media-state",
+        microphoneEnabled,
+        cameraEnabled
+    });
+
+    updateControlButton();
+}
+
+function toggleCamera(){
+
+    if(!localStream) return;
+
+    const tracks =
+        localStream.getVideoTracks();
+
+    if(!tracks.length) return;
+
+    cameraEnabled =
+        !cameraEnabled;
+
+    tracks.forEach(
+        track => track.enabled = cameraEnabled
+    );
+
+    send({
+        type:"media-state",
+        microphoneEnabled,
+        cameraEnabled
+    });
+
+    updateControlButton();
+    updateLocalCameraDisplay();
+}
+
+function updateControlButton(){
+
+    const microBtn =
+        document.getElementById("microBtn");
+
+    const cameraBtn =
+        document.getElementById("cameraBtn");
+
+    microBtn.classList.toggle(
+        "active",
+        microphoneEnabled
+    );
+
+    cameraBtn.classList.toggle(
+        "active",
+        cameraEnabled
+    );
+}
+
+function handleRemoteMediaState(message){
+
+    const userId =
+        message.userId ||
+        message.fromId ||
+        message.senderId;
+
+    if(!userId) return;
+
+    updateRemoteCameraDisplay(
+        userId,
+        !!message.cameraEnabled
+    );
+}
+
+function handleForceMediaState(message){
+
+    if(!localStream) return;
+
+    if(
+        typeof message.microphoneEnabled === "boolean"
+    ){
+        microphoneEnabled =
+            message.microphoneEnabled;
+
+        localStream
+            .getAudioTracks()
+            .forEach(track =>
+                track.enabled = microphoneEnabled
+            );
+    }
+
+    if(
+        typeof message.cameraEnabled === "boolean"
+    ){
+        cameraEnabled =
+            message.cameraEnabled;
+
+        localStream
+            .getVideoTracks()
+            .forEach(track =>
+                track.enabled = cameraEnabled
+            );
+    }
+
+    updateControlButton();
+    updateLocalCameraDisplay();
+}
+
+function stopLocalMedia(){
+
+    if(localStream){
+
+        localStream.getTracks().forEach(
+            track => track.stop()
+        );
+
+        localStream = null;
+    }
+
+    microphoneEnabled = false;
+    cameraEnabled = false;
+
+    updateControlButton();
+}
+
+/* =========================
+   LEAVE ROOM
+========================= */
 
 function leaveCurrentRoom(){
 
-    if (!currentRoom)
-        return;
+    if(!currentRoom) return;
 
     const confirmed =
         confirm(
             `Voulez-vous vraiment quitter le salon "${currentRoom.name}" ?`
         );
 
-    if (!confirmed)
-        return;
+    if(!confirmed) return;
 
     send({
-        type:
-            "leave-room"
+        type:"leave-room"
     });
 
     closeAllPeers();
-
     stopLocalMedia();
 
     currentRoom = null;
 
-    if (currentUser){
-
-        currentUser.roomId =
-            null;
+    if(currentUser){
+        currentUser.roomId = null;
     }
 
     videoGrid.innerHTML = "";
 
-    roomChatMessages.innerHTML = "";
-    roomChatInput.value = "";
+    roomUnreadCount = 0;
+    updateRoomUnreadBadge();
 
-    roomUnreadMessages =
-        0;
+    closeMobileChat();
 
-    updateUnreadBadge();
+    roomScreen.style.display = "none";
+    lobbyScreen.style.display = "flex";
 
-    showLobby();
+    document.getElementById("generalChatToggle").style.display =
+        window.innerWidth <= 700 ? "flex" : "none";
+
+    document.getElementById("roomChatToggle").style.display =
+        "none";
+
+    renderRooms();
 }
 
-function stopLocalMedia(){
+function forceLeaveRoom(message){
 
-    if (!localStream)
-        return;
+    closeAllPeers();
+    stopLocalMedia();
 
-    localStream
-        .getTracks()
-        .forEach(
-            track =>
-                track.stop()
-        );
+    currentRoom = null;
 
-    localStream =
-        null;
+    if(currentUser){
+        currentUser.roomId = null;
+    }
 
-    microphoneEnabled =
-        false;
+    videoGrid.innerHTML = "";
 
-    cameraEnabled =
-        false;
+    roomUnreadCount = 0;
+    updateRoomUnreadBadge();
+
+    closeMobileChat();
+
+    roomScreen.style.display = "none";
+    lobbyScreen.style.display = "flex";
+
+    document.getElementById("generalChatToggle").style.display =
+        window.innerWidth <= 700 ? "flex" : "none";
+
+    document.getElementById("roomChatToggle").style.display =
+        "none";
+
+    if(message?.message){
+        alert(message.message);
+    }
 }
 
-/* ============================================================
+function handleRoomDeleted(message){
+
+    if(
+        currentRoom &&
+        message.roomId === currentRoom.id
+    ){
+        forceLeaveRoom({
+            message:"Le salon a été supprimé par l'administrateur."
+        });
+    }
+
+    renderRooms();
+}
+
+/* =========================
    CHAT
-============================================================ */
-
-lobbyChatSend.addEventListener(
-    "click",
-    sendLobbyChat
-);
-
-roomChatSend.addEventListener(
-    "click",
-    sendRoomChat
-);
-
-/*
- * IMPORTANT :
- * Aucun événement click/focus ne modifie la valeur
- * des champs de texte.
- *
- * Le clavier mobile sert uniquement à saisir du texte.
- */
-
-lobbyChatInput.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key === "Enter" &&
-            !event.shiftKey
-        ){
-
-            event.preventDefault();
-
-            sendLobbyChat();
-        }
-    }
-);
-
-roomChatInput.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key === "Enter" &&
-            !event.shiftKey
-        ){
-
-            event.preventDefault();
-
-            sendRoomChat();
-        }
-    }
-);
+========================= */
 
 function sendLobbyChat(){
 
     const input =
-        lobbyChatInput;
+        document.getElementById(
+            "lobbyChatInput"
+        );
 
     const text =
         input.value.trim();
 
-    if (!text)
-        return;
+    if(!text) return;
 
-    if (
-        !send({
-            type:
-                "chat",
-            text,
-            roomId:
-                null
-        })
-    ){
-        return;
-    }
+    send({
+        type:"chat",
+        text,
+        roomId:null
+    });
 
-    /*
-     * On vide immédiatement le champ.
-     * Aucun ancien message ne peut être remis dedans.
-     */
     input.value = "";
 }
 
 function sendRoomChat(){
 
-    if (!currentRoom)
-        return;
+    if(!currentRoom) return;
 
     const input =
-        roomChatInput;
+        document.getElementById(
+            "roomChatInput"
+        );
 
     const text =
         input.value.trim();
 
-    if (!text)
-        return;
+    if(!text) return;
 
-    if (
-        !send({
-            type:
-                "chat",
-            text,
-            roomId:
-                currentRoom.id
-        })
-    ){
-        return;
-    }
+    send({
+        type:"chat",
+        text,
+        roomId:currentRoom.id
+    });
 
-    /*
-     * Même comportement ici :
-     * uniquement envoi + nettoyage du champ.
-     */
     input.value = "";
 }
 
 function addChatMessage(message){
 
-    if (
-        message.roomId
-    ){
+    const isRoomMessage =
+        !!message.roomId;
+
+    if(isRoomMessage){
 
         /*
-         * Le message appartient au salon actuel.
-         */
-        if (
-            !currentRoom ||
-            message.roomId !==
-                currentRoom.id
-        ){
-            return;
-        }
+           Les messages du salon ne provoquent PLUS
+           de notification au milieu de l'écran.
+
+           Si le chat est fermé et que le message vient
+           d'un autre utilisateur, on incrémente le badge.
+        */
+
+        const isMine =
+            currentUser &&
+            message.userId === currentUser.id;
+
+        const chatOpen =
+            roomChat.classList.contains(
+                "mobile-open"
+            );
 
         appendChatMessage(
-            roomChatMessages,
+            document.getElementById(
+                "roomChatMessages"
+            ),
             message
         );
 
-        /*
-         * Message reçu d'un autre utilisateur :
-         * pas de notification plein écran.
-         *
-         * Si le chat est fermé, on incrémente
-         * uniquement le compteur du bouton.
-         */
-        if (
-            message.userId !==
-            currentUser?.id
+        if(
+            !isMine &&
+            !chatOpen &&
+            currentRoom &&
+            message.roomId === currentRoom.id
         ){
-
-            const chatOpen =
-                roomChatSidebar.classList
-                    .contains(
-                        "mobile-open"
-                    );
-
-            if (!chatOpen){
-
-                roomUnreadMessages++;
-
-                updateUnreadBadge();
-            }
+            roomUnreadCount++;
+            updateRoomUnreadBadge();
         }
 
         return;
     }
 
     /*
-     * Discussion générale
-     */
+       Discussion générale :
+       on conserve l'affichage du message.
+    */
+
     appendChatMessage(
-        lobbyChatMessages,
+        document.getElementById(
+            "lobbyChatMessages"
+        ),
         message
     );
 
-    if (
-        message.userId !==
-        currentUser?.id
+    if(
+        currentUser &&
+        message.userId !== currentUser.id &&
+        lobbyScreen.style.display !== "none"
     ){
-
         /*
-         * On conserve la notification
-         * pour la discussion générale.
-         */
-        showChatNotification(
-            message
-        );
+           Pas de popup gênant sur mobile.
+           Le bouton général reste disponible.
+        */
     }
 }
 
-function appendChatMessage(
-    container,
-    message
-){
+function appendChatMessage(container,message){
 
-    const wrapper =
+    if(!container) return;
+
+    const row =
         document.createElement("div");
 
-    wrapper.className =
-        "chat-message";
+    row.className = "chat-message";
 
-    const head =
+    if(
+        currentUser &&
+        message.userId === currentUser.id
+    ){
+        row.classList.add("mine");
+    }
+
+    const author =
         document.createElement("div");
 
-    head.className =
-        "message-head";
+    author.className =
+        "chat-message-author";
 
-    const user =
-        document.createElement("span");
+    author.textContent =
+        message.username ||
+        message.user?.username ||
+        "Utilisateur";
 
-    user.className =
-        "message-user";
-
-    user.textContent =
-        message.username;
-
-    const time =
-        document.createElement("span");
-
-    time.className =
-        "message-time";
-
-    time.textContent =
-        formatTime(
-            message.timestamp
-        );
-
-    const text =
+    const body =
         document.createElement("div");
 
-    text.className =
-        "message-text";
+    body.className =
+        "chat-message-body";
 
-    /*
-     * textContent et non innerHTML
-     * pour empêcher l'injection HTML.
-     */
-    text.textContent =
-        message.text;
+    body.textContent =
+        message.text || "";
 
-    head.appendChild(
-        user
-    );
+    row.appendChild(author);
+    row.appendChild(body);
 
-    head.appendChild(
-        time
-    );
-
-    wrapper.appendChild(
-        head
-    );
-
-    wrapper.appendChild(
-        text
-    );
-
-    container.appendChild(
-        wrapper
-    );
+    container.appendChild(row);
 
     container.scrollTop =
         container.scrollHeight;
 }
 
-function formatTime(timestamp){
+function updateRoomUnreadBadge(){
 
-    if (!timestamp)
-        return "";
+    const count =
+        roomUnreadCount;
 
-    return new Date(
-        timestamp
-    ).toLocaleTimeString(
-        "fr-FR",
-        {
-            hour:"2-digit",
-            minute:"2-digit"
-        }
-    );
+    const visible =
+        count > 0;
+
+    [roomChatUnread,roomChatUnreadMobile]
+        .forEach(badge => {
+
+            if(!badge) return;
+
+            badge.textContent =
+                count > 99
+                    ? "99+"
+                    : String(count);
+
+            badge.classList.toggle(
+                "visible",
+                visible
+            );
+        });
 }
 
-function showChatNotification(
-    message
-){
-
-    const notification =
-        document.createElement(
-            "div"
-        );
-
-    notification.className =
-        "chat-notification";
-
-    const name =
-        document.createElement(
-            "strong"
-        );
-
-    name.textContent =
-        message.username;
-
-    const text =
-        document.createElement(
-            "span"
-        );
-
-    text.textContent =
-        message.text;
-
-    notification.appendChild(
-        name
-    );
-
-    notification.appendChild(
-        text
-    );
-
-    document.body.appendChild(
-        notification
-    );
-
-    setTimeout(
-        () => {
-
-            notification.remove();
-
-        },
-        4000
-    );
-}
-
-/* ============================================================
+/* =========================
    MOBILE CHAT
-============================================================ */
+========================= */
 
-lobbyChatToggle.addEventListener(
-    "click",
-    () => {
+function toggleLobbyChat(){
 
-        toggleMobileChat(
-            "lobby"
-        );
-    }
-);
-
-roomChatToggle.addEventListener(
-    "click",
-    () => {
-
-        toggleMobileChat(
-            "room"
-        );
-    }
-);
-
-mobileChatBackdrop.addEventListener(
-    "click",
-    closeMobileChat
-);
-
-function toggleMobileChat(
-    type
-){
-
-    const sidebar =
-        type === "lobby"
-            ? lobbyChatSidebar
-            : roomChatSidebar;
-
-    const alreadyOpen =
-        sidebar.classList.contains(
+    const isOpen =
+        lobbyChat.classList.contains(
             "mobile-open"
         );
 
     closeMobileChat();
 
-    if (alreadyOpen)
-        return;
+    if(!isOpen){
 
-    sidebar.classList.add(
-        "mobile-open"
-    );
+        lobbyChat.classList.add(
+            "mobile-open"
+        );
 
-    mobileChatBackdrop.classList.add(
-        "active"
-    );
+        mobileChatBackdrop.classList.add(
+            "visible"
+        );
+    }
+}
 
-    /*
-     * Dès que le chat du salon est ouvert,
-     * les messages reçus précédemment deviennent lus.
-     */
-    if (
-        type === "room"
-    ){
+function toggleRoomChat(){
 
-        roomUnreadMessages =
-            0;
+    const isOpen =
+        roomChat.classList.contains(
+            "mobile-open"
+        );
 
-        updateUnreadBadge();
+    closeMobileChat();
+
+    if(!isOpen){
+
+        roomChat.classList.add(
+            "mobile-open"
+        );
+
+        mobileChatBackdrop.classList.add(
+            "visible"
+        );
 
         /*
-         * On place le focus uniquement sur l'input.
-         * On ne modifie absolument pas sa valeur.
-         */
-        setTimeout(
-            () => {
+           Dès que le chat du salon est ouvert,
+           les messages en attente deviennent lus.
+        */
+        roomUnreadCount = 0;
+        updateRoomUnreadBadge();
 
-                roomChatInput.focus();
+        setTimeout(() => {
 
-            },
-            250
-        );
+            const input =
+                document.getElementById(
+                    "roomChatInput"
+                );
+
+            if(input){
+                input.focus();
+            }
+
+        },80);
     }
 }
 
 function closeMobileChat(){
 
-    lobbyChatSidebar.classList.remove(
+    lobbyChat.classList.remove(
         "mobile-open"
     );
 
-    roomChatSidebar.classList.remove(
+    roomChat.classList.remove(
         "mobile-open"
     );
 
     mobileChatBackdrop.classList.remove(
-        "active"
+        "visible"
     );
 }
 
-function updateUnreadBadge(){
-
-    if (
-        roomUnreadMessages > 0
-    ){
-
-        roomUnreadBadge.textContent =
-            roomUnreadMessages > 99
-                ? "99+"
-                : roomUnreadMessages;
-
-        roomUnreadBadge.classList.add(
-            "visible"
-        );
-
-    }else{
-
-        roomUnreadBadge.textContent =
-            "0";
-
-        roomUnreadBadge.classList.remove(
-            "visible"
-        );
-    }
-}
-
-/* ============================================================
-   ROOM DELETED / FORCE LOBBY
-============================================================ */
-
-function handleRoomDeleted(message){
-
-    if (
-        !currentRoom ||
-        message.roomId !==
-            currentRoom.id
-    ){
-        return;
-    }
-
-    alert(
-        "Ce salon a été supprimé par l'administrateur."
-    );
-
-    closeAllPeers();
-
-    stopLocalMedia();
-
-    currentRoom =
-        null;
-
-    if (currentUser){
-
-        currentUser.roomId =
-            null;
-    }
-
-    videoGrid.innerHTML =
-        "";
-
-    roomChatMessages.innerHTML =
-        "";
-
-    roomUnreadMessages =
-        0;
-
-    updateUnreadBadge();
-
-    showLobby();
-}
-
-function forceLobby(){
-
-    closeAllPeers();
-
-    stopLocalMedia();
-
-    currentRoom =
-        null;
-
-    if (currentUser){
-
-        currentUser.roomId =
-            null;
-    }
-
-    videoGrid.innerHTML =
-        "";
-
-    roomChatMessages.innerHTML =
-        "";
-
-    roomUnreadMessages =
-        0;
-
-    updateUnreadBadge();
-
-    showLobby();
-}
-
-/* ============================================================
+/* =========================
    PROFILE
-============================================================ */
+========================= */
 
-profileButton.addEventListener(
-    "click",
-    openProfileModal
-);
-
-function openProfileModal(){
+function openProfile(){
 
     closeMobileChat();
 
-    if (!currentUser)
-        return;
+    updateTopProfile();
 
-    profileUsername.textContent =
-        currentUser.username;
-
-    profileId.textContent =
-        currentUser.id;
-
-    profileModal.style.display =
-        "flex";
+    document.getElementById(
+        "profileModal"
+    ).style.display = "flex";
 }
 
-function closeProfileModal(){
+function closeProfile(){
 
-    profileModal.style.display =
-        "none";
+    document.getElementById(
+        "profileModal"
+    ).style.display = "none";
 }
 
-profileModal.addEventListener(
-    "click",
-    event => {
-
-        if (
-            event.target ===
-            profileModal
-        ){
-
-            closeProfileModal();
-        }
-    }
-);
-
-/* ============================================================
+/* =========================
    ADMIN
-============================================================ */
+========================= */
 
-adminButton.addEventListener(
-    "click",
-    openAdminModal
-);
+function openAdmin(){
 
-adminUsersTab.addEventListener(
-    "click",
-    () => {
-
-        currentAdminTab =
-            "users";
-
-        renderAdmin();
-    }
-);
-
-adminRoomsTab.addEventListener(
-    "click",
-    () => {
-
-        currentAdminTab =
-            "rooms";
-
-        renderAdmin();
-    }
-);
-
-function openAdminModal(){
-
-    if (
+    if(
         !currentUser ||
         !currentUser.isAdmin
-    ){
-        return;
-    }
+    ) return;
 
     closeMobileChat();
 
-    adminModal.style.display =
-        "flex";
-
-    currentAdminTab =
-        "users";
+    document.getElementById(
+        "adminModal"
+    ).style.display = "flex";
 
     send({
-        type:
-            "admin-refresh"
+        type:"admin-refresh"
     });
+
+    renderAdmin();
 }
 
-function closeAdminModal(){
+function closeAdmin(){
 
-    adminModal.style.display =
-        "none";
+    document.getElementById(
+        "adminModal"
+    ).style.display = "none";
 }
 
-adminModal.addEventListener(
-    "click",
-    event => {
+function switchAdminTab(tab){
 
-        if (
-            event.target ===
-            adminModal
-        ){
+    currentAdminTab = tab;
 
-            closeAdminModal();
-        }
-    }
-);
+    document.getElementById(
+        "adminUsersTab"
+    ).classList.toggle(
+        "active",
+        tab === "users"
+    );
+
+    document.getElementById(
+        "adminRoomsTab"
+    ).classList.toggle(
+        "active",
+        tab === "rooms"
+    );
+
+    renderAdmin();
+}
 
 function renderAdmin(){
 
-    adminUsersTab.classList.toggle(
-        "active",
-        currentAdminTab ===
-            "users"
-    );
+    const list =
+        document.getElementById(
+            "adminList"
+        );
 
-    adminRoomsTab.classList.toggle(
-        "active",
-        currentAdminTab ===
-            "rooms"
-    );
+    if(!list) return;
 
-    adminList.innerHTML = "";
+    list.innerHTML = "";
 
-    if (
-        currentAdminTab ===
-        "users"
-    ){
+    if(currentAdminTab === "users"){
 
-        renderAdminUsers();
+        if(!users.length){
+            list.innerHTML =
+                `<div style="color:var(--muted);">
+                    Aucun utilisateur.
+                </div>`;
+            return;
+        }
 
-    }else{
-
-        renderAdminRooms();
-    }
-}
-
-function renderAdminUsers(){
-
-    users.forEach(
-        user => {
+        users.forEach(user => {
 
             const item =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
-            item.className =
-                "admin-item";
+            item.className = "admin-item";
 
             const info =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
-            info.className =
-                "admin-info";
+            info.className = "admin-info";
 
             const name =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
-            name.className =
-                "admin-name";
+            name.className = "admin-name";
 
             name.textContent =
-                user.username +
-                (
-                    user.isAdmin
-                        ? " 👑"
-                        : ""
-                );
+                user.username;
 
-            const meta =
-                document.createElement(
-                    "div"
-                );
+            const details =
+                document.createElement("div");
 
-            meta.className =
-                "admin-meta";
+            details.className =
+                "admin-details";
 
-            meta.textContent =
+            details.textContent =
                 user.roomId
-                    ? `Salon : ${user.roomId}`
+                    ? "Dans un salon"
                     : "Dans le lobby";
 
-            info.appendChild(
-                name
-            );
-
-            info.appendChild(
-                meta
-            );
+            info.appendChild(name);
+            info.appendChild(details);
 
             const actions =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             actions.className =
                 "admin-actions";
 
-            if (
-                user.id !==
-                currentUser.id
+            if(
+                currentUser &&
+                user.id !== currentUser.id
             ){
 
                 const mute =
-                    document.createElement(
-                        "button"
-                    );
+                    document.createElement("button");
+
+                mute.className =
+                    "admin-action";
 
                 mute.textContent =
-                    "🔇 Mute";
+                    user.microphoneEnabled
+                        ? "🔇 Mute"
+                        : "🎙️ Activer";
 
-                mute.addEventListener(
-                    "click",
-                    () => {
-
-                        send({
-                            type:
-                                "admin-mute",
-                            userId:
-                                user.id
-                        });
-                    }
-                );
+                mute.onclick = () =>
+                    adminMute(user.id);
 
                 const camera =
-                    document.createElement(
-                        "button"
-                    );
+                    document.createElement("button");
+
+                camera.className =
+                    "admin-action";
 
                 camera.textContent =
-                    "📷 Couper caméra";
+                    user.cameraEnabled
+                        ? "📷 Couper"
+                        : "📷 Activer";
 
-                camera.addEventListener(
-                    "click",
-                    () => {
-
-                        send({
-                            type:
-                                "admin-camera",
-                            userId:
-                                user.id
-                        });
-                    }
-                );
+                camera.onclick = () =>
+                    adminCamera(user.id);
 
                 const kick =
-                    document.createElement(
-                        "button"
-                    );
+                    document.createElement("button");
+
+                kick.className =
+                    "admin-action danger";
 
                 kick.textContent =
-                    "🚫 Exclure";
+                    "Expulser";
 
-                kick.addEventListener(
-                    "click",
-                    () => {
+                kick.onclick = () =>
+                    adminKick(user.id);
 
-                        if (
-                            confirm(
-                                `Exclure ${user.username} ?`
-                            )
-                        ){
-
-                            send({
-                                type:
-                                    "admin-kick",
-                                userId:
-                                    user.id
-                            });
-                        }
-                    }
-                );
-
-                actions.appendChild(
-                    mute
-                );
-
-                actions.appendChild(
-                    camera
-                );
-
-                actions.appendChild(
-                    kick
-                );
+                actions.appendChild(mute);
+                actions.appendChild(camera);
+                actions.appendChild(kick);
             }
 
-            item.appendChild(
-                info
-            );
+            item.appendChild(info);
+            item.appendChild(actions);
 
-            item.appendChild(
-                actions
-            );
+            list.appendChild(item);
+        });
 
-            adminList.appendChild(
-                item
-            );
+    }else{
+
+        if(!rooms.length){
+            list.innerHTML =
+                `<div style="color:var(--muted);">
+                    Aucun salon.
+                </div>`;
+            return;
         }
-    );
-}
 
-function renderAdminRooms(){
-
-    rooms.forEach(
-        room => {
+        rooms.forEach(room => {
 
             const item =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
-            item.className =
-                "admin-item";
+            item.className = "admin-item";
 
             const info =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
-            info.className =
-                "admin-info";
+            info.className = "admin-info";
 
             const name =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             name.className =
                 "admin-name";
@@ -4365,100 +3240,220 @@ function renderAdminRooms(){
             name.textContent =
                 room.name;
 
-            const meta =
-                document.createElement(
-                    "div"
-                );
+            const details =
+                document.createElement("div");
 
-            meta.className =
-                "admin-meta";
+            details.className =
+                "admin-details";
 
-            meta.textContent =
-                `${room.userCount} personne${
-                    room.userCount > 1
-                        ? "s"
-                        : ""
-                }`;
+            details.textContent =
+                `${room.userCount ?? 0} participant(s)`;
 
-            info.appendChild(
-                name
-            );
-
-            info.appendChild(
-                meta
-            );
+            info.appendChild(name);
+            info.appendChild(details);
 
             const actions =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             actions.className =
                 "admin-actions";
 
-            if (!room.permanent){
+            const del =
+                document.createElement("button");
 
-                const deleteButton =
-                    document.createElement(
-                        "button"
-                    );
+            del.className =
+                "admin-action danger";
 
-                deleteButton.textContent =
-                    "🗑 Supprimer";
+            del.textContent =
+                "Supprimer";
 
-                deleteButton.addEventListener(
-                    "click",
-                    () => {
+            del.onclick = () =>
+                adminDeleteRoom(room.id);
 
-                        if (
-                            confirm(
-                                `Supprimer le salon "${room.name}" ?`
-                            )
-                        ){
+            actions.appendChild(del);
 
-                            send({
-                                type:
-                                    "admin-delete-room",
-                                roomId:
-                                    room.id
-                            });
-                        }
-                    }
-                );
+            item.appendChild(info);
+            item.appendChild(actions);
 
-                actions.appendChild(
-                    deleteButton
-                );
-            }
-
-            item.appendChild(
-                info
-            );
-
-            item.appendChild(
-                actions
-            );
-
-            adminList.appendChild(
-                item
-            );
-        }
-    );
+            list.appendChild(item);
+        });
+    }
 }
 
-/* ============================================================
-   INITIALISATION
-============================================================ */
+function adminMute(userId){
+
+    send({
+        type:"admin-mute",
+        userId
+    });
+}
+
+function adminCamera(userId){
+
+    send({
+        type:"admin-camera",
+        userId
+    });
+}
+
+function adminKick(userId){
+
+    if(
+        !confirm(
+            "Voulez-vous vraiment expulser cet utilisateur ?"
+        )
+    ) return;
+
+    send({
+        type:"admin-kick",
+        userId
+    });
+}
+
+function adminDeleteRoom(roomId){
+
+    if(
+        !confirm(
+            "Voulez-vous vraiment supprimer ce salon ?"
+        )
+    ) return;
+
+    send({
+        type:"admin-delete-room",
+        roomId
+    });
+}
+
+/* =========================
+   MODAL OUTSIDE
+========================= */
+
+function closeModalOutside(event,id){
+
+    if(event.target.id === id){
+
+        if(id === "profileModal"){
+            closeProfile();
+        }
+
+        if(id === "adminModal"){
+            closeAdmin();
+        }
+    }
+}
+
+/* =========================
+   INPUTS
+========================= */
 
 /*
- * On force les champs de chat à être vides au chargement.
- * Cela évite notamment que Chrome/Safari mobile restaure
- * une ancienne valeur de formulaire.
- */
-lobbyChatInput.value = "";
-roomChatInput.value = "";
+   Les anciens messages ne doivent pas réapparaître
+   quand on clique dans les champs.
 
-connectSocket();
+   On ne fait absolument rien sur focus/click.
+   Enter envoie simplement le contenu actuel.
+*/
+
+document
+    .getElementById("lobbyChatInput")
+    .addEventListener("keydown",event => {
+
+        if(event.key === "Enter"){
+            event.preventDefault();
+            sendLobbyChat();
+        }
+    });
+
+document
+    .getElementById("roomChatInput")
+    .addEventListener("keydown",event => {
+
+        if(event.key === "Enter"){
+            event.preventDefault();
+            sendRoomChat();
+        }
+    });
+
+document
+    .getElementById("usernameInput")
+    .addEventListener("keydown",event => {
+
+        if(event.key === "Enter"){
+            event.preventDefault();
+            login();
+        }
+    });
+
+document
+    .getElementById("passwordInput")
+    .addEventListener("keydown",event => {
+
+        if(event.key === "Enter"){
+            event.preventDefault();
+            login();
+        }
+    });
+
+document
+    .getElementById("lobbyChatInput")
+    .value = "";
+
+document
+    .getElementById("roomChatInput")
+    .value = "";
+
+/* =========================
+   RESIZE
+========================= */
+
+window.addEventListener("resize",() => {
+
+    if(!currentUser) return;
+
+    const mobile =
+        window.innerWidth <= 700;
+
+    if(
+        !mobile &&
+        (
+            lobbyChat.classList.contains("mobile-open") ||
+            roomChat.classList.contains("mobile-open")
+        )
+    ){
+        closeMobileChat();
+    }
+
+    if(currentRoom){
+
+        document.getElementById(
+            "roomChatToggle"
+        ).style.display =
+            mobile ? "flex" : "none";
+
+        document.getElementById(
+            "generalChatToggle"
+        ).style.display = "none";
+
+    }else{
+
+        document.getElementById(
+            "generalChatToggle"
+        ).style.display =
+            mobile ? "flex" : "none";
+
+        document.getElementById(
+            "roomChatToggle"
+        ).style.display = "none";
+    }
+
+    updateVideoGridLayout();
+});
+
+/* =========================
+   START
+========================= */
+
+restoreSession();
 </script>
 
 </body>
