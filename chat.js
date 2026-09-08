@@ -53,10 +53,17 @@ function sendRoomChat(){
 }
 
 
+/* =========================================================
+   RECEPTION DES MESSAGES
+========================================================= */
+
 function addChatMessage(message){
+
+    if(!message) return;
 
     const isRoomMessage =
         !!message.roomId;
+
 
     /* =====================================================
        CHAT DU SALON
@@ -70,9 +77,11 @@ function addChatMessage(message){
                 currentUser.id;
 
         const chatOpen =
+            roomChat &&
             roomChat.classList.contains(
                 "mobile-open"
             );
+
 
         appendChatMessage(
             document.getElementById(
@@ -80,6 +89,7 @@ function addChatMessage(message){
             ),
             message
         );
+
 
         /*
          * Si le message vient d'un autre utilisateur
@@ -116,15 +126,22 @@ function addChatMessage(message){
 }
 
 
+/* =========================================================
+   AJOUT D'UN MESSAGE
+========================================================= */
+
 function appendChatMessage(
     container,
     message
 ){
 
-    if(!container) return;
+    if(!container || !message) return;
+
 
     const row =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     row.className =
         "chat-message";
@@ -143,10 +160,13 @@ function appendChatMessage(
 
 
     const author =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     author.className =
         "chat-message-author";
+
 
     author.textContent =
         message.username ||
@@ -158,19 +178,30 @@ function appendChatMessage(
 
 
     const body =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     body.className =
         "chat-message-body";
+
 
     body.textContent =
         message.text || "";
 
 
-    row.appendChild(author);
-    row.appendChild(body);
+    row.appendChild(
+        author
+    );
 
-    container.appendChild(row);
+    row.appendChild(
+        body
+    );
+
+
+    container.appendChild(
+        row
+    );
 
 
     /*
@@ -191,26 +222,29 @@ function updateRoomUnreadBadge(){
     const count =
         roomUnreadCount;
 
-    /*
-     * Badge mobile
-     */
-    const mobileBadge =
-        document.getElementById(
-            "roomChatUnread"
-        );
 
     /*
-     * Badge desktop
+     * Les deux boutons utilisent leur propre badge :
+     *
+     * Mobile :
+     * roomChatUnread
+     *
+     * Desktop :
+     * desktopRoomChatUnread
      */
-    const desktopBadge =
-        document.getElementById(
-            "desktopRoomChatUnread"
-        );
 
     const badges = [
-        mobileBadge,
-        desktopBadge
+
+        document.getElementById(
+            "roomChatUnread"
+        ),
+
+        document.getElementById(
+            "desktopRoomChatUnread"
+        )
+
     ];
+
 
     const text =
         count > 99
@@ -223,8 +257,10 @@ function updateRoomUnreadBadge(){
 
             if(!badge) return;
 
+
             badge.textContent =
                 text;
+
 
             badge.classList.toggle(
                 "visible",
@@ -240,6 +276,9 @@ function updateRoomUnreadBadge(){
 ========================================================= */
 
 function toggleLobbyChat(){
+
+    if(!lobbyChat) return;
+
 
     const isOpen =
         lobbyChat.classList.contains(
@@ -257,7 +296,10 @@ function toggleLobbyChat(){
         );
 
 
-        if(isMobile()){
+        if(
+            isMobile() &&
+            mobileChatBackdrop
+        ){
 
             mobileChatBackdrop.classList.add(
                 "visible"
@@ -287,13 +329,20 @@ function toggleLobbyChat(){
 
 function closeGeneralChat(){
 
-    lobbyChat.classList.remove(
-        "mobile-open"
-    );
+    if(lobbyChat){
 
-    mobileChatBackdrop.classList.remove(
-        "visible"
-    );
+        lobbyChat.classList.remove(
+            "mobile-open"
+        );
+    }
+
+
+    if(mobileChatBackdrop){
+
+        mobileChatBackdrop.classList.remove(
+            "visible"
+        );
+    }
 }
 
 
@@ -304,6 +353,8 @@ function closeGeneralChat(){
 function toggleRoomChat(){
 
     if(!currentRoom) return;
+
+    if(!roomChat) return;
 
 
     const isOpen =
@@ -322,7 +373,10 @@ function toggleRoomChat(){
         );
 
 
-        if(isMobile()){
+        if(
+            isMobile() &&
+            mobileChatBackdrop
+        ){
 
             mobileChatBackdrop.classList.add(
                 "visible"
@@ -334,6 +388,7 @@ function toggleRoomChat(){
          * Dès que le chat est ouvert,
          * les messages sont considérés comme lus.
          */
+
         roomUnreadCount = 0;
 
         updateRoomUnreadBadge();
@@ -361,13 +416,20 @@ function toggleRoomChat(){
 
 function closeRoomChat(){
 
-    roomChat.classList.remove(
-        "mobile-open"
-    );
+    if(roomChat){
 
-    mobileChatBackdrop.classList.remove(
-        "visible"
-    );
+        roomChat.classList.remove(
+            "mobile-open"
+        );
+    }
+
+
+    if(mobileChatBackdrop){
+
+        mobileChatBackdrop.classList.remove(
+            "visible"
+        );
+    }
 }
 
 
@@ -377,17 +439,28 @@ function closeRoomChat(){
 
 function closeMobileChat(){
 
-    lobbyChat.classList.remove(
-        "mobile-open"
-    );
+    if(lobbyChat){
 
-    roomChat.classList.remove(
-        "mobile-open"
-    );
+        lobbyChat.classList.remove(
+            "mobile-open"
+        );
+    }
 
-    mobileChatBackdrop.classList.remove(
-        "visible"
-    );
+
+    if(roomChat){
+
+        roomChat.classList.remove(
+            "mobile-open"
+        );
+    }
+
+
+    if(mobileChatBackdrop){
+
+        mobileChatBackdrop.classList.remove(
+            "visible"
+        );
+    }
 }
 
 
@@ -400,13 +473,17 @@ const lobbyChatInputElement =
         "lobbyChatInput"
     );
 
+
 if(lobbyChatInputElement){
 
     lobbyChatInputElement.addEventListener(
         "keydown",
         event => {
 
-            if(event.key === "Enter"){
+            if(
+                event.key ===
+                "Enter"
+            ){
 
                 event.preventDefault();
 
@@ -426,13 +503,17 @@ const roomChatInputElement =
         "roomChatInput"
     );
 
+
 if(roomChatInputElement){
 
     roomChatInputElement.addEventListener(
         "keydown",
         event => {
 
-            if(event.key === "Enter"){
+            if(
+                event.key ===
+                "Enter"
+            ){
 
                 event.preventDefault();
 
