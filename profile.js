@@ -2,17 +2,27 @@
    PROFILE
 ========================================================= */
 
-
-/* =========================================================
-   OUVRIR MON PROFIL
-========================================================= */
-
 function openProfile(){
 
     if(!currentUser) return;
 
+
     pendingAvatarUrl =
         currentUser.avatarUrl;
+
+
+    const avatar =
+        document.getElementById(
+            "profileAvatar"
+        );
+
+    if(avatar){
+
+        avatar.innerHTML =
+            avatarInnerHtml(
+                currentUser
+            );
+    }
 
 
     const username =
@@ -22,53 +32,66 @@ function openProfile(){
 
     if(username){
 
-        username.value =
-            currentUser.username || "";
+        username.textContent =
+            currentUser.username ||
+            "Utilisateur";
+    }
+
+
+    const id =
+        document.getElementById(
+            "profileId"
+        );
+
+    if(id){
+
+        id.textContent =
+            currentUser.id
+                ? "ID : " +
+                  currentUser.id
+                : "";
     }
 
 
     const description =
         document.getElementById(
-            "profileDescription"
+            "profileDescriptionInput"
         );
 
     if(description){
 
         description.value =
-            currentUser.description || "";
+            currentUser.description ||
+            "";
     }
 
 
-    const avatarPreview =
+    const modal =
         document.getElementById(
-            "profileAvatarPreview"
+            "profileModal"
         );
 
-    if(avatarPreview){
+    if(modal){
 
-        avatarPreview.innerHTML =
-            avatarInnerHtml(
-                currentUser,
-                true
-            );
+        modal.style.display =
+            "flex";
     }
-
-
-    profileModal.classList.add(
-        "visible"
-    );
 }
 
 
-/* =========================================================
-   FERMER MON PROFIL
-========================================================= */
-
 function closeProfile(){
 
-    profileModal.classList.remove(
-        "visible"
-    );
+    const modal =
+        document.getElementById(
+            "profileModal"
+        );
+
+    if(modal){
+
+        modal.style.display =
+            "none";
+    }
+
 
     pendingAvatarUrl =
         undefined;
@@ -76,14 +99,14 @@ function closeProfile(){
 
 
 /* =========================================================
-   OUVRIR LE SELECTEUR AVATAR
+   AVATAR
 ========================================================= */
 
 function triggerAvatarPicker(){
 
     const input =
         document.getElementById(
-            "profileAvatarInput"
+            "avatarFileInput"
         );
 
     if(input){
@@ -93,23 +116,14 @@ function triggerAvatarPicker(){
 }
 
 
-/* =========================================================
-   CHANGER L'AVATAR
-========================================================= */
-
 function handleAvatarFile(event){
 
     const file =
         event.target.files &&
         event.target.files[0];
 
-
     if(!file) return;
 
-
-    /*
-     * Vérification du type
-     */
 
     if(
         !file.type.startsWith(
@@ -126,10 +140,6 @@ function handleAvatarFile(event){
         return;
     }
 
-
-    /*
-     * Limite à 5 Mo
-     */
 
     if(
         file.size >
@@ -157,15 +167,15 @@ function handleAvatarFile(event){
                 reader.result;
 
 
-            const preview =
+            const avatar =
                 document.getElementById(
-                    "profileAvatarPreview"
+                    "profileAvatar"
                 );
 
 
-            if(preview){
+            if(avatar){
 
-                preview.innerHTML =
+                avatar.innerHTML =
                     `
                     <img
                         src="${pendingAvatarUrl}"
@@ -192,7 +202,7 @@ function handleAvatarFile(event){
 
 
 /* =========================================================
-   SAUVEGARDER LE PROFIL
+   SAUVEGARDE
 ========================================================= */
 
 function saveProfile(){
@@ -202,33 +212,59 @@ function saveProfile(){
 
     const description =
         document.getElementById(
-            "profileDescription"
+            "profileDescriptionInput"
         );
 
 
-    const newDescription =
-        description
-            ? description.value.trim()
-            : "";
+    const payload = {
 
+        type:
+            "update-profile",
 
-    send({
-        type:"update-profile",
         description:
-            newDescription,
-        avatarUrl:
-            pendingAvatarUrl
-    });
+            description
+                ? description.value.trim()
+                : ""
+    };
+
+
+    if(
+        pendingAvatarUrl !==
+        undefined
+    ){
+
+        payload.avatarUrl =
+            pendingAvatarUrl;
+    }
+
+
+    send(
+        payload
+    );
+
+
+    closeProfile();
 }
 
 
 /* =========================================================
-   OUVRIR LE PROFIL D'UN AUTRE UTILISATEUR
+   PROFIL AUTRE UTILISATEUR
 ========================================================= */
 
 function openUserProfile(userId){
 
     if(!userId) return;
+
+
+    if(
+        currentUser &&
+        userId === currentUser.id
+    ){
+
+        openProfile();
+
+        return;
+    }
 
 
     const user =
@@ -244,11 +280,24 @@ function openUserProfile(userId){
         userId;
 
 
-    const username =
+    const avatar =
         document.getElementById(
-            "otherProfileUsername"
+            "viewProfileAvatar"
         );
 
+    if(avatar){
+
+        avatar.innerHTML =
+            avatarInnerHtml(
+                user
+            );
+    }
+
+
+    const username =
+        document.getElementById(
+            "viewProfileUsername"
+        );
 
     if(username){
 
@@ -260,9 +309,8 @@ function openUserProfile(userId){
 
     const description =
         document.getElementById(
-            "otherProfileDescription"
+            "viewProfileDescription"
         );
-
 
     if(description){
 
@@ -272,37 +320,32 @@ function openUserProfile(userId){
     }
 
 
-    const avatar =
+    const modal =
         document.getElementById(
-            "otherProfileAvatar"
+            "userProfileModal"
         );
 
+    if(modal){
 
-    if(avatar){
-
-        avatar.innerHTML =
-            avatarInnerHtml(
-                user,
-                true
-            );
+        modal.style.display =
+            "flex";
     }
-
-
-    otherUserProfileModal.classList.add(
-        "visible"
-    );
 }
 
 
-/* =========================================================
-   FERMER LE PROFIL D'UN AUTRE UTILISATEUR
-========================================================= */
-
 function closeUserProfile(){
 
-    otherUserProfileModal.classList.remove(
-        "visible"
-    );
+    const modal =
+        document.getElementById(
+            "userProfileModal"
+        );
+
+    if(modal){
+
+        modal.style.display =
+            "none";
+    }
+
 
     viewingUserId =
         null;
