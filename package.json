@@ -1,12 +1,12 @@
 {
-  "name": "chatroulette-server",
-  "version": "1.0.0",
-  "description": "WebRTC random video chat server",
+  "name": "colincall-server",
+  "version": "2.0.0",
+  "description": "Col'inCall WebRTC server",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "ws": "^8.18.3"
+    "ws": "^8.18.0"
   }
 }
