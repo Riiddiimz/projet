@@ -687,16 +687,25 @@ function handleMessage(message){
                     message.user;
             }
 
-            if(
-                message.token
-            ){
+            /*
+             * Le serveur utilise "sessionToken".
+             * On accepte également "token" pour
+             * conserver la compatibilité avec
+             * d'anciens messages éventuels.
+             */
+
+            const loginToken =
+                message.sessionToken ||
+                message.token;
+
+            if(loginToken){
 
                 sessionToken =
-                    message.token;
+                    loginToken;
 
                 localStorage.setItem(
                     "colincall_session",
-                    message.token
+                    loginToken
                 );
             }
 
@@ -718,14 +727,23 @@ function handleMessage(message){
                     message.user;
             }
 
-            if(message.token){
+            /*
+             * Le serveur peut renvoyer le token
+             * sous "sessionToken".
+             */
+
+            const restoredToken =
+                message.sessionToken ||
+                message.token;
+
+            if(restoredToken){
 
                 sessionToken =
-                    message.token;
+                    restoredToken;
 
                 localStorage.setItem(
                     "colincall_session",
-                    message.token
+                    restoredToken
                 );
             }
 
@@ -1135,6 +1153,15 @@ function handleMessage(message){
            FORCE LEAVE
         ================================================= */
 
+        /*
+         * Le serveur utilise "force-lobby" lorsqu'un
+         * administrateur expulse un utilisateur.
+         *
+         * On conserve également les anciens noms
+         * "force-leave" et "kicked".
+         */
+
+        case "force-lobby":
         case "force-leave":
         case "kicked":
 
