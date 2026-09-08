@@ -1,1520 +1,448 @@
 const http = require("http");
-const WebSocket = require("ws");
 const crypto = require("crypto");
+const WebSocket = require("ws");
 
-const PORT =
-    process.env.PORT || 10000;
+const PORT = process.env.PORT || 10000;
 
+const ADMIN_USERNAME = "Riddimz";
+const ADMIN_CODE = "85206";
 
-/* =========================================================
-   ADMIN
-========================================================= */
+const users = new Map();
+const rooms = new Map();
 
-const ADMIN_USERNAME =
-    "Riddimz";
+function createId() {
+  return crypto.randomUUID();
+}
 
-const ADMIN_CODE =
-    "85206";
+function cleanText(value, maxLength = 500) {
+  return String(value || "")
+    .trim()
+    .replace(/[<>]/g, "")
+    .slice(0, maxLength);
+}
 
+function send(ws, type, data = {}) {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({
+      type,
+      ...data
+    }));
+  }
+}
 
-/* =========================================================
-   HTTP
-========================================================= */
+function getUser(ws) {
+  return users.get(ws);
+}
 
-const server =
-    http.createServer(
-        (req, res) => {
+function getUserById(id) {
+  for (const user of users.values()) {
+    if (user.id === id) return user;
+  }
 
-            res.writeHead(
-                200,
-                {
-                    "Content-Type":
-                        "application/json",
+  return null;
+}
 
-                    "Access-Control-Allow-Origin":
-                        "*"
-                }
-            );
+function publicUser(user) {
+  return {
+    id: user.id,
+    username: user.username,
+    role: user.role,
+    roomId: user.roomId,
+    profile: user.profile,
+    muted: user.muted,
+    cameraDisabled: user.cameraDisabled
+  };
+}
 
+function broadcastRoomList() {
+  const roomList = [...rooms.values()].map(room => ({
+    id: room.id,
+    name: room.name,
+    count: room.members.size
+  }));
 
-            res.end(
-                JSON.stringify({
-
-                    status:
-                        "online",
-
-                    service:
-                        "Col'inCall Server"
-
-                })
-            );
-
-        }
-    );
-
-
-/* =========================================================
-   WEBSOCKET
-========================================================= */
-
-const wss =
-    new WebSocket.Server({
-        server
+  for (const user of users.values()) {
+    send(user.ws, "room-list", {
+      rooms: roomList
     });
-
-
-/* =========================================================
-   ROOMS
-========================================================= */
-
-const rooms =
-    new Map();
-
-
-/* =========================================================
-   USERS
-========================================================= */
-
-const clients =
-    new Map();
-
-
-/* =========================================================
-   CREATE DEFAULT ROOM
-========================================================= */
-
-function createRoom(
-    id,
-    name,
-    description,
-    icon
-) {
-
-    rooms.set(
-        id,
-        {
-
-            id,
-
-            name,
-
-            description,
-
-            icon,
-
-            max:
-                8,
-
-            users:
-                new Map()
-
-        }
-    );
-
+  }
 }
 
+function broadcastAdminUsers() {
+  const list = [...users.values()].map(publicUser);
 
-createRoom(
-    "general",
-    "Général",
-    "Discussion générale",
-    "💬"
-);
-
-createRoom(
-    "gaming",
-    "Gaming",
-    "Parlez jeux vidéo",
-    "🎮"
-);
-
-createRoom(
-    "chill",
-    "Chill",
-    "Venez simplement discuter",
-    "☕"
-);
-
-createRoom(
-    "musique",
-    "Musique",
-    "Partagez vos découvertes",
-    "🎵"
-);
-
-
-/* =========================================================
-   UTILS
-========================================================= */
-
-function generateId() {
-
-    return crypto
-        .randomBytes(8)
-        .toString("hex");
-
+  for (const user of users.values()) {
+    if (user.role === "admin") {
+      send(user.ws, "users-list", {
+        users: list
+      });
+    }
+  }
 }
 
+function broadcastToRoom(roomId, type, data = {}, excludedWs = null) {
+  const room = rooms.get(roomId);
 
-function send(
+  if (!room) return;
+
+  for (const memberWs of room.members) {
+    if (memberWs !== excludedWs) {
+      send(memberWs, type, data);
+    }
+  }
+}
+
+function leaveRoom(user, notify = true) {
+  if (!user.roomId) return;
+
+  const room = rooms.get(user.roomId);
+
+  if (room) {
+    room.members.delete(user.ws);
+
+    if (notify) {
+      broadcastToRoom(room.id, "user-left", {
+        userId: user.id
+      });
+    }
+
+    if (room.members.size === 0) {
+      rooms.delete(room.id);
+    }
+  }
+
+  user.roomId = null;
+
+  broadcastRoomList();
+  broadcastAdminUsers();
+}
+
+function createRoom(name) {
+  const room = {
+    id: createId(),
+    name: cleanText(name, 40) || "Nouveau salon",
+    members: new Set()
+  };
+
+  rooms.set(room.id, room);
+
+  return room;
+}
+
+const defaultRoom = createRoom("Salon général");
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, {
+    "Content-Type": "application/json; charset=utf-8"
+  });
+
+  res.end(JSON.stringify({
+    status: "online",
+    service: "Chatroulette WebRTC Server",
+    rooms: rooms.size,
+    users: users.size
+  }));
+});
+
+const wss = new WebSocket.Server({
+  server
+});
+
+wss.on("connection", ws => {
+  const user = {
+    id: createId(),
     ws,
-    data
-) {
+    username: "",
+    role: "user",
+    roomId: null,
+    profile: {
+      description: "",
+      avatar: null
+    },
+    muted: false,
+    cameraDisabled: false
+  };
 
-    if(
-        ws &&
-        ws.readyState ===
-            WebSocket.OPEN
-    ) {
+  users.set(ws, user);
 
-        ws.send(
-            JSON.stringify(
-                data
-            )
-        );
+  send(ws, "connected", {
+    userId: user.id
+  });
 
+  ws.on("message", rawMessage => {
+    let message;
+
+    try {
+      message = JSON.parse(rawMessage.toString());
+    } catch {
+      return send(ws, "error-message", {
+        message: "Message invalide."
+      });
     }
 
-}
+    switch (message.type) {
+      case "login": {
+        const username = cleanText(message.username, 24);
+        const role = message.role === "admin" ? "admin" : "user";
 
-
-/* =========================================================
-   ROOM LIST
-========================================================= */
-
-function getRoomList() {
-
-    return Array
-        .from(
-            rooms.values()
-        )
-        .map(
-            room => ({
-
-                id:
-                    room.id,
-
-                name:
-                    room.name,
-
-                description:
-                    room.description,
-
-                icon:
-                    room.icon,
-
-                count:
-                    room.users.size,
-
-                max:
-                    room.max
-
-            })
-        );
-
-}
-
-
-/* =========================================================
-   USERS LIST
-========================================================= */
-
-function getUsersList() {
-
-    return Array
-        .from(
-            clients.entries()
-        )
-        .map(
-            ([id, client]) => ({
-
-                id,
-
-                name:
-                    client.name,
-
-                admin:
-                    client.admin,
-
-                avatar:
-                    client.avatar || "",
-
-                description:
-                    client.description || "",
-
-                room:
-                    client.room || null,
-
-                roomName:
-                    client.room
-                        ? rooms.get(
-                            client.room
-                        )?.name || ""
-                        : ""
-
-            })
-        );
-
-}
-
-
-/* =========================================================
-   UPDATE LOBBY
-========================================================= */
-
-function broadcastLobby() {
-
-    const data = {
-
-        type:
-            "room-updated",
-
-        rooms:
-            getRoomList()
-
-    };
-
-
-    wss.clients.forEach(
-        client => {
-
-            if(
-                client.authenticated
-            ) {
-
-                send(
-                    client,
-                    data
-                );
-
-            }
-
+        if (!username) {
+          return send(ws, "login-error", {
+            message: "Le pseudo est obligatoire."
+          });
         }
-    );
 
-}
-
-
-/* =========================================================
-   AUTHENTICATION
-========================================================= */
-
-function login(
-    ws,
-    data
-) {
-
-    const name =
-        String(
-            data.name || ""
-        ).trim();
-
-
-    const wantsAdmin =
-        Boolean(
-            data.admin
+        const duplicate = [...users.values()].find(
+          other =>
+            other !== user &&
+            other.username.toLowerCase() === username.toLowerCase()
         );
 
+        if (duplicate) {
+          return send(ws, "login-error", {
+            message: "Ce pseudo est déjà utilisé."
+          });
+        }
 
-    if(!name) {
+        if (role === "admin") {
+          if (
+            username !== ADMIN_USERNAME ||
+            String(message.adminCode || "") !== ADMIN_CODE
+          ) {
+            return send(ws, "login-error", {
+              message: "Identifiants administrateur incorrects."
+            });
+          }
+        }
 
-        send(
-            ws,
-            {
+        user.username = username;
+        user.role = role;
 
-                type:
-                    "login-result",
+        send(ws, "login-success", {
+          user: publicUser(user)
+        });
 
-                success:
-                    false,
+        broadcastRoomList();
+        broadcastAdminUsers();
 
-                message:
-                    "Pseudo obligatoire."
+        break;
+      }
 
-            }
-        );
+      case "update-profile": {
+        if (!user.username) return;
 
-        return;
+        user.profile = {
+          description: cleanText(message.description, 300),
+          avatar:
+            typeof message.avatar === "string"
+              ? message.avatar.slice(0, 500000)
+              : null
+        };
 
+        send(ws, "profile-updated", {
+          user: publicUser(user)
+        });
+
+        if (user.roomId) {
+          broadcastToRoom(user.roomId, "user-updated", {
+            user: publicUser(user)
+          });
+        }
+
+        broadcastAdminUsers();
+
+        break;
+      }
+
+      case "create-room": {
+        if (!user.username) return;
+
+        const room = createRoom(message.name);
+
+        send(ws, "room-created", {
+          room: {
+            id: room.id,
+            name: room.name,
+            count: 0
+          }
+        });
+
+        broadcastRoomList();
+
+        break;
+      }
+
+      case "join-room": {
+        if (!user.username) return;
+
+        const room = rooms.get(message.roomId);
+
+        if (!room) {
+          return send(ws, "error-message", {
+            message: "Ce salon n'existe plus."
+          });
+        }
+
+        leaveRoom(user, true);
+
+        const participants = [...room.members].map(memberWs => {
+          const member = getUser(memberWs);
+          return publicUser(member);
+        });
+
+        room.members.add(ws);
+        user.roomId = room.id;
+
+        send(ws, "room-joined", {
+          room: {
+            id: room.id,
+            name: room.name
+          },
+          participants
+        });
+
+        broadcastToRoom(room.id, "user-joined", {
+          user: publicUser(user)
+        }, ws);
+
+        broadcastRoomList();
+        broadcastAdminUsers();
+
+        break;
+      }
+
+      case "leave-room": {
+        leaveRoom(user, true);
+
+        send(ws, "room-left");
+
+        break;
+      }
+
+      case "chat": {
+        if (!user.roomId) return;
+
+        const text = cleanText(message.text, 1000);
+
+        if (!text) return;
+
+        broadcastToRoom(user.roomId, "chat-message", {
+          user: publicUser(user),
+          text,
+          timestamp: Date.now()
+        });
+
+        break;
+      }
+
+      case "offer":
+      case "answer":
+      case "ice-candidate": {
+        const target = getUserById(message.targetId);
+
+        if (!target) return;
+
+        send(target.ws, message.type, {
+          fromId: user.id,
+          offer: message.offer,
+          answer: message.answer,
+          candidate: message.candidate
+        });
+
+        break;
+      }
+
+      case "admin-kick": {
+        if (user.role !== "admin") return;
+
+        const target = getUserById(message.userId);
+
+        if (!target || target === user) return;
+
+        send(target.ws, "kicked", {
+          message: "Vous avez été expulsé par l'administrateur."
+        });
+
+        leaveRoom(target, true);
+
+        broadcastAdminUsers();
+
+        break;
+      }
+
+      case "admin-mute": {
+        if (user.role !== "admin") return;
+
+        const target = getUserById(message.userId);
+
+        if (!target || target === user) return;
+
+        target.muted = Boolean(message.muted);
+
+        send(target.ws, "force-micro", {
+          enabled: !target.muted
+        });
+
+        broadcastAdminUsers();
+
+        break;
+      }
+
+      case "admin-camera": {
+        if (user.role !== "admin") return;
+
+        const target = getUserById(message.userId);
+
+        if (!target || target === user) return;
+
+        target.cameraDisabled = Boolean(message.disabled);
+
+        send(target.ws, "force-camera", {
+          enabled: !target.cameraDisabled
+        });
+
+        broadcastAdminUsers();
+
+        break;
+      }
+
+      case "admin-delete-room": {
+        if (user.role !== "admin") return;
+
+        const room = rooms.get(message.roomId);
+
+        if (!room) return;
+
+        for (const memberWs of room.members) {
+          const member = getUser(memberWs);
+
+          if (member) {
+            send(member.ws, "room-deleted", {
+              message: "Ce salon a été supprimé par l'administrateur."
+            });
+
+            member.roomId = null;
+          }
+        }
+
+        rooms.delete(room.id);
+
+        broadcastRoomList();
+        broadcastAdminUsers();
+
+        break;
+      }
     }
-
-
-    /*
-        ADMIN
-    */
-
-    if(wantsAdmin) {
-
-        if(
-            name !==
-                ADMIN_USERNAME ||
-            String(
-                data.code || ""
-            ) !==
-                ADMIN_CODE
-        ) {
-
-            send(
-                ws,
-                {
-
-                    type:
-                        "login-result",
-
-                    success:
-                        false,
-
-                    message:
-                        "Pseudo ou code administrateur incorrect."
-
-                }
-            );
-
-            return;
-
-        }
-
-    }
-
-
-    const id =
-        generateId();
-
-
-    ws.id =
-        id;
-
-    ws.name =
-        name;
-
-    ws.admin =
-        wantsAdmin;
-
-    ws.authenticated =
-        true;
-
-    ws.room =
-        null;
-
-    ws.avatar =
-        "";
-
-    ws.description =
-        "";
-
-
-    clients.set(
-        id,
-        ws
-    );
-
-
-    send(
-        ws,
-        {
-
-            type:
-                "login-result",
-
-            success:
-                true,
-
-            admin:
-                wantsAdmin,
-
-            id
-
-        }
-    );
-
-
-    console.log(
-        `[LOGIN] ${name} ${wantsAdmin ? "(ADMIN)" : ""}`
-    );
-
-}
-
-
-/* =========================================================
-   JOIN ROOM
-========================================================= */
-
-function joinRoom(
-    ws,
-    roomId,
-    profile
-) {
-
-    if(!ws.authenticated)
-        return;
-
-
-    const room =
-        rooms.get(
-            roomId
-        );
-
-
-    if(!room) {
-
-        send(
-            ws,
-            {
-
-                type:
-                    "error",
-
-                message:
-                    "Salon introuvable."
-
-            }
-        );
-
-        return;
-
-    }
-
-
-    if(
-        room.users.size >=
-            room.max
-    ) {
-
-        send(
-            ws,
-            {
-
-                type:
-                    "error",
-
-                message:
-                    "Salon complet."
-
-            }
-        );
-
-        return;
-
-    }
-
-
-    if(ws.room) {
-
-        leaveRoom(
-            ws
-        );
-
-    }
-
-
-    /*
-        Profil
-    */
-
-    if(profile) {
-
-        ws.avatar =
-            String(
-                profile.avatar || ""
-            ).slice(
-                0,
-                500000
-            );
-
-        ws.description =
-            String(
-                profile.description || ""
-            ).slice(
-                0,
-                160
-            );
-
-    }
-
-
-    const existing =
-        Array
-            .from(
-                room.users.entries()
-            )
-            .map(
-                ([id, user]) => ({
-
-                    id,
-
-                    name:
-                        user.name,
-
-                    avatar:
-                        user.avatar || "",
-
-                    description:
-                        user.description || ""
-
-                })
-            );
-
-
-    room.users.set(
-        ws.id,
-        ws
-    );
-
-
-    ws.room =
-        room.id;
-
-
-    /*
-        Nouveau participant
-    */
-
-    send(
-        ws,
-        {
-
-            type:
-                "joined-room",
-
-            id:
-                ws.id,
-
-            roomName:
-                room.name,
-
-            count:
-                room.users.size,
-
-            users:
-                existing
-
-        }
-    );
-
-
-    /*
-        Prévenir les autres
-    */
-
-    room.users.forEach(
-        (user, id) => {
-
-            if(
-                id ===
-                    ws.id
-            ) {
-                return;
-            }
-
-
-            send(
-                user,
-                {
-
-                    type:
-                        "user-joined",
-
-                    id:
-                        ws.id,
-
-                    name:
-                        ws.name,
-
-                    avatar:
-                        ws.avatar,
-
-                    description:
-                        ws.description,
-
-                    count:
-                        room.users.size
-
-                }
-            );
-
-        }
-    );
-
-
-    broadcastLobby();
-
-
-    console.log(
-        `[ROOM] ${ws.name} -> ${room.name}`
-    );
-
-}
-
-
-/* =========================================================
-   LEAVE ROOM
-========================================================= */
-
-function leaveRoom(
-    ws
-) {
-
-    if(!ws.room)
-        return;
-
-
-    const room =
-        rooms.get(
-            ws.room
-        );
-
-
-    if(!room) {
-
-        ws.room =
-            null;
-
-        return;
-
-    }
-
-
-    const id =
-        ws.id;
-
-
-    room.users.delete(
-        id
-    );
-
-
-    room.users.forEach(
-        user => {
-
-            send(
-                user,
-                {
-
-                    type:
-                        "user-left",
-
-                    id,
-
-                    count:
-                        room.users.size
-
-                }
-            );
-
-        }
-    );
-
-
-    ws.room =
-        null;
-
-
-    broadcastLobby();
-
-}
-
-
-/* =========================================================
-   FORWARD WEBRTC
-========================================================= */
-
-function forward(
-    ws,
-    target,
-    data
-) {
-
-    if(!ws.room)
-        return;
-
-
-    const room =
-        rooms.get(
-            ws.room
-        );
-
-
-    if(!room)
-        return;
-
-
-    const user =
-        room.users.get(
-            target
-        );
-
-
-    if(!user)
-        return;
-
-
-    send(
-        user,
-        {
-
-            ...data,
-
-            sender:
-                ws.id,
-
-            senderName:
-                ws.name,
-
-            senderAvatar:
-                ws.avatar,
-
-            senderDescription:
-                ws.description
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   CHAT
-========================================================= */
-
-function chat(
-    ws,
-    message
-) {
-
-    if(!ws.room)
-        return;
-
-
-    const room =
-        rooms.get(
-            ws.room
-        );
-
-
-    if(!room)
-        return;
-
-
-    const text =
-        String(
-            message || ""
-        )
-        .trim()
-        .slice(
-            0,
-            500
-        );
-
-
-    if(!text)
-        return;
-
-
-    room.users.forEach(
-        user => {
-
-            if(
-                user.id !==
-                    ws.id
-            ) {
-
-                send(
-                    user,
-                    {
-
-                        type:
-                            "chat",
-
-                        name:
-                            ws.name,
-
-                        message:
-                            text,
-
-                        timestamp:
-                            Date.now()
-
-                    }
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   CREATE ROOM
-========================================================= */
-
-function createNewRoom(
-    ws,
-    name,
-    description,
-    icon
-) {
-
-    if(!ws.authenticated)
-        return;
-
-
-    const cleanName =
-        String(
-            name || ""
-        )
-        .trim()
-        .slice(
-            0,
-            30
-        );
-
-
-    if(!cleanName)
-        return;
-
-
-    let id =
-        cleanName
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(
-                /[\u0300-\u036f]/g,
-                ""
-            )
-            .replace(
-                /[^a-z0-9]+/g,
-                "-"
-            )
-            .replace(
-                /^-+|-+$/g,
-                ""
-            );
-
-
-    if(!id) {
-
-        id =
-            "room-" +
-            generateId();
-
-    }
-
-
-    const original =
-        id;
-
-    let i =
-        2;
-
-
-    while(
-        rooms.has(id)
-    ) {
-
-        id =
-            original +
-            "-" +
-            i++;
-
-    }
-
-
-    createRoom(
-        id,
-        cleanName,
-        String(
-            description || ""
-        ).slice(0,80),
-        icon || "💬"
-    );
-
-
-    send(
-        ws,
-        {
-
-            type:
-                "room-created",
-
-            room:
-                id
-
-        }
-    );
-
-
-    broadcastLobby();
-
-}
-
-
-/* =========================================================
-   ADMIN CHECK
-========================================================= */
-
-function requireAdmin(
-    ws
-) {
-
-    return (
-        ws &&
-        ws.authenticated &&
-        ws.admin === true
-    );
-
-}
-
-
-/* =========================================================
-   ADMIN DELETE ROOM
-========================================================= */
-
-function adminDeleteRoom(
-    ws,
-    roomId
-) {
-
-    if(!requireAdmin(ws))
-        return;
-
-
-    const room =
-        rooms.get(
-            roomId
-        );
-
-
-    if(!room)
-        return;
-
-
-    /*
-        Expulser les utilisateurs
-    */
-
-    room.users.forEach(
-        user => {
-
-            send(
-                user,
-                {
-
-                    type:
-                        "kicked",
-
-                    reason:
-                        "Le salon a été supprimé par l'administrateur."
-
-                }
-            );
-
-
-            user.room =
-                null;
-
-        }
-    );
-
-
-    rooms.delete(
-        roomId
-    );
-
-
-    broadcastLobby();
-
-}
-
-
-/* =========================================================
-   ADMIN KICK
-========================================================= */
-
-function adminKick(
-    ws,
-    targetId
-) {
-
-    if(!requireAdmin(ws))
-        return;
-
-
-    const target =
-        clients.get(
-            targetId
-        );
-
-
-    if(!target)
-        return;
-
-
-    /*
-        Ne pas permettre de kick l'admin
-    */
-
-    if(target.admin)
-        return;
-
-
-    if(target.room) {
-
-        const room =
-            rooms.get(
-                target.room
-            );
-
-
-        if(room) {
-
-            room.users.delete(
-                target.id
-            );
-
-
-            room.users.forEach(
-                user => {
-
-                    send(
-                        user,
-                        {
-
-                            type:
-                                "user-left",
-
-                            id:
-                                target.id,
-
-                            count:
-                                room.users.size
-
-                        }
-                    );
-
-                }
-            );
-
-        }
-
-    }
-
-
-    target.room =
-        null;
-
-
-    send(
-        target,
-        {
-
-            type:
-                "kicked",
-
-            reason:
-                "Vous avez été expulsé par l'administrateur."
-
-        }
-    );
-
-
-    broadcastLobby();
-
-}
-
-
-/* =========================================================
-   ADMIN MUTE / CAMERA
-========================================================= */
-
-function adminMediaAction(
-    ws,
-    targetId,
-    type,
-    enabled
-) {
-
-    if(!requireAdmin(ws))
-        return;
-
-
-    const target =
-        clients.get(
-            targetId
-        );
-
-
-    if(!target)
-        return;
-
-
-    if(target.admin)
-        return;
-
-
-    send(
-        target,
-        {
-
-            type:
-                type,
-
-            enabled:
-                enabled !== false
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   CONNECTION
-========================================================= */
-
-wss.on(
-    "connection",
-    ws => {
-
-        ws.authenticated =
-            false;
-
-        ws.admin =
-            false;
-
-        ws.id =
-            null;
-
-        ws.name =
-            null;
-
-        ws.room =
-            null;
-
-
-        ws.on(
-            "message",
-            raw => {
-
-                try {
-
-                    const data =
-                        JSON.parse(
-                            raw.toString()
-                        );
-
-
-                    switch(
-                        data.type
-                    ) {
-
-
-                        case "login":
-
-                            login(
-                                ws,
-                                data
-                            );
-
-                            break;
-
-
-                        case "get-rooms":
-
-                            if(
-                                ws.authenticated
-                            ) {
-
-                                send(
-                                    ws,
-                                    {
-
-                                        type:
-                                            "rooms",
-
-                                        rooms:
-                                            getRoomList()
-
-                                    }
-                                );
-
-                            }
-
-                            break;
-
-
-                        case "get-users":
-
-                            if(
-                                requireAdmin(ws)
-                            ) {
-
-                                send(
-                                    ws,
-                                    {
-
-                                        type:
-                                            "admin-users",
-
-                                        users:
-                                            getUsersList()
-
-                                    }
-                                );
-
-                            }
-
-                            break;
-
-
-                        case "create-room":
-
-                            createNewRoom(
-
-                                ws,
-
-                                data.name,
-
-                                data.description,
-
-                                data.icon
-
-                            );
-
-                            break;
-
-
-                        case "join-room":
-
-                            joinRoom(
-
-                                ws,
-
-                                data.room,
-
-                                data.profile
-
-                            );
-
-                            break;
-
-
-                        case "offer":
-
-                            forward(
-                                ws,
-                                data.target,
-                                {
-
-                                    type:
-                                        "offer",
-
-                                    offer:
-                                        data.offer
-
-                                }
-                            );
-
-                            break;
-
-
-                        case "answer":
-
-                            forward(
-                                ws,
-                                data.target,
-                                {
-
-                                    type:
-                                        "answer",
-
-                                    answer:
-                                        data.answer
-
-                                }
-                            );
-
-                            break;
-
-
-                        case "ice-candidate":
-
-                            forward(
-                                ws,
-                                data.target,
-                                {
-
-                                    type:
-                                        "ice-candidate",
-
-                                    candidate:
-                                        data.candidate
-
-                                }
-                            );
-
-                            break;
-
-
-                        case "chat":
-
-                            chat(
-                                ws,
-                                data.message
-                            );
-
-                            break;
-
-
-                        case "profile-update":
-
-                            if(
-                                ws.authenticated
-                            ) {
-
-                                if(
-                                    data.profile
-                                ) {
-
-                                    ws.avatar =
-                                        String(
-                                            data.profile.avatar || ""
-                                        ).slice(
-                                            0,
-                                            500000
-                                        );
-
-                                    ws.description =
-                                        String(
-                                            data.profile.description || ""
-                                        ).slice(
-                                            0,
-                                            160
-                                        );
-
-                                }
-
-                            }
-
-                            break;
-
-
-                        case "admin-delete-room":
-
-                            adminDeleteRoom(
-                                ws,
-                                data.room
-                            );
-
-                            break;
-
-
-                        case "admin-kick":
-
-                            adminKick(
-                                ws,
-                                data.target
-                            );
-
-                            break;
-
-
-                        case "admin-mute":
-
-                            adminMediaAction(
-                                ws,
-                                data.target,
-                                "admin-mute",
-                                data.enabled
-                            );
-
-                            break;
-
-
-                        case "admin-camera":
-
-                            adminMediaAction(
-                                ws,
-                                data.target,
-                                "admin-camera",
-                                data.enabled
-                            );
-
-                            break;
-
-
-                        case "leave":
-
-                            leaveRoom(
-                                ws
-                            );
-
-                            break;
-
-                    }
-
-                } catch(error) {
-
-                    console.error(
-                        "[MESSAGE ERROR]",
-                        error
-                    );
-
-                }
-
-            }
-        );
-
-
-        ws.on(
-            "close",
-            () => {
-
-                leaveRoom(
-                    ws
-                );
-
-
-                if(ws.id) {
-
-                    clients.delete(
-                        ws.id
-                    );
-
-                }
-
-            }
-        );
-
-
-        ws.on(
-            "error",
-            error => {
-
-                console.error(
-                    "[WS ERROR]",
-                    error
-                );
-
-            }
-        );
-
-    }
-);
-
-
-/* =========================================================
-   START
-========================================================= */
-
-server.listen(
-    PORT,
-    () => {
-
-        console.log(
-            `Col'inCall server started on port ${PORT}`
-        );
-
-    }
-);
+  });
+
+  ws.on("close", () => {
+    leaveRoom(user, true);
+    users.delete(ws);
+
+    broadcastRoomList();
+    broadcastAdminUsers();
+  });
+});
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Col'inCall server listening on port ${PORT}`);
+});
