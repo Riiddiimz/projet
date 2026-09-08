@@ -40,7 +40,8 @@ body{
 }
 
 button,
-input{
+input,
+textarea{
     font:inherit;
 }
 
@@ -139,13 +140,14 @@ button{
 
 .input{
     width:100%;
-    height:45px;
-    padding:0 13px;
+    height:48px;
+    padding:0 14px;
     border:1px solid var(--border);
     background:var(--panel2);
     color:var(--text);
     border-radius:10px;
     outline:none;
+    font-size:15px;
 }
 
 .input:focus{
@@ -239,6 +241,14 @@ button{
     font-size:13px;
     font-weight:800;
     flex:0 0 32px;
+    overflow:hidden;
+}
+
+.avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
 }
 
 .profile-name{
@@ -297,14 +307,15 @@ button{
 }
 
 .search{
-    width:220px;
-    height:40px;
+    width:260px;
+    height:44px;
     border:1px solid var(--border);
     border-radius:9px;
     background:var(--panel);
     color:var(--text);
-    padding:0 12px;
+    padding:0 14px;
     outline:none;
+    font-size:15px;
 }
 
 .search:focus{
@@ -312,8 +323,8 @@ button{
 }
 
 .small-btn{
-    height:40px;
-    padding:0 13px;
+    height:44px;
+    padding:0 15px;
     border-radius:9px;
     border:1px solid var(--border);
     background:var(--panel2);
@@ -323,6 +334,12 @@ button{
 .small-btn.primary{
     border-color:transparent;
     background:var(--accent);
+}
+
+.small-btn.danger-outline{
+    border-color:rgba(229,72,77,.4);
+    background:rgba(229,72,77,.08);
+    color:#ff7478;
 }
 
 /* =========================
@@ -339,12 +356,11 @@ button{
     background:var(--panel);
     border:1px solid var(--border);
     border-radius:13px;
-    padding:14px;
-    min-height:128px;
-    height:128px;
+    padding:14px 16px;
     display:flex;
     flex-direction:column;
     justify-content:space-between;
+    gap:14px;
     transition:.15s;
 }
 
@@ -639,22 +655,26 @@ button{
     flex:1;
     min-height:0;
     width:100%;
-    padding:10px;
+    padding:14px;
     display:grid;
-    gap:10px;
+    gap:12px;
     grid-template-columns:repeat(2,minmax(0,1fr));
-    grid-auto-rows:minmax(0,1fr);
-    overflow:hidden;
+    grid-auto-rows:auto;
+    align-content:center;
+    justify-content:center;
+    overflow-y:auto;
 }
 
 .video-card{
     position:relative;
+    width:100%;
+    aspect-ratio:4/3;
     min-width:0;
-    min-height:0;
     overflow:hidden;
     background:#10141e;
     border:1px solid var(--border);
     border-radius:12px;
+    cursor:pointer;
 }
 
 .video-card video{
@@ -696,16 +716,10 @@ button{
     grid-template-columns:1fr;
 }
 
-.video-grid.count-2{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-}
-
-.video-grid.count-3{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-}
-
-.video-grid.count-4{
-    grid-template-columns:repeat(2,minmax(0,1fr));
+.video-grid.count-1 .video-card{
+    aspect-ratio:16/9;
+    max-width:900px;
+    margin:0 auto;
 }
 
 .video-grid.count-many{
@@ -772,15 +786,35 @@ button{
 }
 
 .profile-big-avatar{
-    width:78px;
-    height:78px;
+    width:88px;
+    height:88px;
     border-radius:50%;
     background:linear-gradient(135deg,var(--accent),#9c96ff);
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:27px;
+    font-size:29px;
     font-weight:800;
+    overflow:hidden;
+    position:relative;
+    flex:0 0 auto;
+}
+
+.profile-big-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+.profile-big-avatar.editable{
+    cursor:pointer;
+}
+
+.avatar-edit-hint{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:-6px;
 }
 
 .profile-id{
@@ -788,15 +822,80 @@ button{
     font-size:12px;
 }
 
+.profile-field{
+    width:100%;
+    margin-top:14px;
+}
+
+.profile-field label{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:6px;
+}
+
+.profile-textarea{
+    width:100%;
+    min-height:80px;
+    resize:vertical;
+    border:1px solid var(--border);
+    background:var(--panel2);
+    color:var(--text);
+    border-radius:10px;
+    padding:10px 12px;
+    outline:none;
+}
+
+.profile-textarea:focus{
+    border-color:var(--accent);
+}
+
+.profile-description-view{
+    color:var(--muted);
+    font-size:13px;
+    text-align:center;
+    max-width:420px;
+    line-height:1.5;
+}
+
+.save-btn{
+    width:100%;
+    margin-top:16px;
+    height:44px;
+    border:0;
+    border-radius:9px;
+    background:var(--accent);
+    color:white;
+    font-weight:700;
+}
+
+.save-btn:hover{
+    background:var(--accent2);
+}
+
 .logout-btn{
     width:100%;
-    margin-top:20px;
+    margin-top:12px;
     height:43px;
     border:1px solid rgba(229,72,77,.4);
     border-radius:9px;
     background:rgba(229,72,77,.1);
     color:#ff7478;
     font-weight:700;
+}
+
+.profile-admin-actions{
+    width:100%;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:18px;
+    justify-content:center;
+}
+
+.profile-admin-actions .admin-action{
+    height:38px;
+    padding:0 14px;
 }
 
 /* =========================
@@ -902,10 +1001,6 @@ button{
         gap:5px;
     }
 
-    .profile-name{
-        display:none;
-    }
-
     .top-btn{
         height:36px;
         padding:0 9px;
@@ -925,7 +1020,7 @@ button{
         min-height:0;
         overflow-y:auto;
         overflow-x:hidden;
-        padding:15px 12px 80px;
+        padding:15px 12px 90px;
         -webkit-overflow-scrolling:touch;
     }
 
@@ -961,15 +1056,13 @@ button{
     }
 
     .room-card{
-        height:110px;
-        min-height:110px;
-        padding:12px;
+        padding:12px 14px;
     }
 
     /*
-       IMPORTANT :
-       les chats ne prennent plus de place dans le layout mobile.
-       Le lobby peut donc défiler normalement.
+       Les chats ne prennent plus de place dans le layout mobile
+       et ne doivent jamais intercepter les touches quand ils
+       sont fermés, afin que le lobby puisse défiler normalement.
     */
 
     .chat-sidebar,
@@ -988,11 +1081,13 @@ button{
         transform:translateY(105%);
         transition:transform .22s ease;
         box-shadow:0 -15px 50px rgba(0,0,0,.55);
+        pointer-events:none;
     }
 
     .chat-sidebar.mobile-open,
     .room-chat.mobile-open{
         transform:translateY(0);
+        pointer-events:auto;
     }
 
     .chat-close{
@@ -1072,37 +1167,31 @@ button{
     }
 
     /*
-       2 personnes et 3 personnes :
-       même grille de 2 colonnes.
-       On ne force surtout PAS une colonne sur mobile.
+       2 personnes et 3 personnes : même grille, mêmes
+       proportions de vignette. La taille de chaque vignette
+       dépend uniquement de la largeur de colonne (aspect-ratio
+       fixe), jamais du nombre de rangées.
     */
 
     .video-grid{
-        padding:7px;
-        gap:7px;
+        padding:8px;
+        gap:8px;
         grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-        grid-auto-rows:minmax(0,1fr);
-        overflow:hidden;
+        grid-auto-rows:auto;
+        overflow-y:auto;
     }
 
     .video-grid.count-1{
         grid-template-columns:1fr !important;
     }
 
-    .video-grid.count-2,
-    .video-grid.count-3,
-    .video-grid.count-4,
-    .video-grid.count-many{
-        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    .video-grid .video-card{
+        aspect-ratio:1/1;
     }
 
-    .video-card{
-        aspect-ratio:auto;
-        min-height:0;
-    }
-
-    .video-card video{
-        object-fit:cover;
+    .video-grid.count-1 .video-card{
+        aspect-ratio:3/4;
+        max-width:100%;
     }
 
     .video-user-label{
@@ -1408,13 +1497,13 @@ button{
     <span id="roomChatUnreadMobile" class="chat-badge">0</span>
 </button>
 
-<!-- PROFILE -->
+<!-- PROFIL (le mien, éditable) -->
 <div id="profileModal" class="modal" onclick="closeModalOutside(event,'profileModal')">
 
     <div class="modal-card">
 
         <div class="modal-header">
-            <span class="modal-title">Profil</span>
+            <span class="modal-title">Mon profil</span>
             <button class="modal-close" onclick="closeProfile()">×</button>
         </div>
 
@@ -1422,17 +1511,68 @@ button{
 
             <div class="profile-center">
 
-                <div id="profileAvatar" class="profile-big-avatar">?</div>
+                <div id="profileAvatar" class="profile-big-avatar editable" onclick="triggerAvatarPicker()">?</div>
+                <div class="avatar-edit-hint">Cliquez sur l'avatar pour changer votre photo</div>
+
+                <input
+                    id="avatarFileInput"
+                    type="file"
+                    accept="image/*"
+                    style="display:none;"
+                    onchange="handleAvatarFile(event)"
+                >
 
                 <strong id="profileUsername">Utilisateur</strong>
 
                 <div id="profileId" class="profile-id"></div>
 
+                <div class="profile-field">
+                    <label for="profileDescriptionInput">Description</label>
+                    <textarea
+                        id="profileDescriptionInput"
+                        class="profile-textarea"
+                        maxlength="300"
+                        placeholder="Parlez un peu de vous..."
+                    ></textarea>
+                </div>
+
             </div>
+
+            <button class="save-btn" onclick="saveProfile()">
+                💾 Enregistrer
+            </button>
 
             <button class="logout-btn" onclick="logout()">
                 🚪 Se déconnecter
             </button>
+
+        </div>
+    </div>
+</div>
+
+<!-- PROFIL D'UN AUTRE UTILISATEUR (lecture seule + actions admin) -->
+<div id="userProfileModal" class="modal" onclick="closeModalOutside(event,'userProfileModal')">
+
+    <div class="modal-card">
+
+        <div class="modal-header">
+            <span class="modal-title">Profil</span>
+            <button class="modal-close" onclick="closeUserProfile()">×</button>
+        </div>
+
+        <div class="modal-body">
+
+            <div class="profile-center">
+
+                <div id="viewProfileAvatar" class="profile-big-avatar">?</div>
+
+                <strong id="viewProfileUsername">Utilisateur</strong>
+
+                <div id="viewProfileDescription" class="profile-description-view"></div>
+
+                <div id="viewProfileAdminActions" class="profile-admin-actions"></div>
+
+            </div>
 
         </div>
     </div>
@@ -1501,6 +1641,9 @@ const pendingCandidates = new Map();
 let currentAdminTab = "users";
 let roomUnreadCount = 0;
 
+let pendingAvatarUrl = undefined; // undefined = pas de changement, null = suppression
+let viewingUserId = null;
+
 /* =========================
    DOM
 ========================= */
@@ -1538,6 +1681,18 @@ function getInitial(username){
 
 function escapeHtml(value){
     return String(value ?? "");
+}
+
+function avatarInnerHtml(user){
+    if(user && user.avatarUrl){
+        return `<img src="${user.avatarUrl}" alt="">`;
+    }
+    return escapeHtml(getInitial(user ? user.username : ""));
+}
+
+function findUserById(userId){
+    if(currentUser && userId === currentUser.id) return currentUser;
+    return users.find(user => user.id === userId) || null;
 }
 
 /* =========================
@@ -1615,8 +1770,10 @@ function connectSocket(callback){
     };
 
     socket.onerror = () => {
-        document.getElementById("loginError").textContent =
-            "Impossible de contacter le serveur.";
+        const error = document.getElementById("loginError");
+        if(error){
+            error.textContent = "Impossible de contacter le serveur.";
+        }
     };
 
     socket.onclose = () => {
@@ -1679,20 +1836,11 @@ function showApplication(){
 function updateTopProfile(){
     if(!currentUser) return;
 
-    const initial = getInitial(currentUser.username);
+    document.getElementById("topAvatar").innerHTML =
+        avatarInnerHtml(currentUser);
 
-    document.getElementById("topAvatar").textContent = initial;
     document.getElementById("topUsername").textContent =
         currentUser.username;
-
-    document.getElementById("profileAvatar").textContent = initial;
-    document.getElementById("profileUsername").textContent =
-        currentUser.username;
-
-    document.getElementById("profileId").textContent =
-        currentUser.id
-            ? "ID : " + currentUser.id
-            : "";
 }
 
 function logout(){
@@ -1716,6 +1864,7 @@ function logout(){
     socket = null;
 
     closeProfile();
+    closeUserProfile();
     closeAdmin();
     closeMobileChat();
 
@@ -1748,9 +1897,18 @@ function handleMessage(message){
             handleSessionRestored(message);
             break;
 
+        case "session-invalid":
+            localStorage.removeItem("colincall_session");
+            break;
+
         case "login-error":
             document.getElementById("loginError").textContent =
                 message.message || "Connexion refusée.";
+            break;
+
+        case "profile-updated":
+            currentUser = message.user;
+            updateTopProfile();
             break;
 
         case "room-list":
@@ -1760,6 +1918,10 @@ function handleMessage(message){
 
         case "user-list":
             users = message.users || [];
+            if(currentUser){
+                const me = users.find(u => u.id === currentUser.id);
+                if(me) currentUser = { ...currentUser, ...me };
+            }
             renderAdmin();
             updateRoomParticipants();
             break;
@@ -2041,6 +2203,9 @@ function handleRoomJoined(message){
 
         addVideoUser(user);
 
+        // Seul le nouvel arrivant initie l'offre vers les
+        // participants déjà présents, pour éviter tout conflit
+        // de négociation (glare) des deux côtés à la fois.
         createOfferForUser(user);
     });
 
@@ -2052,6 +2217,7 @@ function addLocalVideo(){
     const card = document.createElement("div");
     card.className = "video-card";
     card.id = "video-user-local";
+    card.onclick = () => openUserProfile(currentUser.id);
 
     const video = document.createElement("video");
 
@@ -2069,15 +2235,14 @@ function addLocalVideo(){
 
     const avatar = document.createElement("div");
     avatar.className = "avatar";
-    avatar.textContent =
-        getInitial(currentUser?.username);
+    avatar.innerHTML = avatarInnerHtml(currentUser);
 
     cameraOff.appendChild(avatar);
 
     const label = document.createElement("div");
     label.className = "video-user-label";
     label.textContent =
-        currentUser?.username || "Vous";
+        (currentUser && currentUser.username) || "Vous";
 
     card.appendChild(video);
     card.appendChild(cameraOff);
@@ -2098,6 +2263,7 @@ function addVideoUser(user){
 
     card.className = "video-card";
     card.id = "video-user-" + user.id;
+    card.onclick = () => openUserProfile(user.id);
 
     const video = document.createElement("video");
 
@@ -2110,8 +2276,7 @@ function addVideoUser(user){
 
     const avatar = document.createElement("div");
     avatar.className = "avatar";
-    avatar.textContent =
-        getInitial(user.username);
+    avatar.innerHTML = avatarInnerHtml(user);
 
     cameraOff.appendChild(avatar);
 
@@ -2146,26 +2311,17 @@ function updateVideoGridLayout(){
 
     videoGrid.classList.remove(
         "count-1",
-        "count-2",
-        "count-3",
-        "count-4",
         "count-many"
     );
 
     if(count <= 1){
         videoGrid.classList.add("count-1");
-    }else if(count === 2){
-        /*
-          2 personnes = même grille que 3.
-        */
-        videoGrid.classList.add("count-2");
-    }else if(count === 3){
-        videoGrid.classList.add("count-3");
-    }else if(count === 4){
-        videoGrid.classList.add("count-4");
-    }else{
+    }else if(count >= 5){
         videoGrid.classList.add("count-many");
     }
+    // De 2 à 4 personnes : grille par défaut à 2 colonnes,
+    // avec une hauteur de vignette fixe (aspect-ratio) pour
+    // garantir la même taille quel que soit le nombre de rangées.
 }
 
 function updateLocalCameraDisplay(){
@@ -2238,7 +2394,9 @@ function handleRoomUserJoined(message){
 
     addVideoUser(user);
 
-    createOfferForUser(user);
+    // On n'initie PAS d'offre ici : c'est le nouvel arrivant qui
+    // le fait (voir handleRoomJoined) pour éviter une double
+    // négociation simultanée qui casse la connexion vidéo.
 
     updateVideoGridLayout();
 }
@@ -2854,17 +3012,6 @@ function addChatMessage(message){
         ),
         message
     );
-
-    if(
-        currentUser &&
-        message.userId !== currentUser.id &&
-        lobbyScreen.style.display !== "none"
-    ){
-        /*
-           Pas de popup gênant sur mobile.
-           Le bouton général reste disponible.
-        */
-    }
 }
 
 function appendChatMessage(container,message){
@@ -3019,14 +3166,30 @@ function closeMobileChat(){
 }
 
 /* =========================
-   PROFILE
+   PROFILE (moi)
 ========================= */
 
 function openProfile(){
 
+    if(!currentUser) return;
+
     closeMobileChat();
 
-    updateTopProfile();
+    pendingAvatarUrl = undefined;
+
+    document.getElementById("profileAvatar").innerHTML =
+        avatarInnerHtml(currentUser);
+
+    document.getElementById("profileUsername").textContent =
+        currentUser.username;
+
+    document.getElementById("profileId").textContent =
+        currentUser.id
+            ? "ID : " + currentUser.id
+            : "";
+
+    document.getElementById("profileDescriptionInput").value =
+        currentUser.description || "";
 
     document.getElementById(
         "profileModal"
@@ -3037,6 +3200,163 @@ function closeProfile(){
 
     document.getElementById(
         "profileModal"
+    ).style.display = "none";
+}
+
+function triggerAvatarPicker(){
+    document.getElementById("avatarFileInput").click();
+}
+
+function handleAvatarFile(event){
+
+    const file = event.target.files && event.target.files[0];
+
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+
+        const img = new Image();
+
+        img.onload = () => {
+
+            const maxSize = 220;
+
+            let width = img.width;
+            let height = img.height;
+
+            if(width > height){
+                if(width > maxSize){
+                    height = Math.round(height * (maxSize / width));
+                    width = maxSize;
+                }
+            }else{
+                if(height > maxSize){
+                    width = Math.round(width * (maxSize / height));
+                    height = maxSize;
+                }
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img,0,0,width,height);
+
+            const dataUrl = canvas.toDataURL("image/jpeg",0.82);
+
+            pendingAvatarUrl = dataUrl;
+
+            document.getElementById("profileAvatar").innerHTML =
+                `<img src="${dataUrl}" alt="">`;
+        };
+
+        img.src = reader.result;
+    };
+
+    reader.readAsDataURL(file);
+
+    event.target.value = "";
+}
+
+function saveProfile(){
+
+    if(!currentUser) return;
+
+    const description =
+        document.getElementById(
+            "profileDescriptionInput"
+        ).value.trim();
+
+    const payload = {
+        type:"update-profile",
+        description
+    };
+
+    if(pendingAvatarUrl !== undefined){
+        payload.avatarUrl = pendingAvatarUrl;
+    }
+
+    send(payload);
+
+    pendingAvatarUrl = undefined;
+
+    closeProfile();
+}
+
+/* =========================
+   PROFILE (autre utilisateur)
+========================= */
+
+function openUserProfile(userId){
+
+    if(!userId) return;
+
+    if(currentUser && userId === currentUser.id){
+        openProfile();
+        return;
+    }
+
+    const user = findUserById(userId);
+
+    if(!user) return;
+
+    viewingUserId = userId;
+
+    document.getElementById("viewProfileAvatar").innerHTML =
+        avatarInnerHtml(user);
+
+    document.getElementById("viewProfileUsername").textContent =
+        user.username;
+
+    const descriptionEl =
+        document.getElementById("viewProfileDescription");
+
+    descriptionEl.textContent =
+        user.description && user.description.trim()
+            ? user.description
+            : "Aucune description.";
+
+    const actions =
+        document.getElementById("viewProfileAdminActions");
+
+    actions.innerHTML = "";
+
+    if(currentUser && currentUser.isAdmin){
+
+        const mute = document.createElement("button");
+        mute.className = "admin-action";
+        mute.textContent = "🔇 Couper le micro";
+        mute.onclick = () => adminMute(user.id);
+
+        const camera = document.createElement("button");
+        camera.className = "admin-action";
+        camera.textContent = "📷 Couper la caméra";
+        camera.onclick = () => adminCamera(user.id);
+
+        const kick = document.createElement("button");
+        kick.className = "admin-action danger";
+        kick.textContent = "Expulser";
+        kick.onclick = () => adminKick(user.id);
+
+        actions.appendChild(mute);
+        actions.appendChild(camera);
+        actions.appendChild(kick);
+    }
+
+    document.getElementById(
+        "userProfileModal"
+    ).style.display = "flex";
+}
+
+function closeUserProfile(){
+
+    viewingUserId = null;
+
+    document.getElementById(
+        "userProfileModal"
     ).style.display = "none";
 }
 
@@ -3165,9 +3485,7 @@ function renderAdmin(){
                     "admin-action";
 
                 mute.textContent =
-                    user.microphoneEnabled
-                        ? "🔇 Mute"
-                        : "🎙️ Activer";
+                    "🔇 Mute";
 
                 mute.onclick = () =>
                     adminMute(user.id);
@@ -3179,9 +3497,7 @@ function renderAdmin(){
                     "admin-action";
 
                 camera.textContent =
-                    user.cameraEnabled
-                        ? "📷 Couper"
-                        : "📷 Activer";
+                    "📷 Couper";
 
                 camera.onclick = () =>
                     adminCamera(user.id);
@@ -3258,19 +3574,22 @@ function renderAdmin(){
             actions.className =
                 "admin-actions";
 
-            const del =
-                document.createElement("button");
+            if(!room.permanent){
 
-            del.className =
-                "admin-action danger";
+                const del =
+                    document.createElement("button");
 
-            del.textContent =
-                "Supprimer";
+                del.className =
+                    "admin-action danger";
 
-            del.onclick = () =>
-                adminDeleteRoom(room.id);
+                del.textContent =
+                    "Supprimer";
 
-            actions.appendChild(del);
+                del.onclick = () =>
+                    adminDeleteRoom(room.id);
+
+                actions.appendChild(del);
+            }
 
             item.appendChild(info);
             item.appendChild(actions);
@@ -3308,6 +3627,8 @@ function adminKick(userId){
         type:"admin-kick",
         userId
     });
+
+    closeUserProfile();
 }
 
 function adminDeleteRoom(roomId){
@@ -3334,6 +3655,10 @@ function closeModalOutside(event,id){
 
         if(id === "profileModal"){
             closeProfile();
+        }
+
+        if(id === "userProfileModal"){
+            closeUserProfile();
         }
 
         if(id === "adminModal"){
