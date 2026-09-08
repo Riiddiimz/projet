@@ -2,570 +2,706 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Col'inCall</title>
 
 <style>
-* {
-    box-sizing: border-box;
+:root{
+    --bg:#080a10;
+    --panel:#111521;
+    --panel2:#181d2a;
+    --border:#293143;
+    --text:#f4f7fb;
+    --muted:#8993a7;
+    --accent:#6c63ff;
+    --danger:#e5484d;
+    --success:#28c76f;
 }
 
-:root {
-    --bg: #080a10;
-    --panel: #111521;
-    --panel2: #181d2a;
-    --border: #293143;
-    --text: #f4f7fb;
-    --muted: #8993a7;
-    --accent: #6c63ff;
-    --danger: #e5484d;
-    --success: #28c76f;
+*{
+    box-sizing:border-box;
 }
 
-body {
-    margin: 0;
-    min-height: 100vh;
-    background: radial-gradient(circle at top, #1a2033, var(--bg) 50%);
-    color: var(--text);
-    font-family: Arial, sans-serif;
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--bg);
+    color:var(--text);
 }
 
 button,
 input,
-textarea {
-    font: inherit;
+textarea{
+    font:inherit;
 }
 
-button {
-    cursor: pointer;
+button{
+    cursor:pointer;
 }
 
-button:disabled {
-    opacity: .45;
-    cursor: not-allowed;
+.hidden{
+    display:none!important;
 }
 
-.hidden {
-    display: none !important;
+/* =========================
+   AUTH
+========================= */
+
+.auth-screen{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:
+        radial-gradient(circle at top,#171b2c 0,#080a10 55%);
+}
+
+.auth-box{
+    width:420px;
+    max-width:92%;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:35px;
+    box-shadow:0 20px 60px rgba(0,0,0,.45);
+}
+
+.logo{
+    font-size:28px;
+    font-weight:800;
+    text-align:center;
+    margin-bottom:8px;
+}
+
+.logo span{
+    color:var(--accent);
+}
+
+.subtitle{
+    text-align:center;
+    color:var(--muted);
+    margin-bottom:30px;
+}
+
+.role-buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.role-btn{
+    background:var(--panel2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:15px;
+    border-radius:12px;
+    transition:.2s;
+}
+
+.role-btn:hover{
+    border-color:var(--accent);
+}
+
+.role-btn.active{
+    background:rgba(108,99,255,.15);
+    border-color:var(--accent);
+}
+
+.input{
+    width:100%;
+    padding:13px 14px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#0c0f17;
+    color:var(--text);
+    outline:none;
+}
+
+.input:focus{
+    border-color:var(--accent);
+}
+
+.primary-btn{
+    width:100%;
+    border:0;
+    border-radius:10px;
+    padding:13px;
+    background:var(--accent);
+    color:white;
+    font-weight:700;
+    margin-top:15px;
+}
+
+.primary-btn:hover{
+    filter:brightness(1.1);
+}
+
+.auth-message{
+    margin-top:15px;
+    text-align:center;
+    color:var(--danger);
+}
+
+/* =========================
+   APP
+========================= */
+
+.app{
+    min-height:100vh;
+}
+
+.topbar{
+    height:64px;
+    border-bottom:1px solid var(--border);
+    background:var(--panel);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+}
+
+.topbar-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.topbar-logo{
+    font-size:21px;
+    font-weight:800;
 }
 
-.screen {
-    min-height: 100vh;
-    padding: 24px;
+.topbar-logo span{
+    color:var(--accent);
 }
 
-.center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
 
-.panel {
-    width: 100%;
-    max-width: 520px;
-    padding: 30px;
-    background: rgba(17, 21, 33, .94);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    box-shadow: 0 20px 80px rgba(0,0,0,.35);
+.profile-button,
+.admin-button{
+    border:1px solid var(--border);
+    background:var(--panel2);
+    color:var(--text);
+    border-radius:9px;
+    padding:9px 13px;
 }
 
-h1,
-h2,
-h3 {
-    margin-top: 0;
+.admin-button{
+    border-color:#735cff;
 }
 
-.logo {
-    font-size: 28px;
-    font-weight: 800;
-    margin-bottom: 8px;
+.avatar-small{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:var(--accent);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
 }
 
-.subtitle {
-    color: var(--muted);
-    margin-bottom: 25px;
+/* =========================
+   LOBBY
+========================= */
+
+.lobby{
+    display:grid;
+    grid-template-columns:1fr 340px;
+    min-height:calc(100vh - 64px);
+}
+
+.lobby-main{
+    padding:25px;
 }
 
-input,
-textarea {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: #0b0f18;
-    color: white;
-    padding: 15px 16px;
-    outline: none;
+.lobby-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    margin-bottom:22px;
 }
 
-input:focus,
-textarea:focus {
-    border-color: var(--accent);
+.lobby-title h1{
+    margin:0 0 5px;
+    font-size:26px;
 }
 
-textarea {
-    min-height: 110px;
-    resize: vertical;
+.lobby-title p{
+    margin:0;
+    color:var(--muted);
 }
 
-.field {
-    margin-bottom: 16px;
+.lobby-actions{
+    display:flex;
+    gap:10px;
 }
 
-label {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--muted);
-    font-size: 14px;
+.search{
+    width:230px;
+    padding:11px 13px;
+    border-radius:9px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text);
+    outline:none;
 }
 
-.btn {
-    border: 0;
-    border-radius: 13px;
-    padding: 14px 18px;
-    color: white;
-    background: var(--accent);
-    font-weight: 700;
+.create-btn{
+    border:0;
+    background:var(--accent);
+    color:#fff;
+    border-radius:9px;
+    padding:11px 16px;
+    font-weight:bold;
 }
 
-.btn.secondary {
-    background: var(--panel2);
-    border: 1px solid var(--border);
+.rooms-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+    gap:15px;
 }
 
-.btn.danger {
-    background: var(--danger);
+.room-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:18px;
+    transition:.2s;
 }
 
-.btn.success {
-    background: var(--success);
-    color: #06130c;
+.room-card:hover{
+    transform:translateY(-2px);
+    border-color:#454d61;
 }
 
-.btn.full {
-    width: 100%;
+.room-name{
+    font-weight:bold;
+    font-size:18px;
+    margin-bottom:7px;
 }
 
-.choice-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+.room-description{
+    color:var(--muted);
+    font-size:14px;
+    min-height:40px;
 }
 
-.choice {
-    padding: 25px 15px;
-    border: 1px solid var(--border);
-    background: var(--panel2);
-    border-radius: 18px;
-    color: white;
-    text-align: center;
+.room-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:18px;
 }
 
-.choice:hover {
-    border-color: var(--accent);
+.room-count{
+    color:var(--muted);
+    font-size:13px;
 }
+
+.join-btn{
+    border:0;
+    background:var(--accent);
+    color:#fff;
+    border-radius:8px;
+    padding:8px 13px;
+}
+
+/* =========================
+   CHAT
+========================= */
 
-.choice-icon {
-    display: block;
-    font-size: 34px;
-    margin-bottom: 10px;
+.chat-panel{
+    border-left:1px solid var(--border);
+    background:var(--panel);
+    display:flex;
+    flex-direction:column;
 }
 
-.error {
-    color: #ff7479;
-    margin: 12px 0;
-    font-size: 14px;
+.chat-header{
+    padding:17px;
+    border-bottom:1px solid var(--border);
+    font-weight:bold;
 }
 
-.topbar {
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    padding: 0 22px;
-    background: rgba(17, 21, 33, .94);
-    border-bottom: 1px solid var(--border);
+.chat-messages{
+    flex:1;
+    overflow-y:auto;
+    padding:15px;
 }
 
-.topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+.chat-message{
+    margin-bottom:14px;
 }
 
-.topbar .logo {
-    margin: 0;
-    font-size: 22px;
+.chat-author{
+    font-size:12px;
+    color:var(--accent);
+    margin-bottom:3px;
+    font-weight:bold;
 }
 
-.avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background: linear-gradient(135deg, #6c63ff, #a855f7);
-    color: white;
-    font-weight: bold;
-    border: 2px solid var(--border);
+.chat-text{
+    background:var(--panel2);
+    border-radius:10px;
+    padding:9px 11px;
+    display:inline-block;
+    max-width:95%;
+    word-break:break-word;
 }
 
-.avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.chat-input-area{
+    padding:12px;
+    border-top:1px solid var(--border);
+    display:flex;
+    gap:8px;
 }
 
-.profile-button {
-    border: 0;
-    background: transparent;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.chat-input{
+    flex:1;
+    min-width:0;
+    padding:11px;
+    border-radius:9px;
+    background:#0b0e15;
+    border:1px solid var(--border);
+    color:var(--text);
+    outline:none;
 }
 
-.layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
-    min-height: calc(100vh - 70px);
+.chat-send{
+    width:42px;
+    border:0;
+    border-radius:9px;
+    background:var(--accent);
+    color:white;
 }
 
-.main-content {
-    padding: 24px;
+/* =========================
+   ROOM
+========================= */
+
+.room{
+    min-height:calc(100vh - 64px);
+    display:flex;
 }
 
-.search {
-    font-size: 17px;
-    min-height: 56px;
-    margin-bottom: 20px;
+.room-main{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
 }
 
-.rooms {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
+.room-top{
+    height:58px;
+    padding:0 18px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
-.room-card {
-    padding: 20px;
-    border-radius: 18px;
-    background: var(--panel);
-    border: 1px solid var(--border);
+.room-title{
+    font-weight:bold;
 }
 
-.room-card:hover {
-    border-color: var(--accent);
+.room-status{
+    color:var(--muted);
+    font-size:13px;
 }
 
-.room-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 12px;
+.video-grid{
+    flex:1;
+    padding:18px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:15px;
+    align-content:start;
 }
 
-.room-count {
-    color: var(--muted);
-    margin-bottom: 18px;
+.video-card{
+    position:relative;
+    aspect-ratio:16/10;
+    background:#05070b;
+    border:1px solid var(--border);
+    border-radius:14px;
+    overflow:hidden;
 }
 
-.sidebar {
-    border-left: 1px solid var(--border);
-    background: rgba(12, 15, 24, .8);
-    padding: 20px;
+.video-card video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    background:#05070b;
 }
 
-.chat-messages {
-    height: calc(100vh - 190px);
-    overflow-y: auto;
-    margin-bottom: 12px;
+.video-avatar{
+    position:absolute;
+    inset:0;
+    margin:auto;
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:32px;
+    font-weight:bold;
 }
 
-.chat-message {
-    margin-bottom: 13px;
-    padding: 10px 12px;
-    background: var(--panel2);
-    border-radius: 12px;
+.camera-off{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    font-size:35px;
+    opacity:.8;
 }
 
-.chat-author {
-    color: #a9a3ff;
-    font-weight: bold;
-    font-size: 13px;
-    margin-bottom: 5px;
+.video-label{
+    position:absolute;
+    bottom:9px;
+    left:9px;
+    background:rgba(0,0,0,.65);
+    border-radius:7px;
+    padding:6px 9px;
+    font-size:13px;
 }
 
-.chat-text {
-    overflow-wrap: anywhere;
+.controls{
+    height:75px;
+    border-top:1px solid var(--border);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:12px;
 }
 
-.chat-form {
-    display: flex;
-    gap: 8px;
+.control-btn{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--panel2);
+    color:white;
+    font-size:19px;
 }
 
-.chat-form input {
-    min-width: 0;
+.control-btn.active{
+    background:var(--accent);
 }
 
-.room-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
-    min-height: calc(100vh - 70px);
+.control-btn.danger{
+    background:var(--danger);
+    border-color:var(--danger);
 }
 
-.video-area {
-    padding: 16px;
-    position: relative;
+/* =========================
+   ROOM CHAT
+========================= */
+
+.room-chat{
+    width:320px;
+    border-left:1px solid var(--border);
+    background:var(--panel);
+    display:flex;
+    flex-direction:column;
 }
+
+/* =========================
+   MODALS
+========================= */
 
-.video-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 15px;
-    padding-bottom: 90px;
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
 }
 
-.video-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 18px;
-    border: 1px solid var(--border);
-    background: #05070b;
-    aspect-ratio: 16 / 9;
+.modal{
+    width:500px;
+    max-width:92%;
+    max-height:90vh;
+    overflow:auto;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
 }
 
-.video-card video {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    background: #05070b;
+.modal h2{
+    margin-top:0;
 }
 
-.video-label {
-    position: absolute;
-    left: 12px;
-    bottom: 12px;
-    background: rgba(0,0,0,.7);
-    padding: 8px 11px;
-    border-radius: 10px;
-    font-size: 13px;
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
 }
 
-.video-avatar {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    border: 0;
-    background: transparent;
-    padding: 0;
+.close-btn{
+    background:none;
+    border:0;
+    color:var(--muted);
+    font-size:22px;
 }
 
-.camera-off {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #101521;
-    font-size: 50px;
+.profile-avatar{
+    width:90px;
+    height:90px;
+    margin:0 auto 18px;
+    border-radius:50%;
+    background:var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:32px;
+    font-weight:bold;
 }
 
-.controls {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 20px;
-    background: rgba(17,21,33,.95);
-    border: 1px solid var(--border);
-    z-index: 20;
+.profile-name{
+    text-align:center;
+    font-size:21px;
+    font-weight:bold;
 }
 
-.control {
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    border: 0;
-    background: var(--panel2);
-    color: white;
-    font-size: 22px;
+.profile-description{
+    text-align:center;
+    color:var(--muted);
+    margin:8px 0 20px;
 }
 
-.control.off {
-    background: var(--danger);
+.form-group{
+    margin-bottom:14px;
 }
 
-.leave {
-    background: var(--danger);
+.form-group label{
+    display:block;
+    margin-bottom:6px;
+    font-size:13px;
+    color:var(--muted);
 }
 
-.moderation-warning {
-    position: fixed;
-    top: 85px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 30;
-    background: var(--danger);
-    color: white;
-    padding: 13px 18px;
-    border-radius: 12px;
-    display: none;
+.modal-actions{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
 }
 
-.moderation-warning.visible {
-    display: block;
+.modal-actions button{
+    flex:1;
 }
 
-.modal-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: rgba(0,0,0,.7);
+/* =========================
+   ADMIN
+========================= */
+
+.admin-tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:15px;
 }
 
-.modal {
-    width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 25px;
-    border-radius: 22px;
-    background: var(--panel);
-    border: 1px solid var(--border);
+.admin-tab{
+    padding:9px 14px;
+    background:var(--panel2);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:8px;
 }
 
-.modal-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 18px;
+.admin-tab.active{
+    border-color:var(--accent);
+    background:rgba(108,99,255,.15);
 }
 
-.admin-panel {
-    max-width: 850px;
+.admin-item{
+    padding:13px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    margin-bottom:9px;
+    background:var(--panel2);
 }
 
-.admin-tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+.admin-item-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
 }
 
-.admin-list {
-    display: grid;
-    gap: 12px;
+.admin-item-name{
+    font-weight:bold;
 }
 
-.admin-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 15px;
-    background: var(--panel2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
+.admin-actions{
+    display:flex;
+    gap:6px;
+    margin-top:10px;
 }
 
-.admin-row-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+.small-btn{
+    border:1px solid var(--border);
+    background:#10141d;
+    color:white;
+    padding:7px 10px;
+    border-radius:7px;
 }
 
-.admin-row-actions button {
-    padding: 9px 11px;
-    border: 0;
-    border-radius: 9px;
-    color: white;
-    background: #303849;
-    font-size: 12px;
+.small-btn.danger{
+    border-color:var(--danger);
+    color:#ff8a8e;
 }
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:900px){
 
-@media (max-width: 900px) {
-    .layout,
-    .room-layout {
-        grid-template-columns: 1fr;
+    .lobby{
+        grid-template-columns:1fr;
     }
 
-    .sidebar {
-        border-left: 0;
-        border-top: 1px solid var(--border);
+    .chat-panel{
+        height:400px;
+        border-left:0;
+        border-top:1px solid var(--border);
     }
 
-    .chat-messages {
-        height: 260px;
-    }
-}
-
-@media (max-width: 600px) {
-    .screen {
-        padding: 15px;
+    .room{
+        flex-direction:column;
     }
 
-    .panel {
-        padding: 22px;
+    .room-chat{
+        width:100%;
+        height:350px;
+        border-left:0;
+        border-top:1px solid var(--border);
     }
 
-    .topbar {
-        padding: 0 14px;
+    .lobby-header{
+        flex-direction:column;
+        align-items:stretch;
     }
 
-    .topbar .logo {
-        font-size: 18px;
+    .lobby-actions{
+        flex-wrap:wrap;
     }
 
-    .main-content,
-    .video-area {
-        padding: 12px;
-    }
-
-    .video-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
-    }
-
-    .video-card {
-        aspect-ratio: 9 / 12;
-        border-radius: 12px;
-    }
-
-    .video-label {
-        left: 7px;
-        bottom: 7px;
-        padding: 6px 8px;
-        font-size: 11px;
-    }
-
-    .controls {
-        bottom: 12px;
-        gap: 7px;
-    }
-
-    .control {
-        width: 48px;
-        height: 48px;
-    }
-
-    .admin-row {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .choice-grid {
-        grid-template-columns: 1fr;
+    .search{
+        width:100%;
     }
 }
 </style>
@@ -573,618 +709,1167 @@ label {
 
 <body>
 
-<div id="authScreen" class="screen center">
-    <div class="panel">
-        <div class="logo">Col'inCall</div>
-        <div class="subtitle">Choisissez votre type de connexion</div>
+<!-- =========================
+     AUTH
+========================= -->
 
-        <div class="choice-grid">
-            <button class="choice" onclick="chooseRole('user')">
-                <span class="choice-icon">👤</span>
-                Utilisateur
+<div id="authScreen" class="auth-screen">
+
+    <div class="auth-box">
+
+        <div class="logo">
+            Col'in<span>Call</span>
+        </div>
+
+        <div class="subtitle">
+            Discutez et échangez en vidéo
+        </div>
+
+        <div class="role-buttons">
+
+            <button
+                id="userRoleBtn"
+                class="role-btn active"
+                onclick="selectRole('user')">
+                👤 Utilisateur
             </button>
 
-            <button class="choice" onclick="chooseRole('admin')">
-                <span class="choice-icon">🛡️</span>
-                Administrateur
+            <button
+                id="adminRoleBtn"
+                class="role-btn"
+                onclick="selectRole('admin')">
+                🛠️ Administrateur
             </button>
-        </div>
-    </div>
-</div>
 
-<div id="loginScreen" class="screen center hidden">
-    <div class="panel">
-        <div class="logo">Connexion</div>
-        <div class="subtitle" id="loginSubtitle"></div>
-
-        <div class="field">
-            <label for="username">Pseudo</label>
-            <input id="username" maxlength="24" placeholder="Votre pseudo">
         </div>
 
-        <div id="adminCodeField" class="field hidden">
-            <label for="adminCode">Code administrateur</label>
-            <input id="adminCode" type="password" placeholder="Code admin">
-        </div>
+        <div style="margin-top:18px">
 
-        <div id="loginError" class="error"></div>
+            <input
+                id="loginInput"
+                class="input"
+                placeholder="Nom d'utilisateur">
 
-        <button class="btn full" onclick="login()">Entrer</button>
+            <input
+                id="codeInput"
+                class="input"
+                style="margin-top:10px"
+                placeholder="Code administrateur"
+                type="password">
 
-        <br><br>
+            <button
+                class="primary-btn"
+                onclick="login()">
+                Se connecter
+            </button>
 
-        <button class="btn secondary full" onclick="backToAuth()">Retour</button>
-    </div>
-</div>
+            <div id="authMessage" class="auth-message"></div>
 
-<div id="lobbyScreen" class="hidden">
-
-<header class="topbar">
-    <div class="topbar-left">
-        <div class="logo">Col'inCall</div>
-        <span id="roleBadge"></span>
-    </div>
-
-    <div style="display:flex;align-items:center;gap:12px;">
-        <button id="adminButton" class="btn hidden" onclick="openAdminPanel()">
-            Administration
-        </button>
-
-        <button class="profile-button" onclick="openOwnProfile()">
-            <div id="topAvatar" class="avatar"></div>
-            <span id="topUsername"></span>
-        </button>
-    </div>
-</header>
-
-<div class="layout">
-
-<main class="main-content">
-    <h2>Choisir un salon</h2>
-
-    <input
-        id="roomSearch"
-        class="search"
-        placeholder="Rechercher un salon..."
-        oninput="renderRooms()">
-
-    <button class="btn" onclick="createRoom()">+ Créer un salon</button>
-
-    <br><br>
-
-    <div id="roomsList" class="rooms"></div>
-</main>
-
-<aside class="sidebar">
-    <h3>Discussion</h3>
-
-    <div id="lobbyChat" class="chat-messages"></div>
-
-    <form class="chat-form" onsubmit="sendLobbyChat(event)">
-        <input id="lobbyChatInput" placeholder="Écrire un message...">
-        <button class="btn">Envoyer</button>
-    </form>
-</aside>
-
-</div>
-</div>
-
-<div id="roomScreen" class="hidden">
-
-<header class="topbar">
-    <div class="topbar-left">
-
-        <button class="btn secondary" onclick="leaveCurrentRoom()">
-            ← Salons
-        </button>
-
-        <div>
-            <strong id="currentRoomName"></strong>
-            <div id="roomStatus" class="subtitle" style="margin:0;"></div>
         </div>
 
     </div>
-</header>
 
-<div class="room-layout">
+</div>
 
-<main class="video-area">
 
-    <div id="videoGrid" class="video-grid"></div>
+<!-- =========================
+     APPLICATION
+========================= -->
 
-    <div id="moderationWarning" class="moderation-warning"></div>
+<div id="app" class="app hidden">
 
-    <div class="controls">
+    <div class="topbar">
 
-        <button id="micButton" class="control off" onclick="toggleMicro()">
-            🔇
-        </button>
+        <div class="topbar-left">
 
-        <button id="cameraButton" class="control off" onclick="toggleCamera()">
-            📷
-        </button>
+            <div class="topbar-logo">
+                Col'in<span>Call</span>
+            </div>
 
-        <button class="control leave" onclick="leaveCurrentRoom()">
-            ☎
-        </button>
+        </div>
+
+        <div class="topbar-right">
+
+            <button
+                id="adminButton"
+                class="admin-button hidden"
+                onclick="openAdmin()">
+                🛠️ Admin
+            </button>
+
+            <button
+                class="profile-button"
+                onclick="openMyProfile()">
+
+                <span
+                    id="topAvatar"
+                    class="avatar-small">
+                    ?
+                </span>
+
+                <span id="topUsername">
+                    Profil
+                </span>
+
+            </button>
+
+        </div>
 
     </div>
 
-</main>
 
-<aside class="sidebar">
+    <!-- =========================
+         LOBBY
+    ========================= -->
 
-    <h3>Chat du salon</h3>
+    <div id="lobbyScreen" class="lobby">
 
-    <div id="roomChat" class="chat-messages"></div>
+        <main class="lobby-main">
 
-    <form class="chat-form" onsubmit="sendRoomChat(event)">
-        <input id="roomChatInput" placeholder="Écrire un message...">
-        <button class="btn">Envoyer</button>
-    </form>
+            <div class="lobby-header">
 
-</aside>
+                <div class="lobby-title">
 
-</div>
-</div>
+                    <h1>Salons disponibles</h1>
 
-<div id="profileModal" class="modal-backdrop hidden">
-<div class="modal">
+                    <p>
+                        Rejoignez une discussion ou créez votre propre salon.
+                    </p>
 
-<h2 id="profileModalTitle">Profil</h2>
+                </div>
 
-<div style="display:flex;justify-content:center;margin-bottom:20px;">
-    <div id="profileAvatar" class="avatar"
-         style="width:100px;height:100px;font-size:30px;"></div>
-</div>
+                <div class="lobby-actions">
 
-<div id="ownProfileFields">
+                    <input
+                        id="roomSearch"
+                        class="search"
+                        placeholder="Rechercher un salon..."
+                        oninput="renderRooms()">
 
-    <div class="field">
-        <label for="profileDescription">Description</label>
-        <textarea id="profileDescription"
-                  placeholder="Votre description..."></textarea>
+                    <button
+                        class="create-btn"
+                        onclick="openCreateRoom()">
+                        + Créer
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div id="roomsGrid" class="rooms-grid"></div>
+
+        </main>
+
+
+        <!-- LOBBY CHAT -->
+
+        <aside class="chat-panel">
+
+            <div class="chat-header">
+                💬 Discussion générale
+            </div>
+
+            <div
+                id="lobbyChat"
+                class="chat-messages">
+            </div>
+
+            <form
+                class="chat-input-area"
+                onsubmit="sendLobbyChat(event)">
+
+                <input
+                    id="lobbyChatInput"
+                    class="chat-input"
+                    placeholder="Écrire un message...">
+
+                <button
+                    class="chat-send"
+                    type="submit">
+                    ➤
+                </button>
+
+            </form>
+
+        </aside>
+
     </div>
 
-    <div class="field">
-        <label>Avatar</label>
 
-        <input
-            id="avatarPicker"
-            type="file"
-            accept="image/*"
+    <!-- =========================
+         ROOM
+    ========================= -->
+
+    <div id="roomScreen" class="room hidden">
+
+        <main class="room-main">
+
+            <div class="room-top">
+
+                <div>
+
+                    <div
+                        id="roomTitle"
+                        class="room-title">
+                        Salon
+                    </div>
+
+                    <div
+                        id="roomStatus"
+                        class="room-status">
+                        0 participant
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="videoGrid"
+                class="video-grid">
+            </div>
+
+
+            <div class="controls">
+
+                <button
+                    id="microBtn"
+                    class="control-btn"
+                    onclick="toggleMicro()"
+                    title="Microphone">
+                    🎤
+                </button>
+
+                <button
+                    id="cameraBtn"
+                    class="control-btn"
+                    onclick="toggleCamera()"
+                    title="Caméra">
+                    📹
+                </button>
+
+                <button
+                    class="control-btn danger"
+                    onclick="leaveCurrentRoom()"
+                    title="Quitter le salon">
+                    📞
+                </button>
+
+            </div>
+
+        </main>
+
+
+        <!-- ROOM CHAT -->
+
+        <aside class="room-chat">
+
+            <div class="chat-header">
+                💬 Discussion du salon
+            </div>
+
+            <div
+                id="roomChat"
+                class="chat-messages">
+            </div>
+
+            <form
+                class="chat-input-area"
+                onsubmit="sendRoomChat(event)">
+
+                <input
+                    id="roomChatInput"
+                    class="chat-input"
+                    placeholder="Écrire un message...">
+
+                <button
+                    class="chat-send"
+                    type="submit">
+                    ➤
+                </button>
+
+            </form>
+
+        </aside>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     PROFILE MODAL
+========================= -->
+
+<div
+    id="profileModal"
+    class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <h2>Profil</h2>
+
+            <button
+                class="close-btn"
+                onclick="closeModal('profileModal')">
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="profileAvatar"
+            class="profile-avatar">
+            ?
+        </div>
+
+        <div
+            id="profileName"
+            class="profile-name">
+            Utilisateur
+        </div>
+
+        <div
+            id="profileDescription"
+            class="profile-description">
+        </div>
+
+        <div id="myProfileForm">
+
+            <div class="form-group">
+
+                <label>
+                    Nom
+                </label>
+
+                <input
+                    id="profileNameInput"
+                    class="input">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Description
+                </label>
+
+                <textarea
+                    id="profileDescriptionInput"
+                    class="input"
+                    rows="4"></textarea>
+
+            </div>
+
+            <button
+                class="primary-btn"
+                onclick="saveProfile()">
+                Enregistrer
+            </button>
+
+        </div>
+
+        <div
+            id="profileAdminActions"
             class="hidden"
-            onchange="processAvatar(event)">
+            style="margin-top:20px">
 
-        <button class="btn secondary" onclick="chooseAvatar()">
-            Choisir une image
-        </button>
+            <h3>Modération</h3>
 
-        <button class="btn secondary" onclick="takeAvatarPhoto()">
-            Prendre une photo
-        </button>
+            <div class="modal-actions">
+
+                <button
+                    class="small-btn"
+                    onclick="toggleViewedMute()">
+                    🎤 Micro
+                </button>
+
+                <button
+                    class="small-btn"
+                    onclick="toggleViewedCamera()">
+                    📹 Caméra
+                </button>
+
+                <button
+                    class="small-btn danger"
+                    onclick="kickViewedUser()">
+                    Expulser
+                </button>
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>
 
-<div id="viewedProfileDescription" class="subtitle"></div>
 
-<div id="profileAdminActions" class="modal-actions hidden">
+<!-- =========================
+     CREATE ROOM
+========================= -->
 
-    <button class="btn danger" onclick="kickViewedUser()">
-        Expulser
-    </button>
+<div
+    id="createRoomModal"
+    class="modal-overlay hidden">
 
-    <button id="profileMuteButton"
-            class="btn secondary"
-            onclick="toggleViewedMute()">
-        Couper le micro
-    </button>
+    <div class="modal">
 
-    <button id="profileCameraButton"
-            class="btn secondary"
-            onclick="toggleViewedCamera()">
-        Couper la caméra
-    </button>
+        <div class="modal-header">
+
+            <h2>Créer un salon</h2>
+
+            <button
+                class="close-btn"
+                onclick="closeModal('createRoomModal')">
+                ×
+            </button>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                Nom du salon
+            </label>
+
+            <input
+                id="newRoomName"
+                class="input"
+                placeholder="Ex : Discussion gaming">
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                Description
+            </label>
+
+            <textarea
+                id="newRoomDescription"
+                class="input"
+                rows="3"
+                placeholder="Décrivez votre salon..."></textarea>
+
+        </div>
+
+        <button
+            class="primary-btn"
+            onclick="createRoom()">
+            Créer le salon
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     ADMIN
+========================= -->
+
+<div
+    id="adminModal"
+    class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <h2>Administration</h2>
+
+            <button
+                class="close-btn"
+                onclick="closeModal('adminModal')">
+                ×
+            </button>
+
+        </div>
+
+        <div class="admin-tabs">
+
+            <button
+                id="adminUsersTab"
+                class="admin-tab active"
+                onclick="setAdminTab('users')">
+                👥 Utilisateurs
+            </button>
+
+            <button
+                id="adminRoomsTab"
+                class="admin-tab"
+                onclick="setAdminTab('rooms')">
+                🏠 Salons
+            </button>
+
+        </div>
+
+        <div id="adminContent"></div>
+
+    </div>
 
 </div>
 
-<div class="modal-actions">
-
-    <button id="saveProfileButton"
-            class="btn"
-            onclick="saveProfile()">
-        Enregistrer
-    </button>
-
-    <button class="btn secondary" onclick="closeProfileModal()">
-        Fermer
-    </button>
-
-</div>
-
-</div>
-</div>
-
-<div id="adminModal" class="modal-backdrop hidden">
-<div class="modal admin-panel">
-
-<h2>Administration</h2>
-
-<div class="admin-tabs">
-
-    <button class="btn" onclick="showAdminTab('rooms')">
-        Salons
-    </button>
-
-    <button class="btn secondary" onclick="showAdminTab('users')">
-        Users
-    </button>
-
-</div>
-
-<input
-    id="adminSearch"
-    class="search"
-    placeholder="Rechercher un pseudo ou un salon..."
-    oninput="renderAdminPanel()">
-
-<div id="adminContent"></div>
-
-<br>
-
-<button class="btn secondary full" onclick="closeAdminPanel()">
-    Fermer
-</button>
-
-</div>
-</div>
 
 <script>
-const SERVER_URL = "wss://projet-nz7b.onrender.com";
 
-let socket;
+/* =========================
+   CONFIG
+========================= */
+
+const SERVER_URL =
+    "wss://projet-nz7b.onrender.com";
+
+
+/* =========================
+   GLOBALS
+========================= */
+
+let socket = null;
+
 let selectedRole = "user";
+
 let currentUser = null;
+
 let rooms = [];
+
 let allUsers = [];
+
 let currentRoom = null;
 
 let localStream = null;
+
 let microphoneEnabled = false;
+
 let cameraEnabled = false;
 
 let peerConnections = new Map();
-let pendingCandidates = new Map();
+
+let pendingIceCandidates = new Map();
 
 let viewedUser = null;
-let adminTab = "rooms";
 
-const savedProfile = JSON.parse(
-    localStorage.getItem("colincall-profile") || "{}"
-);
+let adminTab = "users";
 
 
 /* =========================
-   CONNEXION
+   AUTH
 ========================= */
 
-function connectSocket() {
-    if (socket &&
-        (socket.readyState === WebSocket.OPEN ||
-         socket.readyState === WebSocket.CONNECTING)) {
-        return;
-    }
+function selectRole(role){
 
-    socket = new WebSocket(SERVER_URL);
-
-    socket.onopen = () => {
-        console.log("WebSocket connecté");
-    };
-
-    socket.onclose = () => {
-        console.log("WebSocket fermé");
-    };
-
-    socket.onerror = () => {
-        showLoginError("Impossible de joindre le serveur.");
-    };
-
-    socket.onmessage = async event => {
-        const message = JSON.parse(event.data);
-
-        switch (message.type) {
-
-            case "login-success":
-                handleLoginSuccess(message.user);
-                break;
-
-            case "login-error":
-                showLoginError(message.message);
-                break;
-
-            case "room-list":
-                rooms = message.rooms || [];
-                renderRooms();
-                renderAdminPanel();
-                break;
-
-            case "room-joined":
-                await handleRoomJoined(message);
-                break;
-
-            case "room-left":
-                cleanupAfterLeaving();
-                break;
-
-            case "room-deleted":
-                if (currentRoom && currentRoom.id === message.roomId) {
-                    cleanupAfterLeaving();
-                    alert(message.message);
-                }
-                break;
-
-            case "user-joined":
-                if (currentRoom) {
-                    addVideoUser(message.user);
-                }
-                break;
-
-            case "user-left":
-                removeVideoUser(message.userId);
-                closePeerConnection(message.userId);
-                break;
-
-            case "offer":
-                await receiveOffer(message);
-                break;
-
-            case "answer":
-                await receiveAnswer(message);
-                break;
-
-            case "ice-candidate":
-                await receiveCandidate(message);
-                break;
-
-            case "chat-message":
-                addChatMessage(message);
-                break;
-
-            case "users-list":
-                allUsers = message.users || [];
-                renderAdminPanel();
-                break;
-
-            case "users-list-room":
-                allUsers = message.users || [];
-                renderAdminPanel();
-                break;
-
-            case "user-updated":
-                updateUserInLists(message.user);
-                break;
-
-            case "profile-updated":
-                currentUser = {
-                    ...currentUser,
-                    ...message.user
-                };
-
-                updateTopProfile();
-                break;
-
-            case "force-micro":
-                applyForcedMicro(message.enabled);
-                break;
-
-            case "force-camera":
-                applyForcedCamera(message.enabled);
-                break;
-
-            case "kicked":
-                cleanupAfterLeaving();
-                alert(message.message);
-                break;
-
-            case "error-message":
-                alert(message.message);
-                break;
-        }
-    };
-}
-
-
-/* =========================
-   AUTHENTIFICATION
-========================= */
-
-function chooseRole(role) {
     selectedRole = role;
 
-    document.getElementById("authScreen").classList.add("hidden");
-    document.getElementById("loginScreen").classList.remove("hidden");
+    document
+        .getElementById("userRoleBtn")
+        .classList.toggle(
+            "active",
+            role === "user"
+        );
 
-    document.getElementById("loginSubtitle").textContent =
-        role === "admin"
-            ? "Connexion administrateur"
-            : "Connexion utilisateur";
+    document
+        .getElementById("adminRoleBtn")
+        .classList.toggle(
+            "active",
+            role === "admin"
+        );
 
-    document.getElementById("adminCodeField").classList.toggle(
-        "hidden",
-        role !== "admin"
-    );
+    document
+        .getElementById("codeInput")
+        .classList.toggle(
+            "hidden",
+            role !== "admin"
+        );
 
-    document.getElementById("loginError").textContent = "";
+    document
+        .getElementById("loginInput")
+        .placeholder =
+            role === "admin"
+                ? "Nom administrateur"
+                : "Nom d'utilisateur";
 }
 
-function backToAuth() {
-    document.getElementById("loginScreen").classList.add("hidden");
-    document.getElementById("authScreen").classList.remove("hidden");
-}
+selectRole("user");
 
-function showLoginError(message) {
-    document.getElementById("loginError").textContent = message;
-}
 
-function login() {
+function login(){
+
     const username =
-        document.getElementById("username").value.trim();
+        document
+            .getElementById("loginInput")
+            .value
+            .trim();
 
-    const adminCode =
-        document.getElementById("adminCode").value;
+    const code =
+        document
+            .getElementById("codeInput")
+            .value
+            .trim();
 
-    if (!username) {
-        showLoginError("Entre un pseudo.");
+    const message =
+        document.getElementById("authMessage");
+
+    if(!username){
+
+        message.textContent =
+            "Indique un nom d'utilisateur.";
+
         return;
     }
 
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-        connectSocket();
+    if(selectedRole === "admin" && !code){
 
-        setTimeout(login, 500);
+        message.textContent =
+            "Indique le code administrateur.";
+
         return;
     }
 
-    socket.send(JSON.stringify({
-        type: "login",
-        username,
-        role: selectedRole,
-        adminCode
-    }));
-}
+    connectSocket();
 
-function handleLoginSuccess(user) {
-    currentUser = user;
+    socket.addEventListener(
+        "open",
+        function onOpen(){
 
-    currentUser.profile = {
-        description: savedProfile.description || "",
-        avatar: savedProfile.avatar || null
-    };
+            socket.removeEventListener(
+                "open",
+                onOpen
+            );
 
-    socket.send(JSON.stringify({
-        type: "update-profile",
-        description: currentUser.profile.description,
-        avatar: currentUser.profile.avatar
-    }));
-
-    document.getElementById("loginScreen").classList.add("hidden");
-    document.getElementById("lobbyScreen").classList.remove("hidden");
-
-    document.getElementById("roleBadge").textContent =
-        currentUser.role === "admin"
-            ? "🛡️ Admin"
-            : "Utilisateur";
-
-    document.getElementById("adminButton").classList.toggle(
-        "hidden",
-        currentUser.role !== "admin"
+            send({
+                type:"login",
+                username,
+                role:selectedRole,
+                code
+            });
+        }
     );
 
-    updateTopProfile();
+    socket.addEventListener(
+        "error",
+        function(){
+
+            message.textContent =
+                "Impossible de contacter le serveur.";
+        }
+    );
 }
 
 
 /* =========================
-   SALONS
+   SOCKET
 ========================= */
 
-function renderRooms() {
-    const container = document.getElementById("roomsList");
-    const search =
-        document.getElementById("roomSearch").value.toLowerCase();
+function connectSocket(){
 
-    container.innerHTML = "";
+    if(socket &&
+       (socket.readyState === WebSocket.OPEN ||
+        socket.readyState === WebSocket.CONNECTING)){
 
-    const filtered = rooms.filter(room =>
-        room.name.toLowerCase().includes(search)
-    );
-
-    if (!filtered.length) {
-        container.innerHTML =
-            "<p class='subtitle'>Aucun salon trouvé.</p>";
         return;
     }
+
+    socket =
+        new WebSocket(SERVER_URL);
+
+    socket.onmessage =
+        handleMessage;
+
+    socket.onclose =
+        function(){
+
+            console.log(
+                "Connexion serveur fermée"
+            );
+        };
+}
+
+
+function send(data){
+
+    if(
+        socket &&
+        socket.readyState === WebSocket.OPEN
+    ){
+
+        socket.send(
+            JSON.stringify(data)
+        );
+    }
+}
+
+
+/* =========================
+   SERVER MESSAGES
+========================= */
+
+function handleMessage(event){
+
+    let message;
+
+    try{
+
+        message =
+            JSON.parse(event.data);
+
+    }catch(error){
+
+        console.error(
+            "Message invalide",
+            event.data
+        );
+
+        return;
+    }
+
+
+    switch(message.type){
+
+        case "login-success":
+            handleLoginSuccess(message);
+            break;
+
+        case "login-error":
+            document
+                .getElementById("authMessage")
+                .textContent =
+                    message.message ||
+                    "Erreur de connexion.";
+            break;
+
+        case "rooms-list":
+            rooms =
+                message.rooms || [];
+            renderRooms();
+            break;
+
+        case "users-list":
+            allUsers =
+                message.users || [];
+            renderAdmin();
+            break;
+
+        case "user-updated":
+            updateUserInLists(
+                message.user
+            );
+            break;
+
+        case "room-created":
+            break;
+
+        case "room-joined":
+            handleRoomJoined(message);
+            break;
+
+        case "room-left":
+            handleRoomLeft();
+            break;
+
+        case "user-joined":
+            handleUserJoined(
+                message.user
+            );
+            break;
+
+        case "user-left":
+            handleUserLeft(
+                message.userId
+            );
+            break;
+
+        case "chat-message":
+            addChatMessage(message);
+            break;
+
+        case "offer":
+            receiveOffer(message);
+            break;
+
+        case "answer":
+            receiveAnswer(message);
+            break;
+
+        case "ice-candidate":
+            receiveCandidate(message);
+            break;
+
+        case "media-state":
+            handleRemoteMediaState(message);
+            break;
+
+        case "admin-action":
+            alert(
+                message.message ||
+                "Action effectuée."
+            );
+            break;
+
+        case "kicked":
+
+            alert(
+                message.message ||
+                "Vous avez été expulsé."
+            );
+
+            if(currentRoom){
+
+                closePeerConnections();
+                stopLocalMedia();
+
+                currentRoom = null;
+
+                showLobby();
+            }
+
+            break;
+
+        case "error":
+            alert(
+                message.message ||
+                "Une erreur est survenue."
+            );
+            break;
+    }
+}
+
+
+/* =========================
+   LOGIN SUCCESS
+========================= */
+
+function handleLoginSuccess(message){
+
+    currentUser =
+        message.user;
+
+    document
+        .getElementById("authScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("app")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("topUsername")
+        .textContent =
+            currentUser.username;
+
+    updateAvatar(
+        document.getElementById("topAvatar"),
+        currentUser
+    );
+
+    if(currentUser.role === "admin"){
+
+        document
+            .getElementById("adminButton")
+            .classList.remove("hidden");
+    }
+
+    renderRooms();
+}
+
+
+/* =========================
+   AVATAR
+========================= */
+
+function getInitials(user){
+
+    if(!user || !user.username)
+        return "?";
+
+    return user.username
+        .substring(0,2)
+        .toUpperCase();
+}
+
+
+function updateAvatar(element,user){
+
+    if(!element)
+        return;
+
+    element.textContent =
+        getInitials(user);
+}
+
+
+/* =========================
+   LOBBY
+========================= */
+
+function showLobby(){
+
+    document
+        .getElementById("roomScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("lobbyScreen")
+        .classList.remove("hidden");
+
+    renderRooms();
+}
+
+
+function renderRooms(){
+
+    const grid =
+        document.getElementById("roomsGrid");
+
+    const search =
+        document
+            .getElementById("roomSearch")
+            ?.value
+            .toLowerCase()
+            .trim() || "";
+
+    grid.innerHTML = "";
+
+    const filtered =
+        rooms.filter(room => {
+
+            return (
+                room.name
+                    .toLowerCase()
+                    .includes(search) ||
+
+                (room.description || "")
+                    .toLowerCase()
+                    .includes(search)
+            );
+        });
+
+
+    if(filtered.length === 0){
+
+        grid.innerHTML =
+            `<div style="color:var(--muted)">
+                Aucun salon trouvé.
+            </div>`;
+
+        return;
+    }
+
 
     filtered.forEach(room => {
 
-        const card = document.createElement("div");
-        card.className = "room-card";
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "room-card";
 
         card.innerHTML = `
-            <div class="room-title">
+
+            <div class="room-name">
                 ${escapeHtml(room.name)}
             </div>
 
-            <div class="room-count">
-                👥 ${room.count} participant(s)
+            <div class="room-description">
+                ${escapeHtml(
+                    room.description || ""
+                )}
             </div>
 
-            <button class="btn full">
-                Rejoindre
-            </button>
+            <div class="room-footer">
+
+                <span class="room-count">
+                    👥 ${room.count || 0}
+                </span>
+
+                <button
+                    class="join-btn"
+                    onclick="joinRoom('${room.id}')">
+                    Rejoindre
+                </button>
+
+            </div>
         `;
 
-        card.querySelector("button").onclick =
-            () => joinRoom(room.id);
-
-        container.appendChild(card);
+        grid.appendChild(card);
     });
 }
 
-function createRoom() {
-    const name = prompt("Nom du salon :");
 
-    if (!name || !name.trim()) return;
+/* =========================
+   CREATE ROOM
+========================= */
 
-    socket.send(JSON.stringify({
-        type: "create-room",
-        name: name.trim()
-    }));
+function openCreateRoom(){
+
+    document
+        .getElementById("newRoomName")
+        .value = "";
+
+    document
+        .getElementById("newRoomDescription")
+        .value = "";
+
+    document
+        .getElementById("createRoomModal")
+        .classList.remove("hidden");
 }
 
-async function joinRoom(roomId) {
-    try {
+
+function createRoom(){
+
+    const name =
+        document
+            .getElementById("newRoomName")
+            .value
+            .trim();
+
+    const description =
+        document
+            .getElementById("newRoomDescription")
+            .value
+            .trim();
+
+    if(!name){
+
+        alert(
+            "Indique un nom de salon."
+        );
+
+        return;
+    }
+
+    send({
+        type:"create-room",
+        name,
+        description
+    });
+
+    closeModal(
+        "createRoomModal"
+    );
+}
+
+
+/* =========================
+   JOIN ROOM
+========================= */
+
+async function joinRoom(roomId){
+
+    if(currentRoom)
+        return;
+
+    try{
+
         await prepareLocalMedia();
 
-        socket.send(JSON.stringify({
-            type: "join-room",
-            roomId
-        }));
+    }catch(error){
 
-    } catch {
-        // L'utilisateur a refusé les permissions.
+        console.error(error);
+
+        alert(
+            "Impossible d'accéder à la caméra/micro. Vérifie les autorisations du navigateur."
+        );
+
+        return;
     }
+
+    send({
+        type:"join-room",
+        roomId
+    });
 }
 
-async function handleRoomJoined(message) {
 
-    currentRoom = message.room;
+/* =========================
+   MEDIA
+========================= */
 
-    document.getElementById("lobbyScreen")
+async function prepareLocalMedia(){
+
+    if(localStream)
+        return;
+
+    localStream =
+        await navigator.mediaDevices.getUserMedia({
+            video:true,
+            audio:true
+        });
+
+    const videoTrack =
+        localStream.getVideoTracks()[0];
+
+    const audioTrack =
+        localStream.getAudioTracks()[0];
+
+    if(videoTrack)
+        videoTrack.enabled = false;
+
+    if(audioTrack)
+        audioTrack.enabled = false;
+
+    cameraEnabled = false;
+    microphoneEnabled = false;
+}
+
+
+/* =========================
+   ROOM JOINED
+========================= */
+
+async function handleRoomJoined(message){
+
+    currentRoom =
+        message.room;
+
+    document
+        .getElementById("lobbyScreen")
         .classList.add("hidden");
 
-    document.getElementById("roomScreen")
+    document
+        .getElementById("roomScreen")
         .classList.remove("hidden");
 
-    document.getElementById("currentRoomName")
-        .textContent = currentRoom.name;
-
-    document.getElementById("roomStatus")
+    document
+        .getElementById("roomTitle")
         .textContent =
-        `${message.participants.length + 1} participant(s)`;
+            currentRoom.name;
 
-    document.getElementById("videoGrid").innerHTML = "";
+    document
+        .getElementById("roomChat")
+        .innerHTML = "";
 
-    document.getElementById("roomChat").innerHTML = "";
+    document
+        .getElementById("videoGrid")
+        .innerHTML = "";
+
+    peerConnections.forEach(
+        pc => pc.close()
+    );
+
+    peerConnections.clear();
+
+    pendingIceCandidates.clear();
+
 
     addLocalVideo();
 
-    /*
-     * Le nouvel arrivant crée les connexions vers
-     * les personnes déjà présentes.
-     */
-    for (const participant of message.participants) {
+
+    const participants =
+        message.participants || [];
+
+
+    updateRoomStatus(
+        participants.length + 1
+    );
+
+
+    for(const participant of participants){
+
         addVideoUser(participant);
 
         await createConnectionToUser(
@@ -1194,96 +1879,12 @@ async function handleRoomJoined(message) {
     }
 }
 
-function leaveCurrentRoom() {
-
-    if (!currentRoom) return;
-
-    const roomName = currentRoom.name;
-
-    const confirmed = confirm(
-        `Voulez-vous vraiment quitter le salon "${roomName}" ?`
-    );
-
-    if (!confirmed) return;
-
-    if (socket &&
-        socket.readyState === WebSocket.OPEN) {
-
-        socket.send(JSON.stringify({
-            type: "leave-room"
-        }));
-    }
-
-    cleanupAfterLeaving();
-}
-
-function cleanupAfterLeaving() {
-
-    closePeerConnections();
-
-    if (localStream) {
-        localStream.getTracks().forEach(track => {
-            track.enabled = false;
-        });
-    }
-
-    currentRoom = null;
-
-    document.getElementById("videoGrid").innerHTML = "";
-    document.getElementById("roomChat").innerHTML = "";
-
-    document.getElementById("roomScreen")
-        .classList.add("hidden");
-
-    document.getElementById("lobbyScreen")
-        .classList.remove("hidden");
-}
-
 
 /* =========================
-   MEDIA
+   LOCAL VIDEO
 ========================= */
 
-async function prepareLocalMedia() {
-
-    if (localStream) return;
-
-    try {
-
-        localStream =
-            await navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: true
-            });
-
-        localStream.getAudioTracks()
-            .forEach(track => {
-                track.enabled = false;
-            });
-
-        localStream.getVideoTracks()
-            .forEach(track => {
-                track.enabled = false;
-            });
-
-        microphoneEnabled = false;
-        cameraEnabled = false;
-
-        updateControls();
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Autorisez l'accès à la caméra et au micro pour entrer dans un salon."
-        );
-
-        throw error;
-    }
-}
-
-function addLocalVideo() {
+function addLocalVideo(){
 
     const grid =
         document.getElementById("videoGrid");
@@ -1291,179 +1892,150 @@ function addLocalVideo() {
     const card =
         document.createElement("div");
 
-    card.className = "video-card";
-    card.id = "video-local";
+    card.className =
+        "video-card";
+
+    card.id =
+        "video-local";
 
     card.innerHTML = `
-        <video id="localVideo"
-               autoplay
-               muted
-               playsinline></video>
 
-        <div class="camera-off"
-             id="localCameraOff">
-            📷
+        <video
+            id="localVideo"
+            autoplay
+            muted
+            playsinline>
+        </video>
+
+        <div
+            id="localCameraOff"
+            class="camera-off">
+            📹
         </div>
 
         <div class="video-label">
-            Vous
+            ${escapeHtml(
+                currentUser.username
+            )} (Vous)
         </div>
     `;
 
     grid.appendChild(card);
 
-    document.getElementById("localVideo")
-        .srcObject = localStream;
+    const video =
+        document.getElementById(
+            "localVideo"
+        );
 
-    updateControls();
+    if(localStream){
+
+        video.srcObject =
+            localStream;
+    }
 }
 
-function toggleMicro() {
 
-    if (!localStream || currentUser?.muted) return;
+/* =========================
+   USER JOINED
+========================= */
 
-    microphoneEnabled = !microphoneEnabled;
+function handleUserJoined(user){
 
-    localStream.getAudioTracks()
-        .forEach(track => {
-            track.enabled = microphoneEnabled;
-        });
+    if(!user)
+        return;
 
-    sendMediaState();
+    if(
+        currentUser &&
+        user.id === currentUser.id
+    ){
 
-    updateControls();
-}
-
-function toggleCamera() {
-
-    if (!localStream || currentUser?.cameraDisabled) return;
-
-    cameraEnabled = !cameraEnabled;
-
-    localStream.getVideoTracks()
-        .forEach(track => {
-            track.enabled = cameraEnabled;
-        });
-
-    sendMediaState();
-
-    updateControls();
-}
-
-function sendMediaState() {
-
-    if (!socket ||
-        socket.readyState !== WebSocket.OPEN ||
-        !currentRoom) {
         return;
     }
 
-    socket.send(JSON.stringify({
-        type: "media-state",
-        microphone: microphoneEnabled,
-        camera: cameraEnabled
-    }));
+    addVideoUser(user);
+
+    updateRoomStatus(
+        document
+            .querySelectorAll(".video-card")
+            .length
+    );
+
+    /*
+       IMPORTANT :
+
+       Le nouvel utilisateur crée les offers
+       vers les utilisateurs déjà présents.
+
+       L'utilisateur déjà présent ne crée
+       donc PAS d'offer ici.
+
+       Cela évite les collisions WebRTC.
+    */
 }
 
-function updateControls() {
 
-    const micButton =
-        document.getElementById("micButton");
+/* =========================
+   ADD REMOTE VIDEO
+========================= */
 
-    const cameraButton =
-        document.getElementById("cameraButton");
+function addVideoUser(user){
 
-    const cameraOff =
-        document.getElementById("localCameraOff");
+    if(!user)
+        return;
 
-    if (!micButton || !cameraButton) return;
-
-    micButton.textContent =
-        microphoneEnabled ? "🎤" : "🔇";
-
-    micButton.classList.toggle(
-        "off",
-        !microphoneEnabled
-    );
-
-    micButton.disabled =
-        Boolean(currentUser?.muted);
-
-    cameraButton.textContent =
-        cameraEnabled ? "📹" : "📷";
-
-    cameraButton.classList.toggle(
-        "off",
-        !cameraEnabled
-    );
-
-    cameraButton.disabled =
-        Boolean(currentUser?.cameraDisabled);
-
-    if (cameraOff) {
-        cameraOff.classList.toggle(
-            "hidden",
-            cameraEnabled
+    const existing =
+        document.getElementById(
+            "video-" + user.id
         );
-    }
-}
 
-function applyForcedMicro(enabled) {
+    if(existing)
+        return;
 
-    microphoneEnabled = enabled;
+    const grid =
+        document.getElementById(
+            "videoGrid"
+        );
 
-    if (localStream) {
-        localStream.getAudioTracks()
-            .forEach(track => {
-                track.enabled = enabled;
-            });
-    }
+    if(!grid)
+        return;
 
-    currentUser.muted = !enabled;
+    const card =
+        document.createElement("div");
 
-    showModerationMessage(
-        enabled
-            ? "Votre micro a été réactivé."
-            : "Votre micro a été coupé par l'administrateur."
-    );
+    card.className =
+        "video-card";
 
-    updateControls();
-}
+    card.id =
+        "video-" + user.id;
 
-function applyForcedCamera(enabled) {
+    card.innerHTML = `
 
-    cameraEnabled = enabled;
+        <video
+            autoplay
+            playsinline>
+        </video>
 
-    if (localStream) {
-        localStream.getVideoTracks()
-            .forEach(track => {
-                track.enabled = enabled;
-            });
-    }
+        <div
+            class="video-avatar">
+            ${escapeHtml(
+                getInitials(user)
+            )}
+        </div>
 
-    currentUser.cameraDisabled = !enabled;
+        <div
+            class="camera-off"
+            style="display:none">
+            📹
+        </div>
 
-    showModerationMessage(
-        enabled
-            ? "Votre caméra a été réactivée."
-            : "Votre caméra a été coupée par l'administrateur."
-    );
+        <div class="video-label">
+            ${escapeHtml(
+                user.username
+            )}
+        </div>
+    `;
 
-    updateControls();
-}
-
-function showModerationMessage(message) {
-
-    const warning =
-        document.getElementById("moderationWarning");
-
-    warning.textContent = message;
-
-    warning.classList.add("visible");
-
-    setTimeout(() => {
-        warning.classList.remove("visible");
-    }, 3500);
+    grid.appendChild(card);
 }
 
 
@@ -1471,390 +2043,611 @@ function showModerationMessage(message) {
    WEBRTC
 ========================= */
 
-function rtcConfig() {
-
-    return {
-        iceServers: [
-            {
-                urls: "stun:stun.l.google.com:19302"
-            },
-            {
-                urls: "stun:stun1.l.google.com:19302"
-            }
-        ]
-    };
-}
-
-function setupPeerEvents(peer, userId) {
-
-    peer.onicecandidate = event => {
-
-        if (!event.candidate) return;
-
-        socket.send(JSON.stringify({
-            type: "ice-candidate",
-            targetId: userId,
-            candidate: event.candidate
-        }));
-    };
-
-    peer.ontrack = event => {
-
-        const card =
-            document.getElementById(`video-${userId}`);
-
-        if (!card) return;
-
-        const video =
-            card.querySelector("video");
-
-        if (!video) return;
-
-        if (event.streams && event.streams[0]) {
-            video.srcObject = event.streams[0];
-        } else {
-
-            if (!video.srcObject) {
-                video.srcObject =
-                    new MediaStream();
-            }
-
-            const stream =
-                video.srcObject;
-
-            if (!stream.getTracks()
-                .some(t => t.id === event.track.id)) {
-
-                stream.addTrack(event.track);
-            }
-        }
-
-        video.play().catch(() => {});
-    };
-
-    peer.onconnectionstatechange = () => {
-
-        if (
-            peer.connectionState === "failed" ||
-            peer.connectionState === "closed"
-        ) {
-            closePeerConnection(userId);
-        }
-    };
-}
-
-function createPeer(userId) {
-
-    const peer =
-        new RTCPeerConnection(rtcConfig());
-
-    peerConnections.set(userId, peer);
-
-    pendingCandidates.set(
-        userId,
-        []
-    );
-
-    if (localStream) {
-
-        localStream.getTracks()
-            .forEach(track => {
-
-                peer.addTrack(
-                    track,
-                    localStream
-                );
-            });
-    }
-
-    setupPeerEvents(
-        peer,
-        userId
-    );
-
-    return peer;
-}
-
 async function createConnectionToUser(
     user,
     createOffer
-) {
+){
 
-    if (!localStream) return;
+    if(!user)
+        return null;
 
-    let peer =
+    let pc =
         peerConnections.get(user.id);
 
-    if (!peer) {
-        peer = createPeer(user.id);
+    if(pc)
+        return pc;
+
+
+    pc =
+        new RTCPeerConnection({
+
+            iceServers:[
+                {
+                    urls:
+                        "stun:stun.l.google.com:19302"
+                }
+            ]
+
+        });
+
+
+    peerConnections.set(
+        user.id,
+        pc
+    );
+
+
+    if(localStream){
+
+        localStream
+            .getTracks()
+            .forEach(track => {
+
+                pc.addTrack(
+                    track,
+                    localStream
+                );
+
+            });
     }
 
-    if (!createOffer) return;
 
-    try {
+    pc.onicecandidate =
+        event => {
 
-        const offer =
-            await peer.createOffer();
+            if(
+                event.candidate
+            ){
 
-        await peer.setLocalDescription(
-            offer
-        );
+                send({
 
-        socket.send(JSON.stringify({
-            type: "offer",
-            targetId: user.id,
-            offer: peer.localDescription
-        }));
+                    type:"ice-candidate",
 
-    } catch (error) {
+                    target:user.id,
 
-        console.error(
-            "Erreur création offer:",
-            error
-        );
-    }
-}
+                    candidate:
+                        event.candidate
+                });
+            }
+        };
 
-async function receiveOffer(message) {
 
-    if (!localStream) return;
+    pc.ontrack =
+        event => {
 
-    let peer =
-        peerConnections.get(message.fromId);
+            const card =
+                document.getElementById(
+                    "video-" + user.id
+                );
 
-    if (!peer) {
-        peer = createPeer(message.fromId);
-    }
+            if(!card)
+                return;
 
-    try {
+            const video =
+                card.querySelector(
+                    "video"
+                );
 
-        await peer.setRemoteDescription(
-            new RTCSessionDescription(
-                message.offer
-            )
-        );
+            if(!video)
+                return;
 
-        await flushPendingCandidates(
-            message.fromId
-        );
+            if(
+                event.streams &&
+                event.streams[0]
+            ){
 
-        const answer =
-            await peer.createAnswer();
+                video.srcObject =
+                    event.streams[0];
 
-        await peer.setLocalDescription(
-            answer
-        );
+            }
+        };
 
-        socket.send(JSON.stringify({
-            type: "answer",
-            targetId: message.fromId,
-            answer: peer.localDescription
-        }));
 
-    } catch (error) {
+    pc.onconnectionstatechange =
+        () => {
 
-        console.error(
-            "Erreur réception offer:",
-            error
-        );
-    }
-}
-
-async function receiveAnswer(message) {
-
-    const peer =
-        peerConnections.get(message.fromId);
-
-    if (!peer) return;
-
-    try {
-
-        await peer.setRemoteDescription(
-            new RTCSessionDescription(
-                message.answer
-            )
-        );
-
-        await flushPendingCandidates(
-            message.fromId
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Erreur réception answer:",
-            error
-        );
-    }
-}
-
-async function receiveCandidate(message) {
-
-    if (!message.candidate) return;
-
-    let peer =
-        peerConnections.get(message.fromId);
-
-    if (!peer) {
-        peer = createPeer(message.fromId);
-    }
-
-    try {
-
-        if (
-            peer.remoteDescription &&
-            peer.remoteDescription.type
-        ) {
-
-            await peer.addIceCandidate(
-                new RTCIceCandidate(
-                    message.candidate
-                )
+            console.log(
+                "WebRTC",
+                user.username,
+                pc.connectionState
             );
 
-        } else {
+            if(
+                pc.connectionState ===
+                    "failed" ||
 
-            if (!pendingCandidates.has(
-                message.fromId
-            )) {
-                pendingCandidates.set(
-                    message.fromId,
-                    []
+                pc.connectionState ===
+                    "closed"
+            ){
+
+                removeVideoUser(
+                    user.id
                 );
             }
+        };
 
-            pendingCandidates
-                .get(message.fromId)
-                .push(message.candidate);
-        }
 
-    } catch (error) {
+    if(createOffer){
 
-        console.error(
-            "Erreur ICE:",
-            error
-        );
-    }
-}
+        try{
 
-async function flushPendingCandidates(userId) {
+            const offer =
+                await pc.createOffer();
 
-    const peer =
-        peerConnections.get(userId);
-
-    const candidates =
-        pendingCandidates.get(userId) || [];
-
-    if (!peer) return;
-
-    for (const candidate of candidates) {
-
-        try {
-
-            await peer.addIceCandidate(
-                new RTCIceCandidate(candidate)
+            await pc.setLocalDescription(
+                offer
             );
 
-        } catch (error) {
+            send({
+
+                type:"offer",
+
+                target:user.id,
+
+                offer
+            });
+
+        }catch(error){
 
             console.error(
-                "Erreur candidate:",
+                "Offer error:",
                 error
             );
         }
     }
 
-    pendingCandidates.set(
-        userId,
-        []
-    );
-}
 
-function closePeerConnection(userId) {
-
-    const peer =
-        peerConnections.get(userId);
-
-    if (peer) {
-        peer.close();
-        peerConnections.delete(userId);
-    }
-
-    pendingCandidates.delete(userId);
-}
-
-function closePeerConnections() {
-
-    for (const peer of peerConnections.values()) {
-        peer.close();
-    }
-
-    peerConnections.clear();
-    pendingCandidates.clear();
+    return pc;
 }
 
 
 /* =========================
-   VIDEOS DISTANTES
+   RECEIVE OFFER
 ========================= */
 
-function addVideoUser(user) {
+async function receiveOffer(message){
 
-    if (
-        document.getElementById(
-            `video-${user.id}`
-        )
-    ) {
+    if(!message.from)
+        return;
+
+
+    const user =
+        allUsers.find(
+            u => u.id === message.from
+        ) || {
+
+            id:message.from,
+            username:"Utilisateur"
+        };
+
+
+    addVideoUser(user);
+
+
+    let pc =
+        peerConnections.get(
+            message.from
+        );
+
+
+    if(!pc){
+
+        pc =
+            await createConnectionToUser(
+                user,
+                false
+            );
+    }
+
+
+    try{
+
+        await pc.setRemoteDescription(
+            new RTCSessionDescription(
+                message.offer
+            )
+        );
+
+
+        await flushIceCandidates(
+            message.from,
+            pc
+        );
+
+
+        const answer =
+            await pc.createAnswer();
+
+        await pc.setLocalDescription(
+            answer
+        );
+
+
+        send({
+
+            type:"answer",
+
+            target:message.from,
+
+            answer
+        });
+
+    }catch(error){
+
+        console.error(
+            "Offer receive error:",
+            error
+        );
+    }
+}
+
+
+/* =========================
+   RECEIVE ANSWER
+========================= */
+
+async function receiveAnswer(message){
+
+    const pc =
+        peerConnections.get(
+            message.from
+        );
+
+    if(!pc)
+        return;
+
+
+    try{
+
+        await pc.setRemoteDescription(
+            new RTCSessionDescription(
+                message.answer
+            )
+        );
+
+
+        await flushIceCandidates(
+            message.from,
+            pc
+        );
+
+    }catch(error){
+
+        console.error(
+            "Answer error:",
+            error
+        );
+    }
+}
+
+
+/* =========================
+   ICE
+========================= */
+
+async function receiveCandidate(message){
+
+    if(!message.from ||
+       !message.candidate)
+        return;
+
+
+    const pc =
+        peerConnections.get(
+            message.from
+        );
+
+
+    if(
+        !pc ||
+        !pc.remoteDescription
+    ){
+
+        if(
+            !pendingIceCandidates.has(
+                message.from
+            )
+        ){
+
+            pendingIceCandidates.set(
+                message.from,
+                []
+            );
+        }
+
+        pendingIceCandidates
+            .get(message.from)
+            .push(message.candidate);
+
         return;
     }
 
-    const card =
-        document.createElement("div");
 
-    card.className = "video-card";
-    card.id = `video-${user.id}`;
+    try{
 
-    card.innerHTML = `
-        <video autoplay playsinline></video>
+        await pc.addIceCandidate(
+            new RTCIceCandidate(
+                message.candidate
+            )
+        );
 
-        <button class="video-avatar">
-            <div class="avatar">
-                ${getAvatarHtml(user)}
-            </div>
-        </button>
+    }catch(error){
 
-        <div class="video-label">
-            ${escapeHtml(user.username)}
-        </div>
-    `;
-
-    card.querySelector(".video-avatar")
-        .onclick = () => {
-            openUserProfile(user.id);
-        };
-
-    document.getElementById("videoGrid")
-        .appendChild(card);
+        console.error(
+            "ICE error:",
+            error
+        );
+    }
 }
 
-function removeVideoUser(userId) {
+
+async function flushIceCandidates(
+    userId,
+    pc
+){
+
+    const candidates =
+        pendingIceCandidates.get(
+            userId
+        );
+
+    if(!candidates)
+        return;
+
+
+    for(const candidate of candidates){
+
+        try{
+
+            await pc.addIceCandidate(
+                new RTCIceCandidate(
+                    candidate
+                )
+            );
+
+        }catch(error){
+
+            console.error(
+                "Queued ICE error:",
+                error
+            );
+        }
+    }
+
+
+    pendingIceCandidates.delete(
+        userId
+    );
+}
+
+
+/* =========================
+   MEDIA CONTROLS
+========================= */
+
+function toggleMicro(){
+
+    if(!localStream)
+        return;
+
+    const tracks =
+        localStream.getAudioTracks();
+
+    if(tracks.length === 0)
+        return;
+
+    microphoneEnabled =
+        !microphoneEnabled;
+
+    tracks.forEach(
+        track => {
+            track.enabled =
+                microphoneEnabled;
+        }
+    );
+
+
+    updateControlButton(
+        "microBtn",
+        microphoneEnabled
+    );
+
+
+    send({
+
+        type:"media-state",
+
+        microphoneEnabled,
+
+        cameraEnabled
+    });
+}
+
+
+function toggleCamera(){
+
+    if(!localStream)
+        return;
+
+    const tracks =
+        localStream.getVideoTracks();
+
+    if(tracks.length === 0)
+        return;
+
+    cameraEnabled =
+        !cameraEnabled;
+
+    tracks.forEach(
+        track => {
+            track.enabled =
+                cameraEnabled;
+        }
+    );
+
+
+    updateControlButton(
+        "cameraBtn",
+        cameraEnabled
+    );
+
+
+    const localCamera =
+        document.getElementById(
+            "localCameraOff"
+        );
+
+    if(localCamera){
+
+        localCamera.style.display =
+            cameraEnabled
+                ? "none"
+                : "block";
+    }
+
+
+    send({
+
+        type:"media-state",
+
+        microphoneEnabled,
+
+        cameraEnabled
+    });
+}
+
+
+function updateControlButton(
+    id,
+    active
+){
+
+    const button =
+        document.getElementById(id);
+
+    if(!button)
+        return;
+
+    button.classList.toggle(
+        "active",
+        active
+    );
+}
+
+
+/* =========================
+   REMOTE MEDIA STATE
+========================= */
+
+function handleRemoteMediaState(message){
+
+    if(!message.userId)
+        return;
 
     const card =
         document.getElementById(
-            `video-${userId}`
+            "video-" + message.userId
         );
 
-    if (card) {
-        card.remove();
+    if(!card)
+        return;
+
+
+    const cameraOff =
+        card.querySelector(
+            ".camera-off"
+        );
+
+    if(cameraOff){
+
+        cameraOff.style.display =
+            message.cameraEnabled
+                ? "none"
+                : "block";
     }
 }
 
 
 /* =========================
-   CHAT
+   USER LEFT
 ========================= */
 
-function sendRoomChat(event) {
+function handleUserLeft(userId){
+
+    removeVideoUser(
+        userId
+    );
+
+    const pc =
+        peerConnections.get(
+            userId
+        );
+
+    if(pc){
+
+        pc.close();
+
+        peerConnections.delete(
+            userId
+        );
+    }
+
+    pendingIceCandidates.delete(
+        userId
+    );
+
+
+    updateRoomStatus(
+        document
+            .querySelectorAll(
+                ".video-card"
+            )
+            .length
+    );
+}
+
+
+function removeVideoUser(userId){
+
+    const card =
+        document.getElementById(
+            "video-" + userId
+        );
+
+    if(card)
+        card.remove();
+}
+
+
+/* =========================
+   ROOM STATUS
+========================= */
+
+function updateRoomStatus(count){
+
+    const element =
+        document.getElementById(
+            "roomStatus"
+        );
+
+    if(!element)
+        return;
+
+    element.textContent =
+        count +
+        (
+            count > 1
+                ? " participants"
+                : " participant"
+        );
+}
+
+
+/* =========================
+   ROOM CHAT
+========================= */
+
+function sendRoomChat(event){
 
     event.preventDefault();
 
@@ -1866,17 +2659,30 @@ function sendRoomChat(event) {
     const text =
         input.value.trim();
 
-    if (!text || !currentRoom) return;
+    if(!text)
+        return;
 
-    socket.send(JSON.stringify({
-        type: "chat",
-        text
-    }));
+    send({
+
+        type:"chat",
+
+        text,
+
+        roomId:
+            currentRoom
+                ? currentRoom.id
+                : null
+    });
 
     input.value = "";
 }
 
-function sendLobbyChat(event) {
+
+/* =========================
+   LOBBY CHAT
+========================= */
+
+function sendLobbyChat(event){
 
     event.preventDefault();
 
@@ -1888,66 +2694,100 @@ function sendLobbyChat(event) {
     const text =
         input.value.trim();
 
-    if (!text) return;
+    if(!text)
+        return;
 
-    socket.send(JSON.stringify({
-        type: "chat",
-        text
-    }));
+
+    send({
+
+        type:"chat",
+
+        text,
+
+        roomId:null
+    });
+
 
     input.value = "";
 }
 
-function addChatMessage(message) {
 
-    /*
-     * Les messages du lobby vont uniquement
-     * dans le chat du lobby.
-     *
-     * Les messages d'un salon vont uniquement
-     * dans le chat de ce salon.
-     */
+/* =========================
+   CHAT DISPLAY
+========================= */
 
-    let container = null;
+function addChatMessage(message){
 
-    if (message.roomId) {
+    const isRoomMessage =
+        message.roomId &&
+        currentRoom &&
+        message.roomId ===
+            currentRoom.id;
 
-        if (
-            currentRoom &&
-            currentRoom.id === message.roomId
-        ) {
-            container =
-                document.getElementById(
-                    "roomChat"
-                );
-        }
 
-    } else {
+    if(isRoomMessage){
 
-        container =
-            document.getElementById(
-                "lobbyChat"
-            );
+        appendChatMessage(
+            "roomChat",
+            message
+        );
+
+        return;
     }
 
-    if (!container) return;
 
-    const row =
+    if(!message.roomId){
+
+        appendChatMessage(
+            "lobbyChat",
+            message
+        );
+    }
+}
+
+
+function appendChatMessage(
+    containerId,
+    message
+){
+
+    const container =
+        document.getElementById(
+            containerId
+        );
+
+    if(!container)
+        return;
+
+
+    const element =
         document.createElement("div");
 
-    row.className = "chat-message";
+    element.className =
+        "chat-message";
 
-    row.innerHTML = `
+
+    element.innerHTML = `
+
         <div class="chat-author">
-            ${escapeHtml(message.user.username)}
+            ${escapeHtml(
+                message.username ||
+                "Utilisateur"
+            )}
         </div>
 
         <div class="chat-text">
-            ${escapeHtml(message.text)}
+            ${escapeHtml(
+                message.text || ""
+            )}
         </div>
     `;
 
-    container.appendChild(row);
+
+    container.appendChild(
+        element
+    );
+
 
     container.scrollTop =
         container.scrollHeight;
@@ -1955,638 +2795,707 @@ function addChatMessage(message) {
 
 
 /* =========================
-   PROFILS
+   LEAVE ROOM
 ========================= */
 
-function updateTopProfile() {
+function leaveCurrentRoom(){
 
-    document.getElementById(
-        "topUsername"
-    ).textContent =
-        currentUser.username;
+    if(!currentRoom)
+        return;
 
-    document.getElementById(
-        "topAvatar"
-    ).innerHTML =
-        getAvatarHtml(currentUser);
-}
 
-function openOwnProfile() {
-
-    viewedUser = currentUser;
-
-    document.getElementById(
-        "profileModalTitle"
-    ).textContent = "Mon profil";
-
-    document.getElementById(
-        "ownProfileFields"
-    ).classList.remove("hidden");
-
-    document.getElementById(
-        "viewedProfileDescription"
-    ).classList.add("hidden");
-
-    document.getElementById(
-        "profileAdminActions"
-    ).classList.add("hidden");
-
-    document.getElementById(
-        "saveProfileButton"
-    ).classList.remove("hidden");
-
-    document.getElementById(
-        "profileDescription"
-    ).value =
-        currentUser.profile?.description || "";
-
-    document.getElementById(
-        "profileAvatar"
-    ).innerHTML =
-        getAvatarHtml(currentUser);
-
-    document.getElementById(
-        "profileModal"
-    ).classList.remove("hidden");
-}
-
-function openUserProfile(userId) {
-
-    const user =
-        allUsers.find(
-            item => item.id === userId
-        ) ||
-        currentRoom?.participants?.find(
-            item => item.id === userId
+    const confirmed =
+        confirm(
+            `Voulez-vous vraiment quitter le salon "${currentRoom.name}" ?`
         );
 
-    if (!user) return;
 
-    viewedUser = user;
+    if(!confirmed)
+        return;
 
-    document.getElementById(
-        "profileModalTitle"
-    ).textContent =
-        user.username;
 
-    document.getElementById(
-        "ownProfileFields"
-    ).classList.add("hidden");
+    send({
+        type:"leave-room"
+    });
 
-    document.getElementById(
-        "saveProfileButton"
-    ).classList.add("hidden");
 
-    document.getElementById(
-        "viewedProfileDescription"
-    ).classList.remove("hidden");
+    closePeerConnections();
 
-    document.getElementById(
-        "viewedProfileDescription"
-    ).textContent =
-        user.profile?.description ||
-        "Aucune description.";
+    stopLocalMedia();
 
-    document.getElementById(
-        "profileAdminActions"
-    ).classList.toggle(
-        "hidden",
-        currentUser.role !== "admin"
-    );
 
-    document.getElementById(
-        "profileAvatar"
-    ).innerHTML =
-        getAvatarHtml(user);
+    currentRoom = null;
 
-    updateViewedUserButtons();
 
-    document.getElementById(
-        "profileModal"
-    ).classList.remove("hidden");
+    showLobby();
 }
 
-function closeProfileModal() {
 
-    document.getElementById(
-        "profileModal"
-    ).classList.add("hidden");
+function handleRoomLeft(){
+
+    closePeerConnections();
+
+    stopLocalMedia();
+
+    currentRoom = null;
+
+    showLobby();
 }
 
-function chooseAvatar() {
 
-    const picker =
-        document.getElementById(
-            "avatarPicker"
-        );
+function closePeerConnections(){
 
-    picker.removeAttribute("capture");
-    picker.click();
-}
+    peerConnections.forEach(
+        pc => {
 
-function takeAvatarPhoto() {
+            try{
+                pc.close();
+            }catch(error){}
 
-    const picker =
-        document.getElementById(
-            "avatarPicker"
-        );
-
-    picker.setAttribute(
-        "capture",
-        "user"
-    );
-
-    picker.click();
-}
-
-function processAvatar(event) {
-
-    const file =
-        event.target.files[0];
-
-    if (!file) return;
-
-    const reader =
-        new FileReader();
-
-    reader.onload = () => {
-
-        const image =
-            new Image();
-
-        image.onload = () => {
-
-            const canvas =
-                document.createElement(
-                    "canvas"
-                );
-
-            const size = 256;
-
-            canvas.width = size;
-            canvas.height = size;
-
-            const context =
-                canvas.getContext(
-                    "2d"
-                );
-
-            context.drawImage(
-                image,
-                0,
-                0,
-                size,
-                size
-            );
-
-            const avatar =
-                canvas.toDataURL(
-                    "image/jpeg",
-                    .72
-                );
-
-            currentUser.profile.avatar =
-                avatar;
-
-            document.getElementById(
-                "profileAvatar"
-            ).innerHTML =
-                getAvatarHtml(
-                    currentUser
-                );
-        };
-
-        image.src = reader.result;
-    };
-
-    reader.readAsDataURL(file);
-}
-
-function saveProfile() {
-
-    const description =
-        document.getElementById(
-            "profileDescription"
-        ).value.trim();
-
-    currentUser.profile.description =
-        description;
-
-    localStorage.setItem(
-        "colincall-profile",
-        JSON.stringify(
-            currentUser.profile
-        )
-    );
-
-    socket.send(JSON.stringify({
-        type: "update-profile",
-        description:
-            currentUser.profile.description,
-        avatar:
-            currentUser.profile.avatar
-    }));
-
-    updateTopProfile();
-
-    closeProfileModal();
-}
-
-function updateUserInLists(updatedUser) {
-
-    allUsers =
-        allUsers.map(user =>
-            user.id === updatedUser.id
-                ? updatedUser
-                : user
-        );
-
-    renderAdminPanel();
-
-    if (
-        currentRoom &&
-        updatedUser.id !== currentUser.id
-    ) {
-        const avatar =
-            document.querySelector(
-                `#video-${updatedUser.id} .avatar`
-            );
-
-        if (avatar) {
-            avatar.innerHTML =
-                getAvatarHtml(
-                    updatedUser
-                );
         }
-    }
+    );
+
+    peerConnections.clear();
+
+    pendingIceCandidates.clear();
 }
 
-function getAvatarHtml(user) {
 
-    if (user.profile?.avatar) {
+function stopLocalMedia(){
 
-        return `
-            <img
-                src="${user.profile.avatar}"
-                alt="Avatar">
-        `;
-    }
+    if(!localStream)
+        return;
 
-    return escapeHtml(
-        (user.username || "?")
-            .charAt(0)
-            .toUpperCase()
+
+    localStream
+        .getTracks()
+        .forEach(
+            track => track.stop()
+        );
+
+
+    localStream = null;
+
+    cameraEnabled = false;
+
+    microphoneEnabled = false;
+
+
+    updateControlButton(
+        "cameraBtn",
+        false
+    );
+
+    updateControlButton(
+        "microBtn",
+        false
     );
 }
 
 
 /* =========================
-   ADMINISTRATION
+   PROFILE
 ========================= */
 
-function openAdminPanel() {
+function openMyProfile(){
 
-    adminTab = "rooms";
+    viewedUser =
+        currentUser;
 
-    socket.send(JSON.stringify({
-        type: "get-users"
-    }));
+    document
+        .getElementById(
+            "myProfileForm"
+        )
+        .classList.remove(
+            "hidden"
+        );
 
-    renderAdminPanel();
+    document
+        .getElementById(
+            "profileAdminActions"
+        )
+        .classList.add(
+            "hidden"
+        );
 
-    document.getElementById(
-        "adminModal"
-    ).classList.remove("hidden");
+
+    document
+        .getElementById(
+            "profileNameInput"
+        )
+        .value =
+            currentUser.username || "";
+
+
+    document
+        .getElementById(
+            "profileDescriptionInput"
+        )
+        .value =
+            currentUser.description || "";
+
+
+    renderProfile(
+        currentUser
+    );
+
+
+    document
+        .getElementById(
+            "profileModal"
+        )
+        .classList.remove(
+            "hidden"
+        );
 }
 
-function closeAdminPanel() {
 
-    document.getElementById(
-        "adminModal"
-    ).classList.add("hidden");
+function openUserProfile(userId){
+
+    const user =
+        allUsers.find(
+            u => u.id === userId
+        );
+
+
+    if(!user)
+        return;
+
+
+    viewedUser =
+        user;
+
+
+    document
+        .getElementById(
+            "myProfileForm"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    if(currentUser.role === "admin"){
+
+        document
+            .getElementById(
+                "profileAdminActions"
+            )
+            .classList.remove(
+                "hidden"
+            );
+
+    }else{
+
+        document
+            .getElementById(
+                "profileAdminActions"
+            )
+            .classList.add(
+                "hidden"
+            );
+    }
+
+
+    renderProfile(
+        user
+    );
+
+
+    document
+        .getElementById(
+            "profileModal"
+        )
+        .classList.remove(
+            "hidden"
+        );
 }
 
-function showAdminTab(tab) {
 
-    adminTab = tab;
+function renderProfile(user){
 
-    renderAdminPanel();
+    updateAvatar(
+        document.getElementById(
+            "profileAvatar"
+        ),
+        user
+    );
+
+
+    document
+        .getElementById(
+            "profileName"
+        )
+        .textContent =
+            user.username || "";
+
+
+    document
+        .getElementById(
+            "profileDescription"
+        )
+        .textContent =
+            user.description ||
+            "Aucune description.";
 }
 
-function renderAdminPanel() {
+
+function saveProfile(){
+
+    const description =
+        document
+            .getElementById(
+                "profileDescriptionInput"
+            )
+            .value
+            .trim();
+
+
+    send({
+
+        type:"update-profile",
+
+        description
+    });
+}
+
+
+function updateUserInLists(updatedUser){
+
+    if(!updatedUser)
+        return;
+
+
+    const index =
+        allUsers.findIndex(
+            user =>
+                user.id ===
+                updatedUser.id
+        );
+
+
+    if(index >= 0){
+
+        allUsers[index] =
+            updatedUser;
+
+    }else{
+
+        allUsers.push(
+            updatedUser
+        );
+    }
+
+
+    if(
+        currentUser &&
+        updatedUser.id ===
+            currentUser.id
+    ){
+
+        currentUser =
+            updatedUser;
+
+
+        document
+            .getElementById(
+                "topUsername"
+            )
+            .textContent =
+                currentUser.username;
+
+
+        updateAvatar(
+            document.getElementById(
+                "topAvatar"
+            ),
+            currentUser
+        );
+
+
+        if(
+            !document
+                .getElementById(
+                    "profileModal"
+                )
+                .classList.contains(
+                    "hidden"
+                )
+        ){
+
+            renderProfile(
+                currentUser
+            );
+        }
+    }
+
+
+    renderAdmin();
+}
+
+
+/* =========================
+   ADMIN
+========================= */
+
+function openAdmin(){
+
+    adminTab = "users";
+
+    setAdminTab(
+        "users"
+    );
+
+    document
+        .getElementById(
+            "adminModal"
+        )
+        .classList.remove(
+            "hidden"
+        );
+}
+
+
+function setAdminTab(tab){
+
+    adminTab =
+        tab;
+
+
+    document
+        .getElementById(
+            "adminUsersTab"
+        )
+        .classList.toggle(
+            "active",
+            tab === "users"
+        );
+
+
+    document
+        .getElementById(
+            "adminRoomsTab"
+        )
+        .classList.toggle(
+            "active",
+            tab === "rooms"
+        );
+
+
+    renderAdmin();
+}
+
+
+function renderAdmin(){
 
     const content =
         document.getElementById(
             "adminContent"
         );
 
-    const modal =
-        document.getElementById(
-            "adminModal"
-        );
 
-    if (
-        !content ||
-        modal.classList.contains("hidden")
-    ) {
+    if(!content)
         return;
-    }
 
-    const search =
-        document.getElementById(
-            "adminSearch"
-        ).value.toLowerCase();
 
-    content.innerHTML = "";
+    if(adminTab === "users"){
 
-    if (adminTab === "rooms") {
+        content.innerHTML = "";
 
-        const filteredRooms =
-            rooms.filter(room =>
-                room.name
-                    .toLowerCase()
-                    .includes(search)
-            );
 
-        const list =
-            document.createElement(
-                "div"
-            );
+        allUsers.forEach(user => {
 
-        list.className =
-            "admin-list";
-
-        filteredRooms.forEach(room => {
-
-            const row =
+            const item =
                 document.createElement(
                     "div"
                 );
 
-            row.className =
-                "admin-row";
+            item.className =
+                "admin-item";
 
-            row.innerHTML = `
-                <div>
-                    <strong>
-                        ${escapeHtml(room.name)}
-                    </strong>
 
-                    <div class="subtitle"
-                         style="margin:5px 0 0;">
-                        ${room.count}
-                        participant(s)
+            item.innerHTML = `
+
+                <div class="admin-item-header">
+
+                    <div class="admin-item-name">
+                        ${escapeHtml(
+                            user.username
+                        )}
                     </div>
-                </div>
 
-                <div class="admin-row-actions">
-                    <button class="danger">
-                        Supprimer
-                    </button>
-                </div>
-            `;
-
-            row.querySelector("button")
-                .onclick = () => {
-
-                    if (
-                        !confirm(
-                            `Supprimer le salon "${room.name}" ?`
-                        )
-                    ) return;
-
-                    socket.send(
-                        JSON.stringify({
-                            type:
-                                "admin-delete-room",
-                            roomId:
-                                room.id
-                        })
-                    );
-                };
-
-            list.appendChild(row);
-        });
-
-        content.appendChild(list);
-    }
-
-    if (adminTab === "users") {
-
-        const filteredUsers =
-            allUsers.filter(user =>
-                user.username
-                    .toLowerCase()
-                    .includes(search)
-            );
-
-        const list =
-            document.createElement(
-                "div"
-            );
-
-        list.className =
-            "admin-list";
-
-        filteredUsers.forEach(user => {
-
-            if (
-                currentUser &&
-                user.id === currentUser.id
-            ) {
-                return;
-            }
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-            row.className =
-                "admin-row";
-
-            row.innerHTML = `
-                <div>
-                    <strong>
-                        ${escapeHtml(user.username)}
-                    </strong>
-
-                    <div class="subtitle"
-                         style="margin:5px 0 0;">
-                        ${
-                            user.roomId
-                                ? "Dans un salon"
-                                : "Dans le lobby"
-                        }
+                    <div style="color:var(--muted);font-size:12px">
+                        ${user.roomId
+                            ? "En salon"
+                            : "Lobby"}
                     </div>
+
                 </div>
 
-                <div class="admin-row-actions">
+                <div class="admin-actions">
 
-                    <button class="mute-button">
-                        ${
-                            user.muted
-                                ? "Réactiver micro"
-                                : "Couper micro"
-                        }
+                    <button
+                        class="small-btn"
+                        onclick="openUserProfile('${user.id}')">
+                        Profil
                     </button>
 
-                    <button class="camera-button">
-                        ${
-                            user.cameraDisabled
-                                ? "Réactiver caméra"
-                                : "Couper caméra"
-                        }
+                    <button
+                        class="small-btn"
+                        onclick="adminMute('${user.id}')">
+                        🎤 Mute
                     </button>
 
-                    <button class="kick-button">
+                    <button
+                        class="small-btn"
+                        onclick="adminCamera('${user.id}')">
+                        📹 Caméra
+                    </button>
+
+                    <button
+                        class="small-btn danger"
+                        onclick="adminKick('${user.id}')">
                         Expulser
                     </button>
 
                 </div>
             `;
 
-            row.querySelector(
-                ".mute-button"
-            ).onclick = () => {
 
-                socket.send(
-                    JSON.stringify({
-                        type: "admin-mute",
-                        userId: user.id,
-                        muted: !user.muted
-                    })
-                );
-            };
-
-            row.querySelector(
-                ".camera-button"
-            ).onclick = () => {
-
-                socket.send(
-                    JSON.stringify({
-                        type: "admin-camera",
-                        userId: user.id,
-                        disabled:
-                            !user.cameraDisabled
-                    })
-                );
-            };
-
-            row.querySelector(
-                ".kick-button"
-            ).onclick = () => {
-
-                if (
-                    confirm(
-                        `Expulser ${user.username} ?`
-                    )
-                ) {
-                    socket.send(
-                        JSON.stringify({
-                            type: "admin-kick",
-                            userId: user.id
-                        })
-                    );
-                }
-            };
-
-            list.appendChild(row);
+            content.appendChild(
+                item
+            );
         });
 
-        content.appendChild(list);
+
+        if(allUsers.length === 0){
+
+            content.innerHTML =
+                `<div style="color:var(--muted)">
+                    Aucun utilisateur.
+                </div>`;
+        }
+
+
+        return;
+    }
+
+
+    if(adminTab === "rooms"){
+
+        content.innerHTML = "";
+
+
+        rooms.forEach(room => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "admin-item";
+
+
+            item.innerHTML = `
+
+                <div class="admin-item-header">
+
+                    <div class="admin-item-name">
+                        ${escapeHtml(
+                            room.name
+                        )}
+                    </div>
+
+                    <div style="color:var(--muted);font-size:12px">
+                        👥 ${room.count || 0}
+                    </div>
+
+                </div>
+
+                <div style="color:var(--muted);margin-top:6px">
+                    ${escapeHtml(
+                        room.description || ""
+                    )}
+                </div>
+
+                <div class="admin-actions">
+
+                    <button
+                        class="small-btn danger"
+                        onclick="adminDeleteRoom('${room.id}')">
+                        🗑️ Supprimer
+                    </button>
+
+                </div>
+            `;
+
+
+            content.appendChild(
+                item
+            );
+        });
+
+
+        if(rooms.length === 0){
+
+            content.innerHTML =
+                `<div style="color:var(--muted)">
+                    Aucun salon.
+                </div>`;
+        }
     }
 }
 
-function updateViewedUserButtons() {
 
-    if (!viewedUser) return;
+function adminMute(userId){
 
-    document.getElementById(
-        "profileMuteButton"
-    ).textContent =
-        viewedUser.muted
-            ? "Réactiver le micro"
-            : "Couper le micro";
+    send({
 
-    document.getElementById(
-        "profileCameraButton"
-    ).textContent =
-        viewedUser.cameraDisabled
-            ? "Réactiver la caméra"
-            : "Couper la caméra";
+        type:"admin-mute",
+
+        userId
+    });
 }
 
-function toggleViewedMute() {
 
-    if (!viewedUser) return;
+function adminCamera(userId){
 
-    const newState =
-        !viewedUser.muted;
+    send({
 
-    socket.send(JSON.stringify({
-        type: "admin-mute",
-        userId: viewedUser.id,
-        muted: newState
-    }));
+        type:"admin-camera",
 
-    viewedUser.muted = newState;
-
-    updateViewedUserButtons();
+        userId
+    });
 }
 
-function toggleViewedCamera() {
 
-    if (!viewedUser) return;
+function adminKick(userId){
 
-    const newState =
-        !viewedUser.cameraDisabled;
+    if(
+        !confirm(
+            "Expulser cet utilisateur ?"
+        )
+    )
+        return;
 
-    socket.send(JSON.stringify({
-        type: "admin-camera",
-        userId: viewedUser.id,
-        disabled: newState
-    }));
 
-    viewedUser.cameraDisabled =
-        newState;
+    send({
 
-    updateViewedUserButtons();
+        type:"admin-kick",
+
+        userId
+    });
 }
 
-function kickViewedUser() {
 
-    if (!viewedUser) return;
+function adminDeleteRoom(roomId){
 
-    socket.send(JSON.stringify({
-        type: "admin-kick",
-        userId: viewedUser.id
-    }));
+    if(
+        !confirm(
+            "Supprimer définitivement ce salon ?"
+        )
+    )
+        return;
 
-    closeProfileModal();
+
+    send({
+
+        type:"admin-delete-room",
+
+        roomId
+    });
+}
+
+
+function toggleViewedMute(){
+
+    if(!viewedUser)
+        return;
+
+    adminMute(
+        viewedUser.id
+    );
+}
+
+
+function toggleViewedCamera(){
+
+    if(!viewedUser)
+        return;
+
+    adminCamera(
+        viewedUser.id
+    );
+}
+
+
+function kickViewedUser(){
+
+    if(!viewedUser)
+        return;
+
+    adminKick(
+        viewedUser.id
+    );
 }
 
 
 /* =========================
-   UTILITAIRES
+   MODAL
 ========================= */
 
-function escapeHtml(value) {
+function closeModal(id){
 
-    return String(value || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    document
+        .getElementById(id)
+        .classList.add(
+            "hidden"
+        );
 }
 
 
 /* =========================
-   DÉMARRAGE
+   UTIL
 ========================= */
 
-connectSocket();
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+
+/* =========================
+   KEYBOARD
+========================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(
+            event.key === "Escape"
+        ){
+
+            document
+                .querySelectorAll(
+                    ".modal-overlay"
+                )
+                .forEach(
+                    modal =>
+                        modal.classList.add(
+                            "hidden"
+                        )
+                );
+        }
+    }
+);
+
 </script>
 
 </body>
