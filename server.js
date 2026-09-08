@@ -1,5 +1,6 @@
 const http = require("http");
 const WebSocket = require("ws");
+const crypto = require("crypto");
 
 const PORT = process.env.PORT || 10000;
 
@@ -11,13 +12,13 @@ const server = http.createServer((req, res) => {
 
   res.end(JSON.stringify({
     status: "online",
-    service: "Chatroulette WebRTC Server"
+    service: "Vibe Rooms"
   }));
 });
 
 const wss = new WebSocket.Server({ server });
 
-const waiting = [];
+const rooms = new Map();
 const clients = new Map();
 
 function send(ws, data) {
@@ -26,93 +27,64 @@ function send(ws, data) {
   }
 }
 
-function removeFromWaiting(ws) {
-  const index = waiting.indexOf(ws);
+function broadcast(room, data, except = null) {
+  if (!room) return;
 
-  if (index !== -1) {
-    waiting.splice(index, 1);
+  for (const client of room) {
+    if (client !== except) {
+      send(client, data);
+    }
   }
 }
 
-function findPartner(ws) {
-  while (waiting.length > 0) {
-    const candidate = waiting.shift();
+function getRoom(roomId) {
+  if (!rooms.has(roomId)) {
+    rooms.set(roomId, new Set());
+  }
 
-    if (
-      candidate !== ws &&
-      candidate.readyState === WebSocket.OPEN &&
-      !candidate.partner
-    ) {
-      return candidate;
+  return rooms.get(roomId);
+}
+
+function removeClient(ws) {
+  const info = clients.get(ws);
+
+  if (!info) return;
+
+  const room = rooms.get(info.roomId);
+
+  if (room) {
+    room.delete(ws);
+
+    broadcast(room, {
+      type: "user-left",
+      userId: info.userId
+    }, ws);
+
+    if (room.size === 0) {
+      rooms.delete(info.roomId);
     }
   }
 
-  return null;
+  clients.delete(ws);
 }
 
-function match(ws) {
-  removeFromWaiting(ws);
+wss.on("connection", ws => {
 
-  if (ws.partner) {
-    return;
-  }
-
-  const partner = findPartner(ws);
-
-  if (!partner) {
-    waiting.push(ws);
-
-    send(ws, {
-      type: "searching"
-    });
-
-    return;
-  }
-
-  ws.partner = partner;
-  partner.partner = ws;
-
-  send(ws, {
-    type: "matched",
-    initiator: true
-  });
-
-  send(partner, {
-    type: "matched",
-    initiator: false
-  });
-}
-
-function disconnectPartner(ws) {
-  const partner = ws.partner;
-
-  if (!partner) {
-    return;
-  }
-
-  ws.partner = null;
-
-  if (partner.partner === ws) {
-    partner.partner = null;
-
-    send(partner, {
-      type: "peer-left"
-    });
-  }
-}
-
-wss.on("connection", (ws) => {
-  ws.partner = null;
+  const userId = crypto.randomUUID();
 
   clients.set(ws, {
-    connectedAt: Date.now()
+    userId,
+    roomId: null,
+    name: "Invité"
   });
 
   send(ws, {
-    type: "connected"
+    type: "connected",
+    userId
   });
 
-  ws.on("message", (raw) => {
+  ws.on("message", raw => {
+
     let message;
 
     try {
@@ -121,59 +93,167 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    switch (message.type) {
-      case "join":
-        match(ws);
-        break;
+    const info = clients.get(ws);
 
-      case "next":
-        disconnectPartner(ws);
-        match(ws);
-        break;
+    if (!info) return;
 
-      case "offer":
-      case "answer":
-      case "ice-candidate":
-      case "chat":
-        if (ws.partner) {
-          send(ws.partner, {
-            type: message.type,
-            data: message.data
-          });
-        }
-        break;
+    /*
+    --------------------------------------------------
+    JOIN ROOM
+    --------------------------------------------------
+    */
 
-      case "report":
-        console.log("Report received");
+    if (message.type === "join-room") {
 
-        if (ws.partner) {
-          send(ws.partner, {
-            type: "reported"
-          });
-        }
+      const roomId =
+        String(message.roomId || "general")
+          .slice(0, 50);
 
-        break;
+      const name =
+        String(message.name || "Invité")
+          .slice(0, 30);
 
-      case "leave":
-        removeFromWaiting(ws);
-        disconnectPartner(ws);
-        break;
+      if (info.roomId) {
+        removeClient(ws);
+      }
+
+      info.roomId = roomId;
+      info.name = name;
+
+      const room = getRoom(roomId);
+
+      /*
+      Envoyer les utilisateurs déjà présents
+      au nouvel utilisateur.
+      */
+
+      for (const other of room) {
+
+        const otherInfo =
+          clients.get(other);
+
+        if (!otherInfo) continue;
+
+        send(ws, {
+          type: "user-joined",
+          userId: otherInfo.userId,
+          name: otherInfo.name,
+          existing: true
+        });
+      }
+
+      room.add(ws);
+
+      /*
+      Prévenir les autres
+      */
+
+      broadcast(room, {
+        type: "user-joined",
+        userId,
+        name
+      }, ws);
+
+      send(ws, {
+        type: "room-joined",
+        roomId,
+        count: room.size
+      });
+
+      return;
     }
+
+    /*
+    --------------------------------------------------
+    WEBRTC SIGNALING
+    --------------------------------------------------
+    */
+
+    if (
+      message.type === "offer" ||
+      message.type === "answer" ||
+      message.type === "ice-candidate"
+    ) {
+
+      const target =
+        [...clients.entries()]
+          .find(([client]) => {
+            const clientInfo =
+              clients.get(client);
+
+            return (
+              clientInfo &&
+              clientInfo.userId === message.target
+            );
+          });
+
+      if (!target) return;
+
+      send(target[0], {
+        type: message.type,
+        from: info.userId,
+        name: info.name,
+        data: message.data
+      });
+
+      return;
+    }
+
+    /*
+    --------------------------------------------------
+    CHAT
+    --------------------------------------------------
+    */
+
+    if (message.type === "chat") {
+
+      const room =
+        rooms.get(info.roomId);
+
+      if (!room) return;
+
+      const text =
+        String(message.text || "")
+          .trim()
+          .slice(0, 500);
+
+      if (!text) return;
+
+      broadcast(room, {
+        type: "chat",
+        userId: info.userId,
+        name: info.name,
+        text,
+        timestamp: Date.now()
+      });
+
+      return;
+    }
+
+    /*
+    --------------------------------------------------
+    LEAVE
+    --------------------------------------------------
+    */
+
+    if (message.type === "leave") {
+      removeClient(ws);
+    }
+
   });
 
   ws.on("close", () => {
-    removeFromWaiting(ws);
-    disconnectPartner(ws);
-    clients.delete(ws);
+    removeClient(ws);
   });
 
   ws.on("error", () => {
-    removeFromWaiting(ws);
-    disconnectPartner(ws);
-    clients.delete(ws);
+    removeClient(ws);
   });
+
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(
+    `Vibe server running on port ${PORT}`
+  );
 });
