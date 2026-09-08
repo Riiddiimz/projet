@@ -414,15 +414,38 @@ button{
 
 .chat-sidebar,
 .room-chat{
-    width:340px;
-    flex:0 0 340px;
     background:var(--panel);
-    border-left:1px solid var(--border);
+    border:1px solid var(--border);
     display:flex;
     flex-direction:column;
     min-height:0;
-    position:relative;
-    z-index:30;
+    z-index:80;
+
+    /*
+       Fenêtre de chat flottante, repliable, identique en
+       comportement sur PC et mobile : fermée par défaut,
+       ouverte/baissée via le bouton dédié.
+    */
+    position:fixed;
+    right:16px;
+    bottom:78px;
+    left:auto;
+    width:min(360px,calc(100vw - 28px));
+    height:min(560px,72dvh);
+    border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    transform:translateY(16px) scale(.97);
+    opacity:0;
+    pointer-events:none;
+    transform-origin:bottom right;
+    transition:transform .18s ease,opacity .18s ease;
+}
+
+.chat-sidebar.mobile-open,
+.room-chat.mobile-open{
+    transform:translateY(0) scale(1);
+    opacity:1;
+    pointer-events:auto;
 }
 
 .chat-header{
@@ -440,7 +463,7 @@ button{
 }
 
 .chat-close{
-    display:none;
+    display:block;
     border:0;
     background:transparent;
     color:var(--muted);
@@ -521,9 +544,11 @@ button{
 ========================= */
 
 .mobile-chat-toggle{
-    display:none;
+    display:none; /* JS bascule flex/none selon l'écran (connexion / lobby / salon) */
+    align-items:center;
+    justify-content:center;
     position:fixed;
-    z-index:45;
+    z-index:81;
     bottom:max(14px,env(safe-area-inset-bottom));
     height:45px;
     border:1px solid var(--border);
@@ -1478,20 +1503,22 @@ button{
     onclick="closeMobileChat()"
 ></div>
 
-<!-- BOUTON CHAT GENERAL MOBILE -->
+<!-- BOUTON CHAT GENERAL -->
 <button
     id="generalChatToggle"
     class="mobile-chat-toggle general"
     onclick="toggleLobbyChat()"
+    style="display:none;"
 >
     💬 Général
 </button>
 
-<!-- BOUTON CHAT SALON MOBILE -->
+<!-- BOUTON CHAT SALON -->
 <button
     id="roomChatToggle"
     class="mobile-chat-toggle room"
     onclick="toggleRoomChat()"
+    style="display:none;"
 >
     💬 Chat
     <span id="roomChatUnreadMobile" class="chat-badge">0</span>
@@ -1868,6 +1895,9 @@ function logout(){
     closeAdmin();
     closeMobileChat();
 
+    document.getElementById("generalChatToggle").style.display = "none";
+    document.getElementById("roomChatToggle").style.display = "none";
+
     app.style.display = "none";
     authScreen.style.display = "flex";
 
@@ -2004,9 +2034,7 @@ function showLobby(){
     lobbyScreen.style.display = "flex";
     roomScreen.style.display = "none";
 
-    document.getElementById("generalChatToggle").style.display =
-        window.innerWidth <= 700 ? "flex" : "none";
-
+    document.getElementById("generalChatToggle").style.display = "flex";
     document.getElementById("roomChatToggle").style.display = "none";
 
     renderRooms();
@@ -2100,13 +2128,18 @@ function createRoom(){
     });
 }
 
-function joinRoom(roomId){
+async function joinRoom(roomId){
 
     if(!currentUser) return;
 
     closeMobileChat();
 
-    prepareLocalMedia();
+    // On attend que le flux local (micro/caméra, désactivés par
+    // défaut) soit prêt AVANT de rejoindre le salon. Sinon les
+    // connexions WebRTC créées à la réception de "room-joined"
+    // démarrent sans piste média, et la vidéo ne se met jamais
+    // à jour ensuite (pas de renégociation automatique).
+    await prepareLocalMedia();
 
     send({
         type:"join-room",
@@ -2172,9 +2205,7 @@ function handleRoomJoined(message){
     roomScreen.style.display = "flex";
 
     document.getElementById("generalChatToggle").style.display = "none";
-
-    document.getElementById("roomChatToggle").style.display =
-        window.innerWidth <= 700 ? "flex" : "none";
+    document.getElementById("roomChatToggle").style.display = "flex";
 
     document.getElementById("roomName").textContent =
         currentRoom.name || "Salon";
@@ -2854,11 +2885,8 @@ function leaveCurrentRoom(){
     roomScreen.style.display = "none";
     lobbyScreen.style.display = "flex";
 
-    document.getElementById("generalChatToggle").style.display =
-        window.innerWidth <= 700 ? "flex" : "none";
-
-    document.getElementById("roomChatToggle").style.display =
-        "none";
+    document.getElementById("generalChatToggle").style.display = "flex";
+    document.getElementById("roomChatToggle").style.display = "none";
 
     renderRooms();
 }
@@ -2884,11 +2912,8 @@ function forceLeaveRoom(message){
     roomScreen.style.display = "none";
     lobbyScreen.style.display = "flex";
 
-    document.getElementById("generalChatToggle").style.display =
-        window.innerWidth <= 700 ? "flex" : "none";
-
-    document.getElementById("roomChatToggle").style.display =
-        "none";
+    document.getElementById("generalChatToggle").style.display = "flex";
+    document.getElementById("roomChatToggle").style.display = "none";
 
     if(message?.message){
         alert(message.message);
@@ -3735,42 +3760,9 @@ window.addEventListener("resize",() => {
 
     if(!currentUser) return;
 
-    const mobile =
-        window.innerWidth <= 700;
-
-    if(
-        !mobile &&
-        (
-            lobbyChat.classList.contains("mobile-open") ||
-            roomChat.classList.contains("mobile-open")
-        )
-    ){
-        closeMobileChat();
-    }
-
-    if(currentRoom){
-
-        document.getElementById(
-            "roomChatToggle"
-        ).style.display =
-            mobile ? "flex" : "none";
-
-        document.getElementById(
-            "generalChatToggle"
-        ).style.display = "none";
-
-    }else{
-
-        document.getElementById(
-            "generalChatToggle"
-        ).style.display =
-            mobile ? "flex" : "none";
-
-        document.getElementById(
-            "roomChatToggle"
-        ).style.display = "none";
-    }
-
+    // Le comportement des fenêtres de chat est désormais identique
+    // sur PC et mobile (fenêtre flottante repliable) : rien à
+    // recalculer ici à part la grille vidéo.
     updateVideoGridLayout();
 });
 
