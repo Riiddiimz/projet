@@ -1,7 +1,7 @@
 {
-  "name": "colincall-server",
+  "name": "colincall",
   "version": "1.0.0",
-  "description": "Serveur WebRTC Col'inCall",
+  "description": "Serveur Col'inCall",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
