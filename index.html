@@ -4,14 +4,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <meta name="theme-color" content="#08090d">
 
-<title>ASCII Studio</title>
+<title>Giant Lens</title>
 
 <style>
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 * {
     box-sizing: border-box;
@@ -21,11 +19,10 @@
 
 :root {
     --bg: #08090d;
-    --card: rgba(255,255,255,0.055);
-    --border: rgba(255,255,255,0.09);
+    --card: rgba(255,255,255,.055);
+    --border: rgba(255,255,255,.09);
     --text: #f7f7f8;
-    --muted: #8e919b;
-    --accent: #ffffff;
+    --muted: #858995;
 }
 
 body {
@@ -33,509 +30,283 @@ body {
     background:
         radial-gradient(
             circle at 50% -10%,
-            rgba(130, 100, 255, .18),
+            rgba(120,90,255,.20),
             transparent 35%
         ),
-        radial-gradient(
-            circle at 100% 70%,
-            rgba(0, 200, 255, .08),
-            transparent 30%
-        ),
-        var(--bg);
+        #08090d;
 
     color: var(--text);
     font-family: Inter, sans-serif;
-
-    overflow-x: hidden;
 }
-
-
-/* ==============================
-   APP
-============================== */
 
 .app {
     width: 100%;
-    max-width: 1100px;
+    max-width: 1000px;
     margin: auto;
-    padding: 30px 20px 60px;
+    padding: 25px 16px 50px;
 }
 
+/* HEADER */
 
-/* ==============================
-   HEADER
-============================== */
-
-.header {
+header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-
-    margin-bottom: 28px;
+    margin-bottom: 30px;
 }
 
 .logo {
     display: flex;
     align-items: center;
-    gap: 12px;
-
-    font-size: 20px;
+    gap: 11px;
     font-weight: 800;
-    letter-spacing: -0.5px;
+    font-size: 19px;
 }
 
 .logo-icon {
     width: 40px;
     height: 40px;
-
     display: grid;
     place-items: center;
+    border-radius: 13px;
 
-    border-radius: 12px;
+    background: white;
+    color: black;
 
-    background: linear-gradient(
-        135deg,
-        #ffffff,
-        #aaa
-    );
-
-    color: #08090d;
-
-    box-shadow:
-        0 8px 30px rgba(255,255,255,.12);
+    font-size: 20px;
 }
 
 .badge {
-    padding: 8px 12px;
-
-    border-radius: 999px;
-
-    background: rgba(255,255,255,.05);
     border: 1px solid var(--border);
-
+    background: var(--card);
     color: var(--muted);
 
-    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 999px;
+
+    font-size: 11px;
 }
 
-
-/* ==============================
-   HERO
-============================== */
+/* HERO */
 
 .hero {
     margin-bottom: 25px;
 }
 
 .hero h1 {
-    font-size: clamp(34px, 6vw, 64px);
-
+    font-size: clamp(40px, 7vw, 68px);
     line-height: .95;
-
-    letter-spacing: -3px;
-
+    letter-spacing: -4px;
     margin-bottom: 14px;
 }
 
 .hero h1 span {
-    background: linear-gradient(
-        90deg,
-        #fff,
-        #888
-    );
-
-    -webkit-background-clip: text;
-    background-clip: text;
-
-    color: transparent;
+    color: #8c7cff;
 }
 
 .hero p {
     color: var(--muted);
-
-    font-size: 15px;
-
-    max-width: 520px;
-
+    font-size: 14px;
     line-height: 1.6;
 }
 
-
-/* ==============================
-   MAIN GRID
-============================== */
+/* GRID */
 
 .workspace {
-
     display: grid;
-
-    grid-template-columns:
-        minmax(0, 1fr)
-        minmax(0, 1fr);
-
+    grid-template-columns: 1fr 1fr;
     gap: 18px;
 }
 
-
-/* ==============================
-   CARDS
-============================== */
+/* CARD */
 
 .card {
-
     background: var(--card);
-
     border: 1px solid var(--border);
-
     border-radius: 24px;
+    overflow: hidden;
 
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-
-    box-shadow:
-        0 20px 60px rgba(0,0,0,.25);
-
-    overflow: hidden;
 }
 
+/* CARD HEADER */
+
 .card-header {
+    height: 58px;
 
     display: flex;
-
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 
-    padding: 18px 20px;
+    padding: 0 18px;
 
     border-bottom: 1px solid var(--border);
 }
 
 .card-title {
-
-    font-size: 13px;
-
+    font-size: 12px;
     font-weight: 700;
-
-    letter-spacing: .2px;
 }
 
-.card-status {
-
-    display: flex;
-    align-items: center;
-
-    gap: 7px;
-
-    color: var(--muted);
-
+.status {
     font-size: 11px;
+    color: var(--muted);
 }
 
-.status-dot {
-
-    width: 7px;
-    height: 7px;
-
-    border-radius: 50%;
-
-    background: #555;
-}
-
-.status-dot.active {
-
-    background: #4ade80;
-
-    box-shadow:
-        0 0 12px #4ade80;
-}
-
-
-/* ==============================
-   CAMERA
-============================== */
+/* CAMERA */
 
 .camera {
-
     position: relative;
-
-    aspect-ratio: 4 / 3;
-
-    background: #030303;
-
+    aspect-ratio: 4/3;
+    background: #000;
     overflow: hidden;
 }
 
 video {
-
     width: 100%;
     height: 100%;
-
     object-fit: cover;
-
-    display: block;
 }
 
-
-/* CAMERA CORNERS */
+/* CAMERA FRAME */
 
 .camera::before,
 .camera::after {
-
     content: "";
-
     position: absolute;
-
-    width: 30px;
-    height: 30px;
-
-    border-color: rgba(255,255,255,.6);
-
+    width: 28px;
+    height: 28px;
+    border-color: rgba(255,255,255,.7);
     pointer-events: none;
 }
 
 .camera::before {
-
-    top: 20px;
-    left: 20px;
+    top: 18px;
+    left: 18px;
 
     border-top: 2px solid;
     border-left: 2px solid;
 }
 
 .camera::after {
-
-    bottom: 20px;
-    right: 20px;
+    bottom: 18px;
+    right: 18px;
 
     border-bottom: 2px solid;
     border-right: 2px solid;
 }
 
-
-/* SCAN LINE */
-
-.scan-line {
-
-    position: absolute;
-
-    left: 0;
-    right: 0;
-
-    height: 1px;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255,255,255,.35),
-            transparent
-        );
-
-    top: 0;
-
-    opacity: 0;
-
-    pointer-events: none;
-}
-
-.camera.active .scan-line {
-
-    opacity: 1;
-
-    animation:
-        scan 3s infinite ease-in-out;
-}
-
-@keyframes scan {
-
-    0% {
-        top: 0%;
-    }
-
-    50% {
-        top: 100%;
-    }
-
-    100% {
-        top: 0%;
-    }
-}
-
-
-/* ==============================
-   CAMERA CONTROLS
-============================== */
+/* BUTTONS */
 
 .controls {
-
-    padding: 18px;
+    padding: 16px;
 
     display: flex;
-
-    gap: 10px;
+    gap: 9px;
 }
 
 button {
-
-    border: none;
-
-    cursor: pointer;
-
+    border: 0;
     font-family: inherit;
-
-    transition:
-        transform .15s,
-        opacity .15s,
-        background .2s;
+    cursor: pointer;
+    transition: .18s;
 }
 
 button:active {
-
     transform: scale(.96);
 }
 
 .primary {
-
     flex: 1;
 
-    min-height: 54px;
+    height: 52px;
 
-    border-radius: 16px;
+    border-radius: 15px;
 
-    background: #fff;
-
-    color: #08090d;
+    background: white;
+    color: #09090b;
 
     font-weight: 800;
-
-    font-size: 14px;
-
-    box-shadow:
-        0 10px 30px rgba(255,255,255,.08);
 }
 
 .primary:hover {
     background: #e9e9e9;
 }
 
-.icon-button {
+.icon-btn {
+    width: 52px;
+    height: 52px;
 
-    width: 54px;
-    height: 54px;
-
-    border-radius: 16px;
+    border-radius: 15px;
 
     background: rgba(255,255,255,.06);
-
     border: 1px solid var(--border);
 
     color: white;
-
     font-size: 18px;
 }
 
-.icon-button:hover {
-
-    background:
-        rgba(255,255,255,.1);
-}
-
-
-/* ==============================
-   SETTINGS
-============================== */
+/* SETTINGS */
 
 .settings {
-
-    padding: 0 18px 18px;
-}
-
-.setting {
-
-    padding: 14px 0;
-
-    border-top:
-        1px solid rgba(255,255,255,.06);
+    padding: 0 16px 17px;
 }
 
 .setting-row {
-
     display: flex;
-
     justify-content: space-between;
 
-    align-items: center;
+    color: var(--muted);
+
+    font-size: 11px;
 
     margin-bottom: 10px;
 }
 
-.setting label {
-
-    font-size: 12px;
-
-    color: var(--muted);
+#intensityValue {
+    color: white;
+    font-weight: 700;
 }
 
-.value {
-
-    font-family:
-        "Space Mono",
-        monospace;
-
-    font-size: 11px;
-}
-
-input[type="range"] {
-
+input[type=range] {
     width: 100%;
-
     accent-color: white;
-
-    cursor: pointer;
 }
 
+/* RESULT */
 
-/* ==============================
-   ASCII RESULT
-============================== */
-
-.result-card {
-
-    min-height: 100%;
+.result {
+    position: relative;
 }
 
-.ascii-wrapper {
+.result-area {
+    position: relative;
 
-    height: calc(100% - 58px);
+    aspect-ratio: 4/3;
 
-    min-height: 430px;
+    background: #020204;
 
-    padding: 18px;
-
-    overflow: auto;
-
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(255,255,255,.035),
-            transparent 60%
-        );
+    overflow: hidden;
 }
 
-.ascii-placeholder {
-
+#resultCanvas {
+    width: 100%;
     height: 100%;
 
-    min-height: 390px;
+    display: block;
+}
+
+.placeholder {
+    position: absolute;
+    inset: 0;
 
     display: flex;
-
-    align-items: center;
-    justify-content: center;
-
     flex-direction: column;
 
-    gap: 12px;
+    justify-content: center;
+    align-items: center;
+
+    gap: 10px;
 
     color: #555;
 
@@ -543,423 +314,313 @@ input[type="range"] {
 }
 
 .placeholder-icon {
-
-    font-size: 34px;
-
-    opacity: .5;
+    font-size: 36px;
 }
 
-.ascii {
+.placeholder p {
+    font-size: 12px;
+}
 
-    font-family:
-        "Space Mono",
-        monospace;
+/* MAGNIFIER */
 
-    font-size: 5px;
+.magnifier {
+    position: absolute;
 
-    line-height: 5px;
+    width: 45px;
+    height: 45px;
 
-    white-space: pre;
+    border-radius: 50%;
 
-    color: #fff;
+    border: 2px solid rgba(255,255,255,.9);
 
-    letter-spacing: 0;
+    box-shadow:
+        0 0 0 5px rgba(0,0,0,.3),
+        0 10px 40px rgba(0,0,0,.4);
+
+    transform:
+        translate(-50%, -50%);
+
+    pointer-events: none;
 
     display: none;
 }
 
+.instructions {
+    padding: 15px 17px;
 
-/* ==============================
-   BOTTOM
-============================== */
-
-.bottom-bar {
-
-    margin-top: 18px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    color: #666;
+    color: var(--muted);
 
     font-size: 11px;
+
+    line-height: 1.5;
 }
 
-.bottom-actions {
+/* FOOTER */
+
+.footer {
+    margin-top: 17px;
 
     display: flex;
+    justify-content: space-between;
 
-    gap: 8px;
+    color: #5f626b;
+
+    font-size: 10px;
 }
 
-.small-button {
-
-    padding: 9px 13px;
-
-    border-radius: 10px;
+.footer button {
+    color: #aaa;
 
     background: rgba(255,255,255,.04);
 
-    color: #aaa;
-
     border: 1px solid var(--border);
 
-    font-size: 11px;
+    border-radius: 9px;
+
+    padding: 8px 11px;
 }
 
-.small-button:hover {
+/* MOBILE */
 
-    color: white;
-
-    background: rgba(255,255,255,.08);
-}
-
-
-/* ==============================
-   MOBILE
-============================== */
-
-@media(max-width: 800px) {
-
-    .app {
-
-        padding:
-            22px
-            15px
-            40px;
-    }
+@media(max-width: 750px) {
 
     .workspace {
-
         grid-template-columns: 1fr;
     }
 
     .hero h1 {
-
-        font-size: 43px;
-
-        letter-spacing: -2px;
+        letter-spacing: -2.5px;
     }
 
-    .ascii-wrapper {
-
-        min-height: 350px;
+    .result-area {
+        aspect-ratio: 4/3;
     }
 
-    .ascii-placeholder {
-
-        min-height: 320px;
-    }
-
-    .ascii {
-
-        font-size: 3px;
-        line-height: 3px;
-    }
-
-}
-
-
-/* ==============================
-   ANIMATION
-============================== */
-
-.card {
-
-    animation:
-        appear .5s ease both;
-}
-
-.result-card {
-
-    animation-delay: .1s;
-}
-
-@keyframes appear {
-
-    from {
-
-        opacity: 0;
-
-        transform:
-            translateY(10px);
-    }
-
-    to {
-
-        opacity: 1;
-
-        transform:
-            translateY(0);
+    .footer {
+        flex-direction: column;
+        gap: 12px;
     }
 }
-
-
-/* ==============================
-   HIDDEN
-============================== */
-
-.hidden {
-    display: none !important;
-}
-
 </style>
 </head>
-
 
 <body>
 
 <div class="app">
 
-    <!-- HEADER -->
+<header>
 
-    <header class="header">
+    <div class="logo">
 
-        <div class="logo">
-
-            <div class="logo-icon">
-                ✦
-            </div>
-
-            ASCII Studio
-
+        <div class="logo-icon">
+            ◉
         </div>
 
-        <div class="badge">
-            CAMERA → ASCII
+        Giant Lens
+
+    </div>
+
+    <div class="badge">
+        LOCAL PROCESSING
+    </div>
+
+</header>
+
+
+<section class="hero">
+
+    <h1>
+        Make it<br>
+        <span>giant.</span>
+    </h1>
+
+    <p>
+        Photograph something, select a point and
+        transform it with a powerful local
+        magnification effect.
+    </p>
+
+</section>
+
+
+<main class="workspace">
+
+
+<!-- CAMERA -->
+
+<section class="card">
+
+    <div class="card-header">
+
+        <div class="card-title">
+            CAMERA
         </div>
 
-    </header>
-
-
-    <!-- HERO -->
-
-    <section class="hero">
-
-        <h1>
-            Turn reality<br>
-            <span>into ASCII.</span>
-        </h1>
-
-        <p>
-            Capture an image with your camera
-            and transform it instantly into
-            a unique ASCII artwork.
-        </p>
-
-    </section>
-
-
-    <!-- WORKSPACE -->
-
-    <main class="workspace">
-
-
-        <!-- CAMERA CARD -->
-
-        <section class="card">
-
-            <div class="card-header">
-
-                <div class="card-title">
-                    CAMERA
-                </div>
-
-                <div class="card-status">
-
-                    <span
-                        id="statusDot"
-                        class="status-dot">
-                    </span>
-
-                    <span id="statusText">
-                        Offline
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div
-                id="cameraContainer"
-                class="camera">
-
-                <video
-                    id="video"
-                    autoplay
-                    playsinline>
-                </video>
-
-                <div class="scan-line"></div>
-
-            </div>
-
-
-            <div class="controls">
-
-                <button
-                    id="capture"
-                    class="primary">
-
-                    ✦
-                    Capture artwork
-
-                </button>
-
-                <button
-                    id="switch"
-                    class="icon-button"
-                    title="Changer de caméra">
-
-                    ↻
-
-                </button>
-
-            </div>
-
-
-            <div class="settings">
-
-                <div class="setting">
-
-                    <div class="setting-row">
-
-                        <label>
-                            DENSITÉ ASCII
-                        </label>
-
-                        <span
-                            id="densityValue"
-                            class="value">
-                            100
-                        </span>
-
-                    </div>
-
-                    <input
-                        id="density"
-                        type="range"
-                        min="40"
-                        max="160"
-                        value="100">
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- RESULT -->
-
-        <section class="card result-card">
-
-            <div class="card-header">
-
-                <div class="card-title">
-                    YOUR ARTWORK
-                </div>
-
-                <div
-                    id="resolution"
-                    class="card-status">
-
-                    Waiting...
-
-                </div>
-
-            </div>
-
-
-            <div class="ascii-wrapper">
-
-                <div
-                    id="placeholder"
-                    class="ascii-placeholder">
-
-                    <div class="placeholder-icon">
-                        ▦
-                    </div>
-
-                    <div>
-                        Ton artwork apparaîtra ici
-                    </div>
-
-                </div>
-
-
-                <pre
-                    id="ascii"
-                    class="ascii">
-                </pre>
-
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <!-- BOTTOM -->
-
-    <div class="bottom-bar">
-
-        <div>
-            Everything happens locally in your browser.
-        </div>
-
-        <div class="bottom-actions">
-
-            <button
-                id="copy"
-                class="small-button">
-
-                Copy ASCII
-
-            </button>
-
-            <button
-                id="download"
-                class="small-button">
-
-                Save .txt
-
-            </button>
+        <div
+            id="cameraStatus"
+            class="status">
+
+            Offline
 
         </div>
 
     </div>
 
 
+    <div class="camera">
+
+        <video
+            id="video"
+            autoplay
+            playsinline>
+        </video>
+
+    </div>
+
+
+    <div class="controls">
+
+        <button
+            id="capture"
+            class="primary">
+
+            ✦ Take photo
+
+        </button>
+
+        <button
+            id="switch"
+            class="icon-btn">
+
+            ↻
+
+        </button>
+
+    </div>
+
+
+    <div class="settings">
+
+        <div class="setting-row">
+
+            <span>
+                MAGNIFICATION
+            </span>
+
+            <span id="intensityValue">
+                3.0×
+            </span>
+
+        </div>
+
+        <input
+            id="intensity"
+            type="range"
+            min="1"
+            max="6"
+            step=".1"
+            value="3">
+
+    </div>
+
+</section>
+
+
+<!-- RESULT -->
+
+<section class="card result">
+
+    <div class="card-header">
+
+        <div class="card-title">
+            GIANT RESULT
+        </div>
+
+        <div
+            id="resultStatus"
+            class="status">
+
+            Waiting
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="resultArea"
+        class="result-area">
+
+        <canvas
+            id="resultCanvas">
+        </canvas>
+
+        <div
+            id="placeholder"
+            class="placeholder">
+
+            <div class="placeholder-icon">
+                ◉
+            </div>
+
+            <p>
+                Prends une photo pour commencer
+            </p>
+
+        </div>
+
+        <div
+            id="magnifier"
+            class="magnifier">
+        </div>
+
+    </div>
+
+
+    <div class="instructions">
+
+        Après la photo, touche directement
+        l'objet que tu veux agrandir.
+        L'effet sera appliqué autour du point sélectionné.
+
+    </div>
+
+</section>
+
+</main>
+
+
+<div class="footer">
+
+    <span>
+        Nothing is uploaded. Everything runs locally.
+    </span>
+
+    <div>
+
+        <button id="download">
+            ↓ Save image
+        </button>
+
+        <button id="reset">
+            Reset
+        </button>
+
+    </div>
+
 </div>
 
-
-<canvas id="canvas"></canvas>
+</div>
 
 
 <script>
 
-
-// ============================================
-// ELEMENTS
-// ============================================
+/* =========================================
+   ELEMENTS
+========================================= */
 
 const video =
     document.getElementById("video");
-
-const canvas =
-    document.getElementById("canvas");
-
-const ascii =
-    document.getElementById("ascii");
-
-const placeholder =
-    document.getElementById("placeholder");
 
 const capture =
     document.getElementById("capture");
@@ -967,39 +628,49 @@ const capture =
 const switchButton =
     document.getElementById("switch");
 
-const density =
-    document.getElementById("density");
+const intensity =
+    document.getElementById("intensity");
 
-const densityValue =
-    document.getElementById("densityValue");
+const intensityValue =
+    document.getElementById("intensityValue");
 
-const cameraContainer =
-    document.getElementById("cameraContainer");
+const canvas =
+    document.getElementById("resultCanvas");
 
-const statusDot =
-    document.getElementById("statusDot");
+const resultArea =
+    document.getElementById("resultArea");
 
-const statusText =
-    document.getElementById("statusText");
+const placeholder =
+    document.getElementById("placeholder");
 
-const resolution =
-    document.getElementById("resolution");
+const magnifier =
+    document.getElementById("magnifier");
 
-const copyButton =
-    document.getElementById("copy");
+const cameraStatus =
+    document.getElementById("cameraStatus");
 
-const downloadButton =
+const resultStatus =
+    document.getElementById("resultStatus");
+
+const download =
     document.getElementById("download");
+
+const reset =
+    document.getElementById("reset");
 
 
 let stream = null;
 
 let facingMode = "environment";
 
+let originalImage = null;
 
-// ============================================
-// CAMERA
-// ============================================
+let hasPhoto = false;
+
+
+/* =========================================
+   CAMERA
+========================================= */
 
 async function startCamera() {
 
@@ -1023,8 +694,7 @@ async function startCamera() {
 
                     video: {
 
-                        facingMode:
-                            facingMode,
+                        facingMode,
 
                         width: {
                             ideal: 1280
@@ -1041,47 +711,29 @@ async function startCamera() {
                 });
 
 
-        video.srcObject = stream;
+        video.srcObject =
+            stream;
 
 
-        cameraContainer
-            .classList
-            .add("active");
-
-
-        statusDot
-            .classList
-            .add("active");
-
-
-        statusText.textContent =
-            "Live";
-
-
-        capture.disabled = false;
+        cameraStatus.textContent =
+            "● Live";
 
 
     } catch(error) {
 
         console.error(error);
 
-        statusText.textContent =
+        cameraStatus.textContent =
             "Camera unavailable";
-
-        alert(
-            "Impossible d'accéder à la caméra.\n\n" +
-            "Vérifie que ton navigateur a " +
-            "l'autorisation d'utiliser la caméra."
-        );
 
     }
 
 }
 
 
-// ============================================
-// SWITCH CAMERA
-// ============================================
+/* =========================================
+   SWITCH CAMERA
+========================================= */
 
 switchButton.addEventListener(
     "click",
@@ -1098,17 +750,15 @@ switchButton.addEventListener(
 );
 
 
-// ============================================
-// CAPTURE
-// ============================================
+/* =========================================
+   TAKE PHOTO
+========================================= */
 
 capture.addEventListener(
     "click",
     () => {
 
         if (!video.videoWidth) {
-
-            startCamera();
 
             return;
 
@@ -1135,317 +785,486 @@ capture.addEventListener(
         );
 
 
-        createASCII();
+        originalImage =
+            ctx.getImageData(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+
+        hasPhoto = true;
+
+
+        placeholder.style.display =
+            "none";
+
+
+        resultStatus.textContent =
+            "Touch the object";
+
+
+        capture.textContent =
+            "✓ Photo captured";
+
+
+        setTimeout(() => {
+
+            capture.textContent =
+                "✦ Take photo";
+
+        }, 1200);
 
     }
 );
 
 
-// ============================================
-// ASCII
-// ============================================
+/* =========================================
+   INTENSITY
+========================================= */
 
-function createASCII() {
+intensity.addEventListener(
+    "input",
+    () => {
 
-    const targetWidth =
-        Number(density.value);
-
-
-    const ratio =
-        canvas.height /
-        canvas.width;
+        intensityValue.textContent =
+            Number(intensity.value)
+            .toFixed(1) + "×";
 
 
-    const targetHeight =
-        Math.floor(
-            targetWidth *
-            ratio *
-            0.48
-        );
+        if (hasPhoto) {
+
+            /*
+              Si un point a déjà été choisi,
+              on recalcule.
+            */
+
+            if (selectedPoint) {
+
+                applyBulge(
+                    selectedPoint.x,
+                    selectedPoint.y
+                );
+
+            }
+
+        }
+
+    }
+);
 
 
-    const smallCanvas =
+/* =========================================
+   SELECTED POINT
+========================================= */
+
+let selectedPoint = null;
+
+
+/* =========================================
+   TOUCH / CLICK
+========================================= */
+
+function selectPoint(event) {
+
+    if (!hasPhoto) {
+
+        return;
+
+    }
+
+
+    const rect =
+        resultArea.getBoundingClientRect();
+
+
+    let x;
+    let y;
+
+
+    if (event.touches) {
+
+        x =
+            event.touches[0].clientX
+            - rect.left;
+
+        y =
+            event.touches[0].clientY
+            - rect.top;
+
+    } else {
+
+        x =
+            event.clientX
+            - rect.left;
+
+        y =
+            event.clientY
+            - rect.top;
+
+    }
+
+
+    const normalizedX =
+        x / rect.width;
+
+    const normalizedY =
+        y / rect.height;
+
+
+    selectedPoint = {
+
+        x: normalizedX,
+        y: normalizedY
+
+    };
+
+
+    magnifier.style.display =
+        "block";
+
+
+    magnifier.style.left =
+        x + "px";
+
+    magnifier.style.top =
+        y + "px";
+
+
+    applyBulge(
+        normalizedX,
+        normalizedY
+    );
+
+}
+
+
+resultArea.addEventListener(
+    "click",
+    selectPoint
+);
+
+
+/* =========================================
+   BULGE EFFECT
+========================================= */
+
+function applyBulge(
+    centerX,
+    centerY
+) {
+
+    if (!originalImage) {
+        return;
+    }
+
+
+    const width =
+        originalImage.width;
+
+    const height =
+        originalImage.height;
+
+
+    const sourceCanvas =
         document.createElement("canvas");
 
+    sourceCanvas.width =
+        width;
 
-    smallCanvas.width =
-        targetWidth;
-
-    smallCanvas.height =
-        targetHeight;
-
-
-    const ctx =
-        smallCanvas.getContext("2d");
+    sourceCanvas.height =
+        height;
 
 
-    ctx.drawImage(
-        canvas,
+    const sourceCtx =
+        sourceCanvas.getContext("2d");
+
+
+    sourceCtx.putImageData(
+        originalImage,
         0,
-        0,
-        targetWidth,
-        targetHeight
+        0
     );
 
 
-    const imageData =
-        ctx.getImageData(
+    const source =
+        sourceCtx.getImageData(
             0,
             0,
-            targetWidth,
-            targetHeight
+            width,
+            height
         );
 
 
-    const pixels =
-        imageData.data;
+    const output =
+        canvas
+            .getContext("2d")
+            .createImageData(
+                width,
+                height
+            );
+
+
+    const input =
+        source.data;
+
+    const result =
+        output.data;
+
+
+    const cx =
+        centerX * width;
+
+    const cy =
+        centerY * height;
 
 
     /*
-       Plus le caractère est dense,
-       plus la zone est sombre.
+       Rayon de l'effet.
+
+       On prend environ 38 %
+       de la largeur de l'image.
     */
 
-    const characters =
-        "@#8&o:*. ";
+    const radius =
+        Math.min(width, height)
+        * 0.42;
 
 
-    let result = "";
+    /*
+       Intensité du grossissement.
+    */
+
+    const strength =
+        Number(intensity.value);
 
 
     for (
         let y = 0;
-        y < targetHeight;
+        y < height;
         y++
     ) {
 
         for (
             let x = 0;
-            x < targetWidth;
+            x < width;
             x++
         ) {
 
-            const index =
-                (y *
-                targetWidth +
-                x) * 4;
+            const dx =
+                x - cx;
+
+            const dy =
+                y - cy;
 
 
-            const r =
-                pixels[index];
-
-            const g =
-                pixels[index + 1];
-
-            const b =
-                pixels[index + 2];
-
-
-            // luminosité perceptuelle
-
-            const brightness =
-                0.2126 * r +
-                0.7152 * g +
-                0.0722 * b;
-
-
-            const charIndex =
-                Math.floor(
-
-                    brightness /
-                    255 *
-                    (characters.length - 1)
-
+            const distance =
+                Math.sqrt(
+                    dx * dx +
+                    dy * dy
                 );
 
 
-            result +=
-                characters[charIndex];
+            let sourceX = x;
+            let sourceY = y;
+
+
+            if (distance < radius) {
+
+                /*
+                   Normalisation du rayon
+                */
+
+                const r =
+                    distance / radius;
+
+
+                /*
+                   Fonction de déformation.
+
+                   Plus r est petit,
+                   plus on va chercher
+                   près du centre.
+
+                   Cela crée l'effet
+                   "loupe / grosse main".
+                */
+
+                const power =
+                    1 +
+                    strength * 0.9;
+
+
+                const distorted =
+                    Math.pow(r, power);
+
+
+                const factor =
+                    distorted / r || 0;
+
+
+                sourceX =
+                    cx + dx * factor;
+
+                sourceY =
+                    cy + dy * factor;
+
+            }
+
+
+            sourceX =
+                Math.max(
+                    0,
+                    Math.min(
+                        width - 1,
+                        sourceX
+                    )
+                );
+
+
+            sourceY =
+                Math.max(
+                    0,
+                    Math.min(
+                        height - 1,
+                        sourceY
+                    )
+                );
+
+
+            /*
+               Bilinéaire simplifié
+            */
+
+            const sx =
+                Math.floor(sourceX);
+
+            const sy =
+                Math.floor(sourceY);
+
+
+            const sourceIndex =
+                (sy * width + sx) * 4;
+
+
+            const outputIndex =
+                (y * width + x) * 4;
+
+
+            result[outputIndex] =
+                input[sourceIndex];
+
+            result[outputIndex + 1] =
+                input[sourceIndex + 1];
+
+            result[outputIndex + 2] =
+                input[sourceIndex + 2];
+
+            result[outputIndex + 3] =
+                255;
 
         }
-
-
-        result += "\n";
 
     }
 
 
-    ascii.textContent =
-        result;
+    canvas
+        .getContext("2d")
+        .putImageData(
+            output,
+            0,
+            0
+        );
 
 
-    placeholder.style.display =
-        "none";
-
-
-    ascii.style.display =
-        "block";
-
-
-    resolution.textContent =
-        targetWidth +
-        " × " +
-        targetHeight;
-
-
-    statusText.textContent =
-        "Artwork captured";
-
-
-    // petit feedback visuel
-
-    capture.textContent =
-        "✓ Artwork captured";
-
-
-    setTimeout(() => {
-
-        capture.textContent =
-            "✦ Capture artwork";
-
-    }, 1200);
+    resultStatus.textContent =
+        "Giant × " +
+        strength.toFixed(1);
 
 }
 
 
-// ============================================
-// DENSITY
-// ============================================
+/* =========================================
+   DOWNLOAD
+========================================= */
 
-density.addEventListener(
-    "input",
-    () => {
-
-        densityValue.textContent =
-            density.value;
-
-
-        // Si une image existe,
-        // on la recalcule
-
-        if (
-            ascii.textContent.trim()
-        ) {
-
-            createASCII();
-
-        }
-
-    }
-);
-
-
-// ============================================
-// COPY
-// ============================================
-
-copyButton.addEventListener(
-    "click",
-    async () => {
-
-        const text =
-            ascii.textContent;
-
-
-        if (!text.trim()) {
-
-            return;
-
-        }
-
-
-        try {
-
-            await navigator
-                .clipboard
-                .writeText(text);
-
-
-            copyButton.textContent =
-                "✓ Copied";
-
-
-            setTimeout(() => {
-
-                copyButton.textContent =
-                    "Copy ASCII";
-
-            }, 1200);
-
-
-        } catch(error) {
-
-            alert(
-                "Impossible de copier le dessin."
-            );
-
-        }
-
-    }
-);
-
-
-// ============================================
-// DOWNLOAD
-// ============================================
-
-downloadButton.addEventListener(
+download.addEventListener(
     "click",
     () => {
 
-        const text =
-            ascii.textContent;
-
-
-        if (!text.trim()) {
-
+        if (!hasPhoto) {
             return;
-
         }
-
-
-        const blob =
-            new Blob(
-                [text],
-                {
-                    type:
-                        "text/plain"
-                }
-            );
-
-
-        const url =
-            URL.createObjectURL(blob);
 
 
         const link =
             document.createElement("a");
 
 
-        link.href =
-            url;
-
         link.download =
-            "ascii-art.txt";
+            "giant-effect.png";
+
+
+        link.href =
+            canvas.toDataURL(
+                "image/png"
+            );
 
 
         link.click();
-
-
-        URL.revokeObjectURL(url);
 
     }
 );
 
 
-// ============================================
-// START
-// ============================================
+/* =========================================
+   RESET
+========================================= */
 
-capture.disabled = false;
+reset.addEventListener(
+    "click",
+    () => {
+
+        hasPhoto = false;
+
+        originalImage = null;
+
+        selectedPoint = null;
+
+
+        const ctx =
+            canvas.getContext("2d");
+
+
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+        placeholder.style.display =
+            "flex";
+
+
+        magnifier.style.display =
+            "none";
+
+
+        resultStatus.textContent =
+            "Waiting";
+
+    }
+);
+
+
+/* =========================================
+   START
+========================================= */
 
 startCamera();
-
 
 </script>
 
