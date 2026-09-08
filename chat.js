@@ -129,19 +129,18 @@ function updateRoomUnreadBadge(){
 ========================================================= */
 
 function toggleLobbyChat(){
+    const lobby = document.getElementById("lobbyScreen");
+
+    /* Le bouton Général ne fait rien lorsqu'on est dans un salon. */
+    if(!lobby || lobby.style.display === "none") return;
     if(!lobbyChat) return;
 
     const isOpen = lobbyChat.classList.contains("mobile-open");
-    closeMobileChat();
 
-    const generalButton = document.getElementById("generalChatToggle");
+    closeMobileChat();
 
     if(!isOpen){
         lobbyChat.classList.add("mobile-open");
-
-        if(generalButton){
-            generalButton.classList.add("chat-open");
-        }
 
         if(isMobile() && mobileChatBackdrop){
             mobileChatBackdrop.classList.add("visible");
@@ -157,11 +156,6 @@ function toggleLobbyChat(){
 function closeGeneralChat(){
     if(lobbyChat){
         lobbyChat.classList.remove("mobile-open");
-    }
-
-    const generalButton = document.getElementById("generalChatToggle");
-    if(generalButton){
-        generalButton.classList.remove("chat-open");
     }
 
     if(mobileChatBackdrop){
@@ -237,11 +231,6 @@ function closeRoomChat(){
 function closeMobileChat(){
     if(lobbyChat){
         lobbyChat.classList.remove("mobile-open");
-    }
-
-    const generalButton = document.getElementById("generalChatToggle");
-    if(generalButton){
-        generalButton.classList.remove("chat-open");
     }
 
     if(roomChat){
