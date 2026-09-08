@@ -2,28 +2,22 @@
    CHAT LOBBY — BOUTON + OUVERTURE AVEC FONDU
 ========================================================= */
 
-/* Le chat général n'occupe plus de place dans le lobby. */
 .lobby-screen > #lobbyChat{
     position:fixed;
-    top:82px;
+    top:auto;
     right:20px;
-    bottom:20px;
+    bottom:76px;
     width:330px;
-    height:auto;
+    height:calc(100vh - 170px);
+    max-height:650px;
     z-index:80;
-
     display:flex;
     flex-direction:column;
-
     opacity:0;
     visibility:hidden;
     pointer-events:none;
     transform:translateY(10px) scale(.98);
-
-    transition:
-        opacity .22s ease,
-        transform .22s ease,
-        visibility 0s linear .22s;
+    transition:opacity .22s ease,transform .22s ease,visibility 0s linear .22s;
 }
 
 .lobby-screen > #lobbyChat.mobile-open{
@@ -31,63 +25,43 @@
     visibility:visible;
     pointer-events:auto;
     transform:translateY(0) scale(1);
-
-    transition:
-        opacity .22s ease,
-        transform .22s ease,
-        visibility 0s linear 0s;
+    transition:opacity .22s ease,transform .22s ease,visibility 0s linear 0s;
 }
 
-/* L'ancien bouton Général de la barre du haut disparaît. */
-#desktopGeneralChatButton{
-    display:none !important;
-}
+#desktopGeneralChatButton{display:none !important;}
 
-/* Bouton Général flottant en bas à droite. */
+/* Bouton Général : même style que Utilisateurs. */
 .general-chat-toggle{
     position:fixed;
     right:20px;
     bottom:20px;
     z-index:90;
-
     display:flex !important;
     align-items:center;
     justify-content:center;
     gap:6px;
-
     min-height:44px;
     padding:0 16px;
-
     border:1px solid var(--border);
     border-radius:12px;
-
     color:var(--text);
     background:var(--panel2);
     box-shadow:0 10px 30px rgba(0,0,0,.3);
-
     font-size:13px;
     font-weight:700;
-
-    transition:
-        opacity .22s ease,
-        transform .22s ease,
-        background .15s ease;
+    cursor:pointer;
+    transition:opacity .22s ease,transform .22s ease,background .15s ease;
 }
 
-/* Quand le chat est ouvert, le bouton disparaît pour ne jamais passer devant. */
+.general-chat-toggle:hover{background:var(--panel3);}
+.general-chat-toggle:active{transform:scale(.97);}
+
+/* Le bouton disparaît lorsque le chat est ouvert. */
 .general-chat-toggle.chat-open{
     opacity:0;
     visibility:hidden;
     pointer-events:none;
     transform:translateY(8px) scale(.96);
-}
-
-.general-chat-toggle:hover{
-    background:var(--panel3);
-}
-
-.general-chat-toggle:active{
-    transform:scale(.97);
 }
 
 /* =========================================================
@@ -99,47 +73,28 @@
     left:20px;
     bottom:20px;
     z-index:90;
-
     display:flex;
     align-items:center;
     justify-content:center;
     gap:6px;
-
     min-height:44px;
     padding:0 16px;
-
     border:1px solid var(--border);
     border-radius:12px;
-
     color:var(--text);
     background:var(--panel2);
     box-shadow:0 10px 30px rgba(0,0,0,.3);
-
     font-size:13px;
     font-weight:700;
     cursor:pointer;
-
-    transition:
-        opacity .2s ease,
-        transform .2s ease,
-        background .15s ease;
+    transition:opacity .2s ease,transform .2s ease,background .15s ease;
 }
 
-.users-sidebar-toggle:hover{
-    background:var(--panel3);
-}
+.users-sidebar-toggle:hover{background:var(--panel3);}
+.users-sidebar-toggle:active{transform:scale(.97);}
 
-.users-sidebar-toggle:active{
-    transform:scale(.97);
-}
-
-/* Le panneau utilisateurs se replie avec une animation. */
 .users-sidebar{
-    transition:
-        width .22s ease,
-        flex-basis .22s ease,
-        padding .22s ease,
-        opacity .22s ease;
+    transition:width .22s ease,flex-basis .22s ease,padding .22s ease,opacity .22s ease;
 }
 
 .lobby-screen.users-hidden .users-sidebar{
@@ -152,47 +107,31 @@
     border-right-width:0;
 }
 
-/* =========================================================
-   BACKDROP MOBILE
-========================================================= */
-
 .mobile-chat-backdrop{
     opacity:0;
     visibility:hidden;
-    transition:
-        opacity .22s ease,
-        visibility 0s linear .22s;
+    transition:opacity .22s ease,visibility 0s linear .22s;
 }
 
 .mobile-chat-backdrop.visible{
     opacity:1;
     visibility:visible;
-    transition:
-        opacity .22s ease,
-        visibility 0s linear 0s;
+    transition:opacity .22s ease,visibility 0s linear 0s;
 }
 
 @media (max-width:700px){
-
     .lobby-screen > #lobbyChat{
         top:auto;
         right:12px;
-        bottom:12px;
+        bottom:70px;
         left:12px;
         width:auto;
         height:min(70vh,520px);
-        max-height:calc(100vh - 90px);
+        max-height:calc(100vh - 140px);
     }
 
-    .general-chat-toggle{
-        right:14px;
-        bottom:14px;
-    }
-
-    .users-sidebar-toggle{
-        left:14px;
-        bottom:14px;
-    }
+    .general-chat-toggle{right:14px;bottom:14px;}
+    .users-sidebar-toggle{left:14px;bottom:14px;}
 
     .lobby-screen.users-hidden .users-sidebar{
         width:0;
