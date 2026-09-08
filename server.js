@@ -1,54 +1,55 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
-const crypto = require("crypto");
 const WebSocket = require("ws");
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
 const ADMIN_USERNAME = "Riddimz";
 const ADMIN_CODE = "85206";
 
-const users = new Map();
-const rooms = new Map();
-
-const GENERAL_ROOM_ID = "general";
-
-rooms.set(GENERAL_ROOM_ID, {
-    id: GENERAL_ROOM_ID,
-    name: "Général",
-    ownerId: null,
-    participants: new Set()
-});
-
 
 /* =========================
-   HTTP
+   HTTP SERVER
 ========================= */
 
 const server = http.createServer((req, res) => {
 
     if (req.url === "/health") {
+
         res.writeHead(200, {
-            "Content-Type": "text/plain; charset=utf-8"
+            "Content-Type": "application/json"
         });
 
-        res.end("Col'inCall OK");
+        res.end(
+            JSON.stringify({
+                status: "ok",
+                service: "Col'inCall"
+            })
+        );
+
         return;
     }
+
 
     if (req.url === "/" || req.url === "/index.html") {
 
         const filePath =
             path.join(__dirname, "index.html");
 
-        fs.readFile(filePath, (error, data) => {
+        fs.readFile(filePath, (err, data) => {
 
-            if (error) {
+            if (err) {
+
                 res.writeHead(500);
-                res.end("Erreur serveur");
+
+                res.end(
+                    "Erreur lors du chargement de index.html"
+                );
+
                 return;
             }
+
 
             res.writeHead(200, {
                 "Content-Type": "text/html; charset=utf-8"
@@ -60,8 +61,10 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+
     res.writeHead(404);
-    res.end("Not found");
+
+    res.end("Not Found");
 });
 
 
@@ -69,117 +72,244 @@ const server = http.createServer((req, res) => {
    WEBSOCKET
 ========================= */
 
-const wss = new WebSocket.Server({
-    server
-});
-
-
-wss.on("connection", ws => {
-
-    ws.userId = null;
-
-    send(ws, {
-        type: "connected"
+const wss =
+    new WebSocket.Server({
+        server
     });
 
-    ws.on("message", raw => {
 
-        let message;
+/* =========================
+   DATA
+========================= */
 
-        try {
-            message = JSON.parse(raw.toString());
-        } catch {
-            sendError(ws, "Message invalide.");
-            return;
-        }
+const users = new Map();
 
-        handleMessage(ws, message);
-    });
+const rooms = new Map();
 
-    ws.on("close", () => {
 
-        if (!ws.userId) return;
+/*
+    Salon général permanent
+*/
 
-        removeUser(ws.userId);
-    });
+rooms.set("general", {
+
+    id: "general",
+
+    name: "Général",
+
+    description:
+        "Discussion générale de Col'inCall",
+
+    ownerId: null,
+
+    participants: new Set()
 });
 
 
 /* =========================
-   MESSAGE HANDLER
+   HELPERS
 ========================= */
 
-function handleMessage(ws, message) {
+function createId(prefix = "") {
 
-    switch (message.type) {
+    return (
+        prefix +
+        Math.random()
+            .toString(36)
+            .substring(2, 10) +
+        Date.now()
+            .toString(36)
+    );
+}
 
-        case "login":
-            handleLogin(ws, message);
-            break;
 
-        case "update-profile":
-            handleUpdateProfile(ws, message);
-            break;
+function safeSend(ws, data) {
 
-        case "create-room":
-            handleCreateRoom(ws, message);
-            break;
+    if (
+        ws &&
+        ws.readyState === WebSocket.OPEN
+    ) {
 
-        case "join-room":
-            handleJoinRoom(ws, message);
-            break;
-
-        case "leave-room":
-            handleLeaveRoom(ws);
-            break;
-
-        case "chat":
-            handleChat(ws, message);
-            break;
-
-        case "offer":
-            relayToUser(ws, message, "offer");
-            break;
-
-        case "answer":
-            relayToUser(ws, message, "answer");
-            break;
-
-        case "ice-candidate":
-            relayToUser(ws, message, "ice-candidate");
-            break;
-
-        case "media-state":
-            handleMediaState(ws, message);
-            break;
-
-        case "admin-mute":
-            handleAdminMute(ws, message);
-            break;
-
-        case "admin-camera":
-            handleAdminCamera(ws, message);
-            break;
-
-        case "admin-kick":
-            handleAdminKick(ws, message);
-            break;
-
-        case "admin-delete-room":
-            handleAdminDeleteRoom(ws, message);
-            break;
-
-        case "get-room-list":
-            sendRoomList(ws);
-            break;
-
-        case "get-users":
-            sendUsers(ws);
-            break;
-
-        default:
-            sendError(ws, "Action inconnue.");
+        ws.send(
+            JSON.stringify(data)
+        );
     }
+}
+
+
+function publicUser(user) {
+
+    return {
+
+        id: user.id,
+
+        username: user.username,
+
+        role: user.role,
+
+        description:
+            user.description || "",
+
+        roomId:
+            user.roomId || null,
+
+        microphoneEnabled:
+            !!user.microphoneEnabled,
+
+        cameraEnabled:
+            !!user.cameraEnabled
+    };
+}
+
+
+function publicRoom(room) {
+
+    return {
+
+        id: room.id,
+
+        name: room.name,
+
+        description:
+            room.description || "",
+
+        count:
+            room.participants.size,
+
+        ownerId:
+            room.ownerId || null
+    };
+}
+
+
+/* =========================
+   ROOM LIST
+========================= */
+
+function sendRoomList() {
+
+    const list =
+        Array.from(
+            rooms.values()
+        )
+        .map(publicRoom);
+
+
+    broadcastAll({
+
+        type: "rooms-list",
+
+        rooms: list
+    });
+}
+
+
+/* =========================
+   USER LIST
+========================= */
+
+function sendUsersList() {
+
+    const list =
+        Array.from(
+            users.values()
+        )
+        .map(publicUser);
+
+
+    broadcastAll({
+
+        type: "users-list",
+
+        users: list
+    });
+}
+
+
+/* =========================
+   BROADCAST
+========================= */
+
+function broadcastAll(data) {
+
+    users.forEach(user => {
+
+        safeSend(
+            user.ws,
+            data
+        );
+
+    });
+}
+
+
+function broadcastRoom(room, data, exceptUserId = null) {
+
+    if (!room)
+        return;
+
+
+    room.participants.forEach(userId => {
+
+        if (
+            exceptUserId &&
+            userId === exceptUserId
+        ) {
+
+            return;
+        }
+
+
+        const user =
+            users.get(userId);
+
+
+        if(user){
+
+            safeSend(
+                user.ws,
+                data
+            );
+        }
+    });
+}
+
+
+/*
+    Discussion générale :
+    uniquement les utilisateurs
+    actuellement dans le lobby.
+*/
+
+function broadcastLobby(data) {
+
+    users.forEach(user => {
+
+        if (!user.roomId) {
+
+            safeSend(
+                user.ws,
+                data
+            );
+        }
+
+    });
+}
+
+
+/* =========================
+   USER UPDATE
+========================= */
+
+function broadcastUserUpdate(user) {
+
+    broadcastAll({
+
+        type: "user-updated",
+
+        user:
+            publicUser(user)
+    });
 }
 
 
@@ -190,34 +320,44 @@ function handleMessage(ws, message) {
 function handleLogin(ws, message) {
 
     const username =
-        String(message.username || "")
-            .trim()
-            .slice(0, 24);
+        String(
+            message.username || ""
+        ).trim();
+
 
     const role =
         message.role === "admin"
             ? "admin"
             : "user";
 
-    if (!username) {
-        send(ws, {
+
+    if(!username){
+
+        safeSend(ws, {
+
             type: "login-error",
-            message: "Pseudo obligatoire."
+
+            message:
+                "Nom d'utilisateur obligatoire."
         });
 
         return;
     }
 
-    if (
+
+    if(
         role === "admin" &&
         (
             username !== ADMIN_USERNAME ||
-            message.adminCode !== ADMIN_CODE
+            String(message.code || "") !==
+                ADMIN_CODE
         )
-    ) {
+    ){
 
-        send(ws, {
+        safeSend(ws, {
+
             type: "login-error",
+
             message:
                 "Identifiants administrateur incorrects."
         });
@@ -225,237 +365,342 @@ function handleLogin(ws, message) {
         return;
     }
 
-    const duplicate =
-        [...users.values()].find(
+
+    /*
+        Si le nom est déjà utilisé,
+        on refuse la connexion.
+    */
+
+    const alreadyExists =
+        Array.from(
+            users.values()
+        ).some(
             user =>
                 user.username.toLowerCase() ===
                 username.toLowerCase()
         );
 
-    if (duplicate) {
 
-        send(ws, {
+    if(alreadyExists){
+
+        safeSend(ws, {
+
             type: "login-error",
-            message: "Ce pseudo est déjà utilisé."
+
+            message:
+                "Ce nom d'utilisateur est déjà utilisé."
         });
 
         return;
     }
 
-    const id = crypto.randomUUID();
 
     const user = {
-        id,
+
+        id:
+            createId("user_"),
+
         username,
+
         role,
-        ws,
+
+        description: "",
+
         roomId: null,
-        muted: false,
-        cameraDisabled: false,
-        profile: {
-            description: "",
-            avatar: null
-        }
+
+        microphoneEnabled: false,
+
+        cameraEnabled: false,
+
+        ws
     };
 
-    users.set(id, user);
-    ws.userId = id;
 
-    send(ws, {
+    users.set(
+        user.id,
+        user
+    );
+
+
+    ws.userId =
+        user.id;
+
+
+    safeSend(ws, {
+
         type: "login-success",
-        user: publicUser(user)
+
+        user:
+            publicUser(user)
     });
 
-    sendRoomList(ws);
 
-    if (role === "admin") {
-        sendUsers(ws);
-    }
+    sendRoomList();
+
+    sendUsersList();
 }
 
 
 /* =========================
-   PROFILE
+   CREATE ROOM
 ========================= */
 
-function handleUpdateProfile(ws, message) {
+function createRoom(user, message) {
 
-    const user =
-        users.get(ws.userId);
-
-    if (!user) return;
-
-    user.profile = {
-        description:
-            String(message.description || "")
-                .slice(0, 1000),
-
-        avatar:
-            typeof message.avatar === "string"
-                ? message.avatar
-                : null
-    };
-
-    broadcastUserUpdate(user);
-
-    send(ws, {
-        type: "profile-updated",
-        user: publicUser(user)
-    });
-}
+    const name =
+        String(
+            message.name || ""
+        ).trim();
 
 
-/* =========================
-   ROOMS
-========================= */
+    const description =
+        String(
+            message.description || ""
+        ).trim();
 
-function handleCreateRoom(ws, message) {
 
-    const user =
-        users.get(ws.userId);
+    if(!name){
 
-    if (!user) return;
+        safeSend(user.ws, {
 
-    let name =
-        String(message.name || "")
-            .trim()
-            .slice(0, 50);
+            type: "error",
 
-    if (!name) {
-        sendError(ws, "Nom du salon obligatoire.");
+            message:
+                "Le nom du salon est obligatoire."
+        });
+
         return;
     }
 
-    const existing =
-        [...rooms.values()].find(
-            room =>
-                room.name.toLowerCase() ===
-                name.toLowerCase()
-        );
-
-    if (existing) {
-        sendError(ws, "Ce salon existe déjà.");
-        return;
-    }
 
     const room = {
-        id: crypto.randomUUID(),
+
+        id:
+            createId("room_"),
+
         name,
-        ownerId: user.id,
-        participants: new Set()
+
+        description,
+
+        ownerId:
+            user.id,
+
+        participants:
+            new Set()
     };
 
-    rooms.set(room.id, room);
 
-    sendRoomListToAll();
+    rooms.set(
+        room.id,
+        room
+    );
+
+
+    safeSend(user.ws, {
+
+        type: "room-created",
+
+        room:
+            publicRoom(room)
+    });
+
+
+    sendRoomList();
 }
 
 
-function handleJoinRoom(ws, message) {
+/* =========================
+   JOIN ROOM
+========================= */
 
-    const user =
-        users.get(ws.userId);
-
-    if (!user) return;
+async function joinRoom(user, roomId) {
 
     const room =
-        rooms.get(message.roomId);
+        rooms.get(roomId);
 
-    if (!room) {
-        sendError(ws, "Salon introuvable.");
+
+    if(!room){
+
+        safeSend(user.ws, {
+
+            type: "error",
+
+            message:
+                "Ce salon n'existe plus."
+        });
+
         return;
     }
 
-    if (user.roomId) {
-        removeUserFromRoom(user);
+
+    /*
+        Si l'utilisateur est déjà
+        dans un salon, on le fait sortir
+        proprement avant de rejoindre.
+    */
+
+    if(user.roomId){
+
+        leaveRoom(
+            user,
+            false
+        );
     }
 
+
+    const existingParticipantIds =
+        Array.from(
+            room.participants
+        );
+
+
+    room.participants.add(
+        user.id
+    );
+
+
+    user.roomId =
+        room.id;
+
+
+    /*
+        On prépare la liste des participants
+        déjà présents.
+    */
+
     const participants =
-        [...room.participants]
+        existingParticipantIds
             .map(id => users.get(id))
             .filter(Boolean)
             .map(publicUser);
 
-    room.participants.add(user.id);
-    user.roomId = room.id;
 
-    send(ws, {
+    safeSend(user.ws, {
+
         type: "room-joined",
-        room: publicRoom(room),
+
+        room:
+            publicRoom(room),
+
         participants
     });
 
+
     /*
-     * On informe les autres.
-     * Le nouvel utilisateur va ensuite créer
-     * les offres vers les participants existants.
-     */
-    broadcastRoom(room, {
-        type: "user-joined",
-        user: publicUser(user)
-    }, user.id);
+        On informe les autres qu'un utilisateur
+        vient d'arriver.
 
-    sendRoomListToAll();
-    sendUsersToAdmins();
-}
+        IMPORTANT :
+        le nouvel utilisateur est celui qui
+        crée les offers.
+    */
 
+    broadcastRoom(
+        room,
+        {
 
-function handleLeaveRoom(ws) {
+            type: "user-joined",
 
-    const user =
-        users.get(ws.userId);
+            user:
+                publicUser(user)
 
-    if (!user) return;
-
-    if (!user.roomId) return;
-
-    removeUserFromRoom(user);
-
-    send(ws, {
-        type: "room-left"
-    });
-
-    sendRoomListToAll();
-    sendUsersToAdmins();
-}
-
-
-function removeUserFromRoom(user) {
-
-    if (!user.roomId) return;
-
-    const room =
-        rooms.get(user.roomId);
-
-    if (!room) {
-        user.roomId = null;
-        return;
-    }
-
-    room.participants.delete(
+        },
         user.id
     );
 
-    broadcastRoom(room, {
-        type: "user-left",
-        userId: user.id
-    });
+
+    sendRoomList();
+
+    sendUsersList();
+}
+
+
+/* =========================
+   LEAVE ROOM
+========================= */
+
+function leaveRoom(
+    user,
+    sendConfirmation = true
+) {
+
+    if(!user.roomId)
+        return;
+
+
+    const room =
+        rooms.get(
+            user.roomId
+        );
+
+
+    const oldRoomId =
+        user.roomId;
+
+
+    if(room){
+
+        room.participants.delete(
+            user.id
+        );
+
+
+        broadcastRoom(
+            room,
+            {
+
+                type: "user-left",
+
+                userId:
+                    user.id
+
+            },
+            user.id
+        );
+
+
+        /*
+            Les salons créés par les utilisateurs
+            sont supprimés automatiquement lorsqu'ils
+            sont complètement vides.
+
+            Le salon Général reste permanent.
+        */
+
+        if(
+            room.id !== "general" &&
+            room.participants.size === 0
+        ){
+
+            rooms.delete(
+                room.id
+            );
+        }
+    }
+
 
     user.roomId = null;
 
-    /*
-     * Les salons créés par les utilisateurs
-     * sont supprimés automatiquement lorsqu'ils
-     * deviennent complètement vides.
-     *
-     * Le salon Général reste toujours présent.
-     */
-    if (
-        room.id !== GENERAL_ROOM_ID &&
-        room.participants.size === 0
-    ) {
-        rooms.delete(room.id);
+    user.microphoneEnabled = false;
+
+    user.cameraEnabled = false;
+
+
+    if(sendConfirmation){
+
+        safeSend(user.ws, {
+
+            type: "room-left",
+
+            roomId:
+                oldRoomId
+        });
     }
+
+
+    sendRoomList();
+
+    sendUsersList();
 }
 
 
@@ -463,118 +708,223 @@ function removeUserFromRoom(user) {
    CHAT
 ========================= */
 
-function handleChat(ws, message) {
-
-    const user =
-        users.get(ws.userId);
-
-    if (!user) return;
+function handleChat(user, message) {
 
     const text =
-        String(message.text || "")
-            .trim()
-            .slice(0, 2000);
+        String(
+            message.text || ""
+        ).trim();
 
-    if (!text) return;
+
+    if(!text)
+        return;
+
 
     /*
-     * Pas dans un salon :
-     * chat général.
-     */
-    if (!user.roomId) {
+        Message de lobby
+    */
 
-        broadcastAll({
+    if(!user.roomId){
+
+        broadcastLobby({
+
             type: "chat-message",
+
             roomId: null,
-            user: publicUser(user),
+
+            userId:
+                user.id,
+
+            username:
+                user.username,
+
             text
         });
 
         return;
     }
 
+
     /*
-     * Dans un salon :
-     * message envoyé à tous les membres,
-     * y compris l'auteur.
-     */
+        Message de salon
+    */
+
     const room =
-        rooms.get(user.roomId);
+        rooms.get(
+            user.roomId
+        );
 
-    if (!room) return;
 
-    broadcastRoom(room, {
-        type: "chat-message",
-        roomId: room.id,
-        user: publicUser(user),
-        text
-    });
+    if(!room)
+        return;
+
+
+    /*
+        IMPORTANT :
+        on envoie au sender aussi,
+        mais une seule fois.
+    */
+
+    broadcastRoom(
+        room,
+        {
+
+            type: "chat-message",
+
+            roomId:
+                room.id,
+
+            userId:
+                user.id,
+
+            username:
+                user.username,
+
+            text
+        }
+    );
 }
 
 
 /* =========================
-   WEBRTC
+   PROFILE
 ========================= */
 
-function relayToUser(ws, message, type) {
+function updateProfile(user, message) {
 
-    const sender =
-        users.get(ws.userId);
+    user.description =
+        String(
+            message.description || ""
+        ).trim()
+        .substring(0, 500);
 
-    if (!sender) return;
 
-    const target =
-        users.get(message.targetId);
+    safeSend(user.ws, {
 
-    if (!target) return;
+        type: "profile-updated",
 
-    /*
-     * Sécurité :
-     * on ne relaie les signaux que si les deux
-     * utilisateurs sont dans le même salon.
-     */
-    if (
-        !sender.roomId ||
-        sender.roomId !== target.roomId
-    ) {
-        return;
-    }
-
-    send(target.ws, {
-        type,
-        fromId: sender.id,
-        [type === "offer"
-            ? "offer"
-            : type === "answer"
-                ? "answer"
-                : "candidate"]:
-            type === "offer"
-                ? message.offer
-                : type === "answer"
-                    ? message.answer
-                    : message.candidate
+        user:
+            publicUser(user)
     });
+
+
+    broadcastUserUpdate(
+        user
+    );
+
+
+    sendUsersList();
 }
 
 
-function handleMediaState(ws, message) {
+/* =========================
+   WEBRTC SIGNALING
+========================= */
 
-    const user =
-        users.get(ws.userId);
+function relayToTarget(
+    user,
+    message,
+    payloadKey
+) {
 
-    if (!user || !user.roomId) return;
+    const targetId =
+        message.target;
 
-    const room =
-        rooms.get(user.roomId);
 
-    if (!room) return;
+    if(!targetId)
+        return;
 
-    broadcastRoom(room, {
-        type: "media-state",
-        userId: user.id,
-        microphone: Boolean(message.microphone),
-        camera: Boolean(message.camera)
-    }, user.id);
+
+    const target =
+        users.get(targetId);
+
+
+    if(!target)
+        return;
+
+
+    /*
+        On s'assure que les deux utilisateurs
+        sont dans le même salon.
+    */
+
+    if(
+        !user.roomId ||
+        target.roomId !==
+            user.roomId
+    ){
+
+        return;
+    }
+
+
+    safeSend(
+        target.ws,
+        {
+
+            type:
+                message.type,
+
+            from:
+                user.id,
+
+            [payloadKey]:
+                message[payloadKey]
+        }
+    );
+}
+
+
+/* =========================
+   MEDIA STATE
+========================= */
+
+function updateMediaState(
+    user,
+    message
+) {
+
+    user.microphoneEnabled =
+        !!message.microphoneEnabled;
+
+
+    user.cameraEnabled =
+        !!message.cameraEnabled;
+
+
+    if(user.roomId){
+
+        const room =
+            rooms.get(
+                user.roomId
+            );
+
+
+        if(room){
+
+            broadcastRoom(
+                room,
+                {
+
+                    type:
+                        "media-state",
+
+                    userId:
+                        user.id,
+
+                    microphoneEnabled:
+                        user.microphoneEnabled,
+
+                    cameraEnabled:
+                        user.cameraEnabled
+                },
+                user.id
+            );
+        }
+    }
+
+
+    sendUsersList();
 }
 
 
@@ -582,328 +932,686 @@ function handleMediaState(ws, message) {
    ADMIN
 ========================= */
 
-function isAdmin(ws) {
+function isAdmin(user){
 
-    const user =
-        users.get(ws.userId);
-
-    return Boolean(
+    return (
         user &&
         user.role === "admin"
     );
 }
 
 
-function handleAdminMute(ws, message) {
-
-    if (!isAdmin(ws)) {
-        sendError(ws, "Accès administrateur requis.");
-        return;
-    }
-
-    const target =
-        users.get(message.userId);
-
-    if (!target) return;
-
-    target.muted =
-        Boolean(message.muted);
-
-    send(target.ws, {
-        type: "force-micro",
-        enabled: !target.muted
-    });
-
-    broadcastUserUpdate(target);
-
-    sendUsersToAdmins();
-}
-
-
-function handleAdminCamera(ws, message) {
-
-    if (!isAdmin(ws)) {
-        sendError(ws, "Accès administrateur requis.");
-        return;
-    }
-
-    const target =
-        users.get(message.userId);
-
-    if (!target) return;
-
-    target.cameraDisabled =
-        Boolean(message.disabled);
-
-    send(target.ws, {
-        type: "force-camera",
-        enabled: !target.cameraDisabled
-    });
-
-    broadcastUserUpdate(target);
-
-    sendUsersToAdmins();
-}
-
-
-function handleAdminKick(ws, message) {
-
-    if (!isAdmin(ws)) {
-        sendError(ws, "Accès administrateur requis.");
-        return;
-    }
-
-    const target =
-        users.get(message.userId);
-
-    if (!target) return;
-
-    if (target.roomId) {
-        removeUserFromRoom(target);
-    }
-
-    send(target.ws, {
-        type: "kicked",
-        message:
-            "Vous avez été expulsé par l'administrateur."
-    });
-
-    target.roomId = null;
-
-    sendRoomListToAll();
-    sendUsersToAdmins();
-}
-
-
-function handleAdminDeleteRoom(ws, message) {
-
-    if (!isAdmin(ws)) {
-        sendError(ws, "Accès administrateur requis.");
-        return;
-    }
-
-    const room =
-        rooms.get(message.roomId);
-
-    if (!room) return;
-
-    if (room.id === GENERAL_ROOM_ID) {
-        sendError(
-            ws,
-            "Le salon Général ne peut pas être supprimé."
-        );
-
-        return;
-    }
-
-    for (const userId of room.participants) {
-
-        const user =
-            users.get(userId);
-
-        if (!user) continue;
-
-        user.roomId = null;
-
-        send(user.ws, {
-            type: "room-deleted",
-            roomId: room.id,
-            message:
-                `Le salon "${room.name}" a été supprimé par l'administrateur.`
-        });
-    }
-
-    rooms.delete(room.id);
-
-    sendRoomListToAll();
-    sendUsersToAdmins();
-}
-
-
-/* =========================
-   USERS
-========================= */
-
-function removeUser(userId) {
-
-    const user =
-        users.get(userId);
-
-    if (!user) return;
-
-    if (user.roomId) {
-        removeUserFromRoom(user);
-    }
-
-    users.delete(userId);
-
-    sendRoomListToAll();
-    sendUsersToAdmins();
-}
-
-
-function sendUsers(ws) {
-
-    if (!isAdmin(ws)) return;
-
-    send(ws, {
-        type: "users-list",
-        users:
-            [...users.values()]
-                .map(publicUser)
-    });
-}
-
-
-function sendUsersToAdmins() {
-
-    for (const user of users.values()) {
-
-        if (user.role === "admin") {
-            sendUsers(user.ws);
-        }
-    }
-}
-
-
-/* =========================
-   ROOM LIST
-========================= */
-
-function sendRoomList(ws) {
-
-    send(ws, {
-        type: "room-list",
-        rooms:
-            [...rooms.values()]
-                .map(publicRoom)
-    });
-}
-
-
-function sendRoomListToAll() {
-
-    for (const user of users.values()) {
-        sendRoomList(user.ws);
-    }
-}
-
-
-/* =========================
-   BROADCAST
-========================= */
-
-function broadcastAll(message) {
-
-    for (const user of users.values()) {
-        send(user.ws, message);
-    }
-}
-
-
-function broadcastRoom(
-    room,
-    message,
-    excludeUserId = null
+function adminMute(
+    admin,
+    userId
 ) {
 
-    for (const userId of room.participants) {
+    if(!isAdmin(admin))
+        return;
 
-        if (userId === excludeUserId) {
-            continue;
+
+    const target =
+        users.get(userId);
+
+
+    if(!target)
+        return;
+
+
+    target.microphoneEnabled =
+        false;
+
+
+    safeSend(
+        target.ws,
+        {
+
+            type:
+                "admin-action",
+
+            message:
+                "Votre microphone a été désactivé par l'administrateur."
         }
+    );
 
-        const user =
-            users.get(userId);
 
-        if (user) {
-            send(user.ws, message);
+    broadcastUserUpdate(
+        target
+    );
+
+
+    if(target.roomId){
+
+        const room =
+            rooms.get(
+                target.roomId
+            );
+
+
+        if(room){
+
+            broadcastRoom(
+                room,
+                {
+
+                    type:
+                        "media-state",
+
+                    userId:
+                        target.id,
+
+                    microphoneEnabled:
+                        false,
+
+                    cameraEnabled:
+                        target.cameraEnabled
+                }
+            );
         }
     }
-}
 
 
-function broadcastUserUpdate(user) {
+    safeSend(
+        admin.ws,
+        {
 
-    broadcastAll({
-        type: "user-updated",
-        user: publicUser(user)
-    });
-}
+            type:
+                "admin-action",
 
-
-/* =========================
-   PUBLIC DATA
-========================= */
-
-function publicUser(user) {
-
-    return {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-        roomId: user.roomId,
-        muted: user.muted,
-        cameraDisabled: user.cameraDisabled,
-        profile: {
-            description:
-                user.profile?.description || "",
-            avatar:
-                user.profile?.avatar || null
+            message:
+                "Microphone désactivé."
         }
-    };
+    );
+
+
+    sendUsersList();
 }
 
 
-function publicRoom(room) {
+function adminCamera(
+    admin,
+    userId
+) {
 
-    return {
-        id: room.id,
-        name: room.name,
-        ownerId: room.ownerId,
-        count: room.participants.size,
-        participants:
-            [...room.participants]
-                .map(id => users.get(id))
-                .filter(Boolean)
-                .map(publicUser)
-    };
+    if(!isAdmin(admin))
+        return;
+
+
+    const target =
+        users.get(userId);
+
+
+    if(!target)
+        return;
+
+
+    target.cameraEnabled =
+        false;
+
+
+    safeSend(
+        target.ws,
+        {
+
+            type:
+                "admin-action",
+
+            message:
+                "Votre caméra a été désactivée par l'administrateur."
+        }
+    );
+
+
+    broadcastUserUpdate(
+        target
+    );
+
+
+    if(target.roomId){
+
+        const room =
+            rooms.get(
+                target.roomId
+            );
+
+
+        if(room){
+
+            broadcastRoom(
+                room,
+                {
+
+                    type:
+                        "media-state",
+
+                    userId:
+                        target.id,
+
+                    microphoneEnabled:
+                        target.microphoneEnabled,
+
+                    cameraEnabled:
+                        false
+                }
+            );
+        }
+    }
+
+
+    safeSend(
+        admin.ws,
+        {
+
+            type:
+                "admin-action",
+
+            message:
+                "Caméra désactivée."
+        }
+    );
+
+
+    sendUsersList();
 }
 
 
-/* =========================
-   HELPERS
-========================= */
+function adminKick(
+    admin,
+    userId
+) {
 
-function send(ws, data) {
+    if(!isAdmin(admin))
+        return;
 
-    if (
-        ws &&
-        ws.readyState === WebSocket.OPEN
-    ) {
-        ws.send(
-            JSON.stringify(data)
+
+    const target =
+        users.get(userId);
+
+
+    if(!target)
+        return;
+
+
+    if(target.id === admin.id){
+
+        safeSend(admin.ws, {
+
+            type:
+                "error",
+
+            message:
+                "Vous ne pouvez pas vous expulser vous-même."
+        });
+
+        return;
+    }
+
+
+    safeSend(
+        target.ws,
+        {
+
+            type:
+                "kicked",
+
+            message:
+                "Vous avez été expulsé par l'administrateur."
+        }
+    );
+
+
+    if(target.roomId){
+
+        leaveRoom(
+            target,
+            false
         );
     }
+
+
+    safeSend(
+        admin.ws,
+        {
+
+            type:
+                "admin-action",
+
+            message:
+                "Utilisateur expulsé."
+        }
+    );
+
+
+    sendRoomList();
+
+    sendUsersList();
 }
 
 
-function sendError(ws, message) {
+function adminDeleteRoom(
+    admin,
+    roomId
+) {
 
-    send(ws, {
-        type: "error-message",
-        message
-    });
+    if(!isAdmin(admin))
+        return;
+
+
+    if(roomId === "general"){
+
+        safeSend(admin.ws, {
+
+            type:
+                "error",
+
+            message:
+                "Le salon Général ne peut pas être supprimé."
+        });
+
+        return;
+    }
+
+
+    const room =
+        rooms.get(roomId);
+
+
+    if(!room)
+        return;
+
+
+    /*
+        On prévient tous les participants
+        puis on les remet dans le lobby.
+    */
+
+    const participantIds =
+        Array.from(
+            room.participants
+        );
+
+
+    participantIds.forEach(
+        userId => {
+
+            const user =
+                users.get(userId);
+
+
+            if(!user)
+                return;
+
+
+            safeSend(
+                user.ws,
+                {
+
+                    type:
+                        "room-left",
+
+                    roomId:
+                        room.id,
+
+                    message:
+                        "Le salon a été supprimé par l'administrateur."
+                }
+            );
+
+
+            user.roomId = null;
+
+            user.microphoneEnabled =
+                false;
+
+            user.cameraEnabled =
+                false;
+        }
+    );
+
+
+    rooms.delete(
+        roomId
+    );
+
+
+    safeSend(
+        admin.ws,
+        {
+
+            type:
+                "admin-action",
+
+            message:
+                "Salon supprimé."
+        }
+    );
+
+
+    sendRoomList();
+
+    sendUsersList();
 }
+
+
+/* =========================
+   MESSAGE ROUTER
+========================= */
+
+function handleMessage(
+    ws,
+    message
+) {
+
+    const user =
+        ws.userId
+            ? users.get(ws.userId)
+            : null;
+
+
+    if(message.type === "login"){
+
+        handleLogin(
+            ws,
+            message
+        );
+
+        return;
+    }
+
+
+    if(!user){
+
+        safeSend(ws, {
+
+            type:
+                "error",
+
+            message:
+                "Vous devez être connecté."
+        });
+
+        return;
+    }
+
+
+    switch(message.type){
+
+        case "create-room":
+
+            createRoom(
+                user,
+                message
+            );
+
+            break;
+
+
+        case "join-room":
+
+            joinRoom(
+                user,
+                message.roomId
+            );
+
+            break;
+
+
+        case "leave-room":
+
+            leaveRoom(
+                user,
+                true
+            );
+
+            break;
+
+
+        case "chat":
+
+            handleChat(
+                user,
+                message
+            );
+
+            break;
+
+
+        case "update-profile":
+
+            updateProfile(
+                user,
+                message
+            );
+
+            break;
+
+
+        case "offer":
+
+            relayToTarget(
+                user,
+                message,
+                "offer"
+            );
+
+            break;
+
+
+        case "answer":
+
+            relayToTarget(
+                user,
+                message,
+                "answer"
+            );
+
+            break;
+
+
+        case "ice-candidate":
+
+            relayToTarget(
+                user,
+                message,
+                "candidate"
+            );
+
+            break;
+
+
+        case "media-state":
+
+            updateMediaState(
+                user,
+                message
+            );
+
+            break;
+
+
+        case "admin-mute":
+
+            adminMute(
+                user,
+                message.userId
+            );
+
+            break;
+
+
+        case "admin-camera":
+
+            adminCamera(
+                user,
+                message.userId
+            );
+
+            break;
+
+
+        case "admin-kick":
+
+            adminKick(
+                user,
+                message.userId
+            );
+
+            break;
+
+
+        case "admin-delete-room":
+
+            adminDeleteRoom(
+                user,
+                message.roomId
+            );
+
+            break;
+
+
+        default:
+
+            safeSend(user.ws, {
+
+                type:
+                    "error",
+
+                message:
+                    "Commande inconnue."
+            });
+    }
+}
+
+
+/* =========================
+   CONNECTION
+========================= */
+
+wss.on(
+    "connection",
+    ws => {
+
+        console.log(
+            "Nouvelle connexion WebSocket"
+        );
+
+
+        ws.on(
+            "message",
+            raw => {
+
+                try{
+
+                    const message =
+                        JSON.parse(
+                            raw.toString()
+                        );
+
+
+                    handleMessage(
+                        ws,
+                        message
+                    );
+
+                }catch(error){
+
+                    console.error(
+                        "Message error:",
+                        error
+                    );
+
+
+                    safeSend(
+                        ws,
+                        {
+
+                            type:
+                                "error",
+
+                            message:
+                                "Message invalide."
+                        }
+                    );
+                }
+            }
+        );
+
+
+        ws.on(
+            "close",
+            () => {
+
+                const userId =
+                    ws.userId;
+
+
+                if(!userId)
+                    return;
+
+
+                const user =
+                    users.get(
+                        userId
+                    );
+
+
+                if(!user)
+                    return;
+
+
+                console.log(
+                    "Déconnexion:",
+                    user.username
+                );
+
+
+                if(user.roomId){
+
+                    leaveRoom(
+                        user,
+                        false
+                    );
+                }
+
+
+                users.delete(
+                    userId
+                );
+
+
+                sendRoomList();
+
+                sendUsersList();
+            }
+        );
+
+
+        ws.on(
+            "error",
+            error => {
+
+                console.error(
+                    "WebSocket error:",
+                    error
+                );
+            }
+        );
+    }
+);
 
 
 /* =========================
    START
 ========================= */
 
-server.listen(PORT, () => {
+server.listen(
+    PORT,
+    "0.0.0.0",
+    () => {
 
-    console.log(
-        `Col'inCall démarré sur le port ${PORT}`
-    );
-});
+        console.log(
+            `Col'inCall server listening on port ${PORT}`
+        );
+
+    }
+);
