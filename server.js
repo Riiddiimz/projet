@@ -7,6 +7,17 @@ const PORT =
 
 
 /* =========================================================
+   ADMIN
+========================================================= */
+
+const ADMIN_USERNAME =
+    "Riddimz";
+
+const ADMIN_CODE =
+    "85206";
+
+
+/* =========================================================
    HTTP
 ========================================================= */
 
@@ -19,6 +30,7 @@ const server =
                 {
                     "Content-Type":
                         "application/json",
+
                     "Access-Control-Allow-Origin":
                         "*"
                 }
@@ -27,11 +39,13 @@ const server =
 
             res.end(
                 JSON.stringify({
+
                     status:
                         "online",
 
                     service:
-                        "Col'inCall WebRTC Server"
+                        "Col'inCall Server"
+
                 })
             );
 
@@ -53,28 +67,23 @@ const wss =
    ROOMS
 ========================================================= */
 
-/*
-    Chaque salon :
-
-    {
-        id,
-        name,
-        description,
-        icon,
-        max,
-        users: Map()
-    }
-*/
-
 const rooms =
     new Map();
 
 
 /* =========================================================
-   DEFAULT ROOMS
+   USERS
 ========================================================= */
 
-function createDefaultRoom(
+const clients =
+    new Map();
+
+
+/* =========================================================
+   CREATE DEFAULT ROOM
+========================================================= */
+
+function createRoom(
     id,
     name,
     description,
@@ -93,7 +102,8 @@ function createDefaultRoom(
 
             icon,
 
-            max: 8,
+            max:
+                8,
 
             users:
                 new Map()
@@ -104,28 +114,28 @@ function createDefaultRoom(
 }
 
 
-createDefaultRoom(
+createRoom(
     "general",
     "Général",
     "Discussion générale",
     "💬"
 );
 
-createDefaultRoom(
+createRoom(
     "gaming",
     "Gaming",
     "Parlez jeux vidéo",
     "🎮"
 );
 
-createDefaultRoom(
+createRoom(
     "chill",
     "Chill",
     "Venez simplement discuter",
     "☕"
 );
 
-createDefaultRoom(
+createRoom(
     "musique",
     "Musique",
     "Partagez vos découvertes",
@@ -151,7 +161,7 @@ function send(
     data
 ) {
 
-    if (
+    if(
         ws &&
         ws.readyState ===
             WebSocket.OPEN
@@ -174,49 +184,102 @@ function send(
 
 function getRoomList() {
 
-    return Array.from(
-        rooms.values()
-    ).map(
-        room => ({
+    return Array
+        .from(
+            rooms.values()
+        )
+        .map(
+            room => ({
 
-            id:
-                room.id,
+                id:
+                    room.id,
 
-            name:
-                room.name,
+                name:
+                    room.name,
 
-            description:
-                room.description,
+                description:
+                    room.description,
 
-            icon:
-                room.icon,
+                icon:
+                    room.icon,
 
-            count:
-                room.users.size,
+                count:
+                    room.users.size,
 
-            max:
-                room.max
+                max:
+                    room.max
 
-        })
-    );
+            })
+        );
 
 }
 
 
 /* =========================================================
-   BROADCAST ALL
+   USERS LIST
 ========================================================= */
 
-function broadcastAll(
-    data,
-    except = null
-) {
+function getUsersList() {
+
+    return Array
+        .from(
+            clients.entries()
+        )
+        .map(
+            ([id, client]) => ({
+
+                id,
+
+                name:
+                    client.name,
+
+                admin:
+                    client.admin,
+
+                avatar:
+                    client.avatar || "",
+
+                description:
+                    client.description || "",
+
+                room:
+                    client.room || null,
+
+                roomName:
+                    client.room
+                        ? rooms.get(
+                            client.room
+                        )?.name || ""
+                        : ""
+
+            })
+        );
+
+}
+
+
+/* =========================================================
+   UPDATE LOBBY
+========================================================= */
+
+function broadcastLobby() {
+
+    const data = {
+
+        type:
+            "room-updated",
+
+        rooms:
+            getRoomList()
+
+    };
+
 
     wss.clients.forEach(
         client => {
 
-            if (
-                client !== except
+            if(
+                client.authenticated
             ) {
 
                 send(
@@ -233,110 +296,116 @@ function broadcastAll(
 
 
 /* =========================================================
-   UPDATE ROOM LIST
+   AUTHENTICATION
 ========================================================= */
 
-function updateLobby() {
-
-    broadcastAll({
-
-        type:
-            "room-updated",
-
-        rooms:
-            getRoomList()
-
-    });
-
-}
-
-
-/* =========================================================
-   CREATE ROOM
-========================================================= */
-
-function createRoom(
+function login(
     ws,
-    name,
-    description,
-    icon
+    data
 ) {
 
-    let id =
-        name
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(
-                /[\u0300-\u036f]/g,
-                ""
-            )
-            .replace(
-                /[^a-z0-9]+/g,
-                "-"
-            )
-            .replace(
-                /^-+|-+$/g,
-                ""
+    const name =
+        String(
+            data.name || ""
+        ).trim();
+
+
+    const wantsAdmin =
+        Boolean(
+            data.admin
+        );
+
+
+    if(!name) {
+
+        send(
+            ws,
+            {
+
+                type:
+                    "login-result",
+
+                success:
+                    false,
+
+                message:
+                    "Pseudo obligatoire."
+
+            }
+        );
+
+        return;
+
+    }
+
+
+    /*
+        ADMIN
+    */
+
+    if(wantsAdmin) {
+
+        if(
+            name !==
+                ADMIN_USERNAME ||
+            String(
+                data.code || ""
+            ) !==
+                ADMIN_CODE
+        ) {
+
+            send(
+                ws,
+                {
+
+                    type:
+                        "login-result",
+
+                    success:
+                        false,
+
+                    message:
+                        "Pseudo ou code administrateur incorrect."
+
+                }
             );
 
-
-    if (!id) {
-
-        id =
-            "room-" +
-            generateId();
-
-    }
-
-
-    const originalId =
-        id;
-
-
-    let number =
-        2;
-
-
-    while (
-        rooms.has(id)
-    ) {
-
-        id =
-            originalId +
-            "-" +
-            number;
-
-        number++;
-
-    }
-
-
-    rooms.set(
-        id,
-        {
-
-            id,
-
-            name:
-                name.slice(0,30),
-
-            description:
-                (
-                    description ||
-                    "Salon Col'inCall"
-                ).slice(0,80),
-
-            icon:
-                icon ||
-                "💬",
-
-            max:
-                8,
-
-            users:
-                new Map()
+            return;
 
         }
+
+    }
+
+
+    const id =
+        generateId();
+
+
+    ws.id =
+        id;
+
+    ws.name =
+        name;
+
+    ws.admin =
+        wantsAdmin;
+
+    ws.authenticated =
+        true;
+
+    ws.room =
+        null;
+
+    ws.avatar =
+        "";
+
+    ws.description =
+        "";
+
+
+    clients.set(
+        id,
+        ws
     );
 
 
@@ -345,33 +414,40 @@ function createRoom(
         {
 
             type:
-                "room-created",
+                "login-result",
 
-            room:
-                {
+            success:
+                true,
 
-                    id
+            admin:
+                wantsAdmin,
 
-                }
+            id
 
         }
     );
 
 
-    updateLobby();
+    console.log(
+        `[LOGIN] ${name} ${wantsAdmin ? "(ADMIN)" : ""}`
+    );
 
 }
 
 
 /* =========================================================
-   JOIN
+   JOIN ROOM
 ========================================================= */
 
 function joinRoom(
     ws,
     roomId,
-    name
+    profile
 ) {
+
+    if(!ws.authenticated)
+        return;
+
 
     const room =
         rooms.get(
@@ -379,7 +455,7 @@ function joinRoom(
         );
 
 
-    if (!room) {
+    if(!room) {
 
         send(
             ws,
@@ -399,9 +475,9 @@ function joinRoom(
     }
 
 
-    if (
+    if(
         room.users.size >=
-        room.max
+            room.max
     ) {
 
         send(
@@ -412,7 +488,7 @@ function joinRoom(
                     "error",
 
                 message:
-                    "Ce salon est complet."
+                    "Salon complet."
 
             }
         );
@@ -422,11 +498,7 @@ function joinRoom(
     }
 
 
-    /*
-        Si déjà dans un autre salon
-    */
-
-    if (ws.room) {
+    if(ws.room) {
 
         leaveRoom(
             ws
@@ -435,57 +507,66 @@ function joinRoom(
     }
 
 
-    const id =
-        generateId();
-
-
     /*
-        Utilisateurs déjà présents
+        Profil
     */
 
-    const existingUsers =
-        Array.from(
-            room.users.entries()
-        ).map(
-            ([userId, user]) => ({
+    if(profile) {
 
-                id:
-                    userId,
+        ws.avatar =
+            String(
+                profile.avatar || ""
+            ).slice(
+                0,
+                500000
+            );
 
-                name:
-                    user.name
+        ws.description =
+            String(
+                profile.description || ""
+            ).slice(
+                0,
+                160
+            );
 
-            })
-        );
+    }
+
+
+    const existing =
+        Array
+            .from(
+                room.users.entries()
+            )
+            .map(
+                ([id, user]) => ({
+
+                    id,
+
+                    name:
+                        user.name,
+
+                    avatar:
+                        user.avatar || "",
+
+                    description:
+                        user.description || ""
+
+                })
+            );
 
 
     room.users.set(
-        id,
-        {
-
-            ws,
-
-            name:
-                name ||
-                "Participant"
-
-        }
+        ws.id,
+        ws
     );
 
 
-    ws.id =
-        id;
-
     ws.room =
-        roomId;
-
-    ws.name =
-        name ||
-        "Participant";
+        room.id;
 
 
     /*
-        Réponse au nouveau client
+        Nouveau participant
     */
 
     send(
@@ -495,16 +576,17 @@ function joinRoom(
             type:
                 "joined-room",
 
-            id,
+            id:
+                ws.id,
 
             roomName:
                 room.name,
 
-            users:
-                existingUsers,
-
             count:
-                room.users.size
+                room.users.size,
+
+            users:
+                existing
 
         }
     );
@@ -515,108 +597,34 @@ function joinRoom(
     */
 
     room.users.forEach(
-        (user, userId) => {
+        (user, id) => {
 
-            if (
-                userId !== id
+            if(
+                id ===
+                    ws.id
             ) {
-
-                send(
-                    user.ws,
-                    {
-
-                        type:
-                            "user-joined",
-
-                        id,
-
-                        name:
-                            ws.name,
-
-                        count:
-                            room.users.size
-
-                    }
-                );
-
+                return;
             }
 
-        }
-    );
-
-
-    updateLobby();
-
-
-    console.log(
-        `[JOIN] ${ws.name} -> ${room.name}`
-    );
-
-}
-
-
-/* =========================================================
-   LEAVE
-========================================================= */
-
-function leaveRoom(
-    ws
-) {
-
-    if (
-        !ws.room ||
-        !ws.id
-    ) {
-
-        return;
-
-    }
-
-
-    const room =
-        rooms.get(
-            ws.room
-        );
-
-
-    if (!room) {
-
-        ws.room =
-            null;
-
-        ws.id =
-            null;
-
-        return;
-
-    }
-
-
-    const leavingId =
-        ws.id;
-
-
-    room.users.delete(
-        leavingId
-    );
-
-
-    /*
-        Prévenir les autres
-    */
-
-    room.users.forEach(
-        user => {
 
             send(
-                user.ws,
+                user,
                 {
 
                     type:
-                        "user-left",
+                        "user-joined",
 
                     id:
-                        leavingId,
+                        ws.id,
+
+                    name:
+                        ws.name,
+
+                    avatar:
+                        ws.avatar,
+
+                    description:
+                        ws.description,
 
                     count:
                         room.users.size
@@ -628,39 +636,26 @@ function leaveRoom(
     );
 
 
+    broadcastLobby();
+
+
     console.log(
-        `[LEAVE] ${ws.name} -> ${room.name}`
+        `[ROOM] ${ws.name} -> ${room.name}`
     );
-
-
-    ws.room =
-        null;
-
-    ws.id =
-        null;
-
-    ws.name =
-        null;
-
-
-    updateLobby();
 
 }
 
 
 /* =========================================================
-   FORWARD WEBRTC
+   LEAVE ROOM
 ========================================================= */
 
-function forwardToPeer(
-    ws,
-    targetId,
-    data
+function leaveRoom(
+    ws
 ) {
 
-    if (!ws.room) {
+    if(!ws.room)
         return;
-    }
 
 
     const room =
@@ -669,24 +664,92 @@ function forwardToPeer(
         );
 
 
-    if (!room) {
+    if(!room) {
+
+        ws.room =
+            null;
+
         return;
+
     }
 
 
-    const target =
-        room.users.get(
-            targetId
+    const id =
+        ws.id;
+
+
+    room.users.delete(
+        id
+    );
+
+
+    room.users.forEach(
+        user => {
+
+            send(
+                user,
+                {
+
+                    type:
+                        "user-left",
+
+                    id,
+
+                    count:
+                        room.users.size
+
+                }
+            );
+
+        }
+    );
+
+
+    ws.room =
+        null;
+
+
+    broadcastLobby();
+
+}
+
+
+/* =========================================================
+   FORWARD WEBRTC
+========================================================= */
+
+function forward(
+    ws,
+    target,
+    data
+) {
+
+    if(!ws.room)
+        return;
+
+
+    const room =
+        rooms.get(
+            ws.room
         );
 
 
-    if (!target) {
+    if(!room)
         return;
-    }
+
+
+    const user =
+        room.users.get(
+            target
+        );
+
+
+    if(!user)
+        return;
 
 
     send(
-        target.ws,
+        user,
         {
 
             ...data,
@@ -695,7 +758,13 @@ function forwardToPeer(
                 ws.id,
 
             senderName:
-                ws.name
+                ws.name,
+
+            senderAvatar:
+                ws.avatar,
+
+            senderDescription:
+                ws.description
 
         }
     );
@@ -707,35 +776,13 @@ function forwardToPeer(
    CHAT
 ========================================================= */
 
-function handleChat(
+function chat(
     ws,
     message
 ) {
 
-    if (!ws.room) {
+    if(!ws.room)
         return;
-    }
-
-
-    if (
-        typeof message !==
-        "string"
-    ) {
-
-        return;
-
-    }
-
-
-    const clean =
-        message
-            .trim()
-            .slice(0,500);
-
-
-    if (!clean) {
-        return;
-    }
 
 
     const room =
@@ -744,26 +791,35 @@ function handleChat(
         );
 
 
-    if (!room) {
+    if(!room)
         return;
-    }
 
 
-    /*
-        Envoyer à tous les autres.
-        L'expéditeur affiche lui-même
-        son message côté navigateur.
-    */
+    const text =
+        String(
+            message || ""
+        )
+        .trim()
+        .slice(
+            0,
+            500
+        );
+
+
+    if(!text)
+        return;
+
 
     room.users.forEach(
-        (user, userId) => {
+        user => {
 
-            if (
-                userId !== ws.id
+            if(
+                user.id !==
+                    ws.id
             ) {
 
                 send(
-                    user.ws,
+                    user,
                     {
 
                         type:
@@ -773,7 +829,7 @@ function handleChat(
                             ws.name,
 
                         message:
-                            clean,
+                            text,
 
                         timestamp:
                             Date.now()
@@ -790,6 +846,330 @@ function handleChat(
 
 
 /* =========================================================
+   CREATE ROOM
+========================================================= */
+
+function createNewRoom(
+    ws,
+    name,
+    description,
+    icon
+) {
+
+    if(!ws.authenticated)
+        return;
+
+
+    const cleanName =
+        String(
+            name || ""
+        )
+        .trim()
+        .slice(
+            0,
+            30
+        );
+
+
+    if(!cleanName)
+        return;
+
+
+    let id =
+        cleanName
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(
+                /[\u0300-\u036f]/g,
+                ""
+            )
+            .replace(
+                /[^a-z0-9]+/g,
+                "-"
+            )
+            .replace(
+                /^-+|-+$/g,
+                ""
+            );
+
+
+    if(!id) {
+
+        id =
+            "room-" +
+            generateId();
+
+    }
+
+
+    const original =
+        id;
+
+    let i =
+        2;
+
+
+    while(
+        rooms.has(id)
+    ) {
+
+        id =
+            original +
+            "-" +
+            i++;
+
+    }
+
+
+    createRoom(
+        id,
+        cleanName,
+        String(
+            description || ""
+        ).slice(0,80),
+        icon || "💬"
+    );
+
+
+    send(
+        ws,
+        {
+
+            type:
+                "room-created",
+
+            room:
+                id
+
+        }
+    );
+
+
+    broadcastLobby();
+
+}
+
+
+/* =========================================================
+   ADMIN CHECK
+========================================================= */
+
+function requireAdmin(
+    ws
+) {
+
+    return (
+        ws &&
+        ws.authenticated &&
+        ws.admin === true
+    );
+
+}
+
+
+/* =========================================================
+   ADMIN DELETE ROOM
+========================================================= */
+
+function adminDeleteRoom(
+    ws,
+    roomId
+) {
+
+    if(!requireAdmin(ws))
+        return;
+
+
+    const room =
+        rooms.get(
+            roomId
+        );
+
+
+    if(!room)
+        return;
+
+
+    /*
+        Expulser les utilisateurs
+    */
+
+    room.users.forEach(
+        user => {
+
+            send(
+                user,
+                {
+
+                    type:
+                        "kicked",
+
+                    reason:
+                        "Le salon a été supprimé par l'administrateur."
+
+                }
+            );
+
+
+            user.room =
+                null;
+
+        }
+    );
+
+
+    rooms.delete(
+        roomId
+    );
+
+
+    broadcastLobby();
+
+}
+
+
+/* =========================================================
+   ADMIN KICK
+========================================================= */
+
+function adminKick(
+    ws,
+    targetId
+) {
+
+    if(!requireAdmin(ws))
+        return;
+
+
+    const target =
+        clients.get(
+            targetId
+        );
+
+
+    if(!target)
+        return;
+
+
+    /*
+        Ne pas permettre de kick l'admin
+    */
+
+    if(target.admin)
+        return;
+
+
+    if(target.room) {
+
+        const room =
+            rooms.get(
+                target.room
+            );
+
+
+        if(room) {
+
+            room.users.delete(
+                target.id
+            );
+
+
+            room.users.forEach(
+                user => {
+
+                    send(
+                        user,
+                        {
+
+                            type:
+                                "user-left",
+
+                            id:
+                                target.id,
+
+                            count:
+                                room.users.size
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+    }
+
+
+    target.room =
+        null;
+
+
+    send(
+        target,
+        {
+
+            type:
+                "kicked",
+
+            reason:
+                "Vous avez été expulsé par l'administrateur."
+
+        }
+    );
+
+
+    broadcastLobby();
+
+}
+
+
+/* =========================================================
+   ADMIN MUTE / CAMERA
+========================================================= */
+
+function adminMediaAction(
+    ws,
+    targetId,
+    type,
+    enabled
+) {
+
+    if(!requireAdmin(ws))
+        return;
+
+
+    const target =
+        clients.get(
+            targetId
+        );
+
+
+    if(!target)
+        return;
+
+
+    if(target.admin)
+        return;
+
+
+    send(
+        target,
+        {
+
+            type:
+                type,
+
+            enabled:
+                enabled !== false
+
+        }
+    );
+
+}
+
+
+/* =========================================================
    CONNECTION
 ========================================================= */
 
@@ -797,18 +1177,19 @@ wss.on(
     "connection",
     ws => {
 
-        console.log(
-            "[WS] Client connecté"
-        );
+        ws.authenticated =
+            false;
 
+        ws.admin =
+            false;
 
         ws.id =
             null;
 
-        ws.room =
+        ws.name =
             null;
 
-        ws.name =
+        ws.room =
             null;
 
 
@@ -824,64 +1205,85 @@ wss.on(
                         );
 
 
-                    switch (
+                    switch(
                         data.type
                     ) {
 
 
-                        /* =========================
-                           GET ROOMS
-                        ========================= */
+                        case "login":
+
+                            login(
+                                ws,
+                                data
+                            );
+
+                            break;
+
 
                         case "get-rooms":
 
-                            send(
-                                ws,
-                                {
+                            if(
+                                ws.authenticated
+                            ) {
 
-                                    type:
-                                        "rooms",
+                                send(
+                                    ws,
+                                    {
 
-                                    rooms:
-                                        getRoomList()
+                                        type:
+                                            "rooms",
 
-                                }
-                            );
+                                        rooms:
+                                            getRoomList()
+
+                                    }
+                                );
+
+                            }
 
                             break;
 
 
-                        /* =========================
-                           CREATE ROOM
-                        ========================= */
+                        case "get-users":
+
+                            if(
+                                requireAdmin(ws)
+                            ) {
+
+                                send(
+                                    ws,
+                                    {
+
+                                        type:
+                                            "admin-users",
+
+                                        users:
+                                            getUsersList()
+
+                                    }
+                                );
+
+                            }
+
+                            break;
+
 
                         case "create-room":
 
-                            createRoom(
+                            createNewRoom(
 
                                 ws,
 
-                                String(
-                                    data.name ||
-                                    "Nouveau salon"
-                                ).trim(),
+                                data.name,
 
-                                String(
-                                    data.description ||
-                                    ""
-                                ).trim(),
+                                data.description,
 
-                                data.icon ||
-                                "💬"
+                                data.icon
 
                             );
 
                             break;
 
-
-                        /* =========================
-                           JOIN
-                        ========================= */
 
                         case "join-room":
 
@@ -889,31 +1291,20 @@ wss.on(
 
                                 ws,
 
-                                data.room ||
-                                    "general",
+                                data.room,
 
-                                String(
-                                    data.name ||
-                                    "Participant"
-                                ).trim()
+                                data.profile
 
                             );
 
                             break;
 
 
-                        /* =========================
-                           OFFER
-                        ========================= */
-
                         case "offer":
 
-                            forwardToPeer(
-
+                            forward(
                                 ws,
-
                                 data.target,
-
                                 {
 
                                     type:
@@ -923,24 +1314,16 @@ wss.on(
                                         data.offer
 
                                 }
-
                             );
 
                             break;
 
 
-                        /* =========================
-                           ANSWER
-                        ========================= */
-
                         case "answer":
 
-                            forwardToPeer(
-
+                            forward(
                                 ws,
-
                                 data.target,
-
                                 {
 
                                     type:
@@ -950,24 +1333,16 @@ wss.on(
                                         data.answer
 
                                 }
-
                             );
 
                             break;
 
 
-                        /* =========================
-                           ICE
-                        ========================= */
-
                         case "ice-candidate":
 
-                            forwardToPeer(
-
+                            forward(
                                 ws,
-
                                 data.target,
-
                                 {
 
                                     type:
@@ -977,32 +1352,97 @@ wss.on(
                                         data.candidate
 
                                 }
-
                             );
 
                             break;
 
-
-                        /* =========================
-                           CHAT
-                        ========================= */
 
                         case "chat":
 
-                            handleChat(
-
+                            chat(
                                 ws,
-
                                 data.message
-
                             );
 
                             break;
 
 
-                        /* =========================
-                           LEAVE
-                        ========================= */
+                        case "profile-update":
+
+                            if(
+                                ws.authenticated
+                            ) {
+
+                                if(
+                                    data.profile
+                                ) {
+
+                                    ws.avatar =
+                                        String(
+                                            data.profile.avatar || ""
+                                        ).slice(
+                                            0,
+                                            500000
+                                        );
+
+                                    ws.description =
+                                        String(
+                                            data.profile.description || ""
+                                        ).slice(
+                                            0,
+                                            160
+                                        );
+
+                                }
+
+                            }
+
+                            break;
+
+
+                        case "admin-delete-room":
+
+                            adminDeleteRoom(
+                                ws,
+                                data.room
+                            );
+
+                            break;
+
+
+                        case "admin-kick":
+
+                            adminKick(
+                                ws,
+                                data.target
+                            );
+
+                            break;
+
+
+                        case "admin-mute":
+
+                            adminMediaAction(
+                                ws,
+                                data.target,
+                                "admin-mute",
+                                data.enabled
+                            );
+
+                            break;
+
+
+                        case "admin-camera":
+
+                            adminMediaAction(
+                                ws,
+                                data.target,
+                                "admin-camera",
+                                data.enabled
+                            );
+
+                            break;
+
 
                         case "leave":
 
@@ -1014,11 +1454,10 @@ wss.on(
 
                     }
 
-
-                } catch (error) {
+                } catch(error) {
 
                     console.error(
-                        "[WS ERROR]",
+                        "[MESSAGE ERROR]",
                         error
                     );
 
@@ -1028,10 +1467,6 @@ wss.on(
         );
 
 
-        /* =========================
-           CLOSE
-        ========================= */
-
         ws.on(
             "close",
             () => {
@@ -1039,6 +1474,15 @@ wss.on(
                 leaveRoom(
                     ws
                 );
+
+
+                if(ws.id) {
+
+                    clients.delete(
+                        ws.id
+                    );
+
+                }
 
             }
         );
@@ -1069,7 +1513,7 @@ server.listen(
     () => {
 
         console.log(
-            `Col'inCall server running on port ${PORT}`
+            `Col'inCall server started on port ${PORT}`
         );
 
     }
