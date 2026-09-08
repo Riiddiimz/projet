@@ -30,6 +30,14 @@
 
 #desktopGeneralChatButton{display:none !important;}
 
+/* Aucun bouton de chat lorsqu'on est dans un salon. */
+body:has(#roomScreen[style*="display: flex"]) #desktopGeneralChatButton,
+body:has(#roomScreen[style*="display: flex"]) #desktopRoomChatButton,
+body:has(#roomScreen[style*="display: flex"]) #generalChatToggle,
+body:has(#roomScreen[style*="display: flex"]) #roomChatMobileButton{
+    display:none !important;
+}
+
 /* Bouton Général : même style que Utilisateurs. */
 .general-chat-toggle{
     position:fixed;
@@ -55,14 +63,6 @@
 
 .general-chat-toggle:hover{background:var(--panel3);}
 .general-chat-toggle:active{transform:scale(.97);}
-
-/* Le bouton disparaît lorsque le chat est ouvert. */
-.general-chat-toggle.chat-open{
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-    transform:translateY(8px) scale(.96);
-}
 
 /* =========================================================
    BOUTON UTILISATEURS
