@@ -8,11 +8,6 @@ const PORT = process.env.PORT || 3000;
 const ADMIN_USERNAME = "Riddimz";
 const ADMIN_CODE = "85206";
 
-
-/* =========================
-   HTTP SERVER
-========================= */
-
 const server = http.createServer((req, res) => {
 
     if (req.url === "/health") {
@@ -21,35 +16,27 @@ const server = http.createServer((req, res) => {
             "Content-Type": "application/json"
         });
 
-        res.end(
-            JSON.stringify({
-                status: "ok",
-                service: "Col'inCall"
-            })
-        );
+        res.end(JSON.stringify({
+            status: "ok",
+            service: "Col'inCall"
+        }));
 
         return;
     }
 
-
     if (req.url === "/" || req.url === "/index.html") {
 
-        const filePath =
-            path.join(__dirname, "index.html");
+        const filePath = path.join(__dirname, "index.html");
 
         fs.readFile(filePath, (err, data) => {
 
             if (err) {
 
                 res.writeHead(500);
-
-                res.end(
-                    "Erreur lors du chargement de index.html"
-                );
+                res.end("Erreur lors du chargement de index.html");
 
                 return;
             }
-
 
             res.writeHead(200, {
                 "Content-Type": "text/html; charset=utf-8"
@@ -61,64 +48,36 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-
     res.writeHead(404);
-
     res.end("Not Found");
 });
 
 
-/* =========================
-   WEBSOCKET
-========================= */
+const wss = new WebSocket.Server({
+    server
+});
 
-const wss =
-    new WebSocket.Server({
-        server
-    });
-
-
-/* =========================
-   DATA
-========================= */
 
 const users = new Map();
-
 const rooms = new Map();
 
-
-/*
-    Salon général permanent
-*/
 
 rooms.set("general", {
 
     id: "general",
-
     name: "Général",
-
-    description:
-        "Discussion générale de Col'inCall",
-
+    description: "Discussion générale de Col'inCall",
     ownerId: null,
-
     participants: new Set()
 });
 
-
-/* =========================
-   HELPERS
-========================= */
 
 function createId(prefix = "") {
 
     return (
         prefix +
-        Math.random()
-            .toString(36)
-            .substring(2, 10) +
-        Date.now()
-            .toString(36)
+        Math.random().toString(36).substring(2, 10) +
+        Date.now().toString(36)
     );
 }
 
@@ -130,9 +89,7 @@ function safeSend(ws, data) {
         ws.readyState === WebSocket.OPEN
     ) {
 
-        ws.send(
-            JSON.stringify(data)
-        );
+        ws.send(JSON.stringify(data));
     }
 }
 
@@ -142,22 +99,12 @@ function publicUser(user) {
     return {
 
         id: user.id,
-
         username: user.username,
-
         role: user.role,
-
-        description:
-            user.description || "",
-
-        roomId:
-            user.roomId || null,
-
-        microphoneEnabled:
-            !!user.microphoneEnabled,
-
-        cameraEnabled:
-            !!user.cameraEnabled
+        description: user.description || "",
+        roomId: user.roomId || null,
+        microphoneEnabled: !!user.microphoneEnabled,
+        cameraEnabled: !!user.cameraEnabled
     };
 }
 
@@ -167,77 +114,19 @@ function publicRoom(room) {
     return {
 
         id: room.id,
-
         name: room.name,
-
-        description:
-            room.description || "",
-
-        count:
-            room.participants.size,
-
-        ownerId:
-            room.ownerId || null
+        description: room.description || "",
+        count: room.participants.size,
+        ownerId: room.ownerId || null
     };
 }
 
-
-/* =========================
-   ROOM LIST
-========================= */
-
-function sendRoomList() {
-
-    const list =
-        Array.from(
-            rooms.values()
-        )
-        .map(publicRoom);
-
-
-    broadcastAll({
-
-        type: "rooms-list",
-
-        rooms: list
-    });
-}
-
-
-/* =========================
-   USER LIST
-========================= */
-
-function sendUsersList() {
-
-    const list =
-        Array.from(
-            users.values()
-        )
-        .map(publicUser);
-
-
-    broadcastAll({
-
-        type: "users-list",
-
-        users: list
-    });
-}
-
-
-/* =========================
-   BROADCAST
-========================= */
 
 function broadcastAll(data) {
 
     users.forEach(user => {
 
-        safeSend(
-            user.ws,
-            data
-        );
+        safeSend(user.ws, data);
 
     });
 }
@@ -248,58 +137,64 @@ function broadcastRoom(room, data, exceptUserId = null) {
     if (!room)
         return;
 
-
     room.participants.forEach(userId => {
 
         if (
             exceptUserId &&
             userId === exceptUserId
         ) {
-
             return;
         }
 
+        const user = users.get(userId);
 
-        const user =
-            users.get(userId);
-
-
-        if(user){
-
-            safeSend(
-                user.ws,
-                data
-            );
+        if (user) {
+            safeSend(user.ws, data);
         }
+
     });
 }
 
-
-/*
-    Discussion générale :
-    uniquement les utilisateurs
-    actuellement dans le lobby.
-*/
 
 function broadcastLobby(data) {
 
     users.forEach(user => {
 
         if (!user.roomId) {
-
-            safeSend(
-                user.ws,
-                data
-            );
+            safeSend(user.ws, data);
         }
 
     });
 }
 
 
-/* =========================
-   USER UPDATE
-========================= */
+function sendRoomList() {
+
+    broadcastAll({
+
+        type: "rooms-list",
+
+        rooms:
+            Array.from(rooms.values())
+                .map(publicRoom)
+
+    });
+}
+
+
+function sendUsersList() {
+
+    broadcastAll({
+
+        type: "users-list",
+
+        users:
+            Array.from(users.values())
+                .map(publicUser)
+
+    });
+}
+
 
 function broadcastUserUpdate(user) {
 
@@ -309,6 +204,7 @@ function broadcastUserUpdate(user) {
 
         user:
             publicUser(user)
+
     });
 }
 
@@ -320,10 +216,7 @@ function broadcastUserUpdate(user) {
 function handleLogin(ws, message) {
 
     const username =
-        String(
-            message.username || ""
-        ).trim();
-
+        String(message.username || "").trim();
 
     const role =
         message.role === "admin"
@@ -331,7 +224,7 @@ function handleLogin(ws, message) {
             : "user";
 
 
-    if(!username){
+    if (!username) {
 
         safeSend(ws, {
 
@@ -339,20 +232,20 @@ function handleLogin(ws, message) {
 
             message:
                 "Nom d'utilisateur obligatoire."
+
         });
 
         return;
     }
 
 
-    if(
+    if (
         role === "admin" &&
         (
             username !== ADMIN_USERNAME ||
-            String(message.code || "") !==
-                ADMIN_CODE
+            String(message.code || "") !== ADMIN_CODE
         )
-    ){
+    ) {
 
         safeSend(ws, {
 
@@ -360,28 +253,22 @@ function handleLogin(ws, message) {
 
             message:
                 "Identifiants administrateur incorrects."
+
         });
 
         return;
     }
 
 
-    /*
-        Si le nom est déjà utilisé,
-        on refuse la connexion.
-    */
-
     const alreadyExists =
-        Array.from(
-            users.values()
-        ).some(
+        Array.from(users.values()).some(
             user =>
                 user.username.toLowerCase() ===
                 username.toLowerCase()
         );
 
 
-    if(alreadyExists){
+    if (alreadyExists) {
 
         safeSend(ws, {
 
@@ -389,6 +276,7 @@ function handleLogin(ws, message) {
 
             message:
                 "Ce nom d'utilisateur est déjà utilisé."
+
         });
 
         return;
@@ -397,8 +285,7 @@ function handleLogin(ws, message) {
 
     const user = {
 
-        id:
-            createId("user_"),
+        id: createId("user_"),
 
         username,
 
@@ -432,11 +319,11 @@ function handleLogin(ws, message) {
 
         user:
             publicUser(user)
+
     });
 
 
     sendRoomList();
-
     sendUsersList();
 }
 
@@ -448,18 +335,13 @@ function handleLogin(ws, message) {
 function createRoom(user, message) {
 
     const name =
-        String(
-            message.name || ""
-        ).trim();
-
+        String(message.name || "").trim();
 
     const description =
-        String(
-            message.description || ""
-        ).trim();
+        String(message.description || "").trim();
 
 
-    if(!name){
+    if (!name) {
 
         safeSend(user.ws, {
 
@@ -467,6 +349,7 @@ function createRoom(user, message) {
 
             message:
                 "Le nom du salon est obligatoire."
+
         });
 
         return;
@@ -475,8 +358,7 @@ function createRoom(user, message) {
 
     const room = {
 
-        id:
-            createId("room_"),
+        id: createId("room_"),
 
         name,
 
@@ -487,6 +369,7 @@ function createRoom(user, message) {
 
         participants:
             new Set()
+
     };
 
 
@@ -502,6 +385,7 @@ function createRoom(user, message) {
 
         room:
             publicRoom(room)
+
     });
 
 
@@ -513,13 +397,13 @@ function createRoom(user, message) {
    JOIN ROOM
 ========================= */
 
-async function joinRoom(user, roomId) {
+function joinRoom(user, roomId) {
 
     const room =
         rooms.get(roomId);
 
 
-    if(!room){
+    if (!room) {
 
         safeSend(user.ws, {
 
@@ -527,19 +411,14 @@ async function joinRoom(user, roomId) {
 
             message:
                 "Ce salon n'existe plus."
+
         });
 
         return;
     }
 
 
-    /*
-        Si l'utilisateur est déjà
-        dans un salon, on le fait sortir
-        proprement avant de rejoindre.
-    */
-
-    if(user.roomId){
+    if (user.roomId) {
 
         leaveRoom(
             user,
@@ -549,9 +428,7 @@ async function joinRoom(user, roomId) {
 
 
     const existingParticipantIds =
-        Array.from(
-            room.participants
-        );
+        Array.from(room.participants);
 
 
     room.participants.add(
@@ -562,11 +439,6 @@ async function joinRoom(user, roomId) {
     user.roomId =
         room.id;
 
-
-    /*
-        On prépare la liste des participants
-        déjà présents.
-    */
 
     const participants =
         existingParticipantIds
@@ -583,17 +455,9 @@ async function joinRoom(user, roomId) {
             publicRoom(room),
 
         participants
+
     });
 
-
-    /*
-        On informe les autres qu'un utilisateur
-        vient d'arriver.
-
-        IMPORTANT :
-        le nouvel utilisateur est celui qui
-        crée les offers.
-    */
 
     broadcastRoom(
         room,
@@ -610,35 +474,29 @@ async function joinRoom(user, roomId) {
 
 
     sendRoomList();
-
     sendUsersList();
 }
 
 
 /* =========================
-   LEAVE ROOM
+   LEAVE
 ========================= */
 
-function leaveRoom(
-    user,
-    sendConfirmation = true
-) {
+function leaveRoom(user, sendConfirmation = true) {
 
-    if(!user.roomId)
+    if (!user.roomId)
         return;
 
 
     const room =
-        rooms.get(
-            user.roomId
-        );
+        rooms.get(user.roomId);
 
 
     const oldRoomId =
         user.roomId;
 
 
-    if(room){
+    if (room) {
 
         room.participants.delete(
             user.id
@@ -659,18 +517,10 @@ function leaveRoom(
         );
 
 
-        /*
-            Les salons créés par les utilisateurs
-            sont supprimés automatiquement lorsqu'ils
-            sont complètement vides.
-
-            Le salon Général reste permanent.
-        */
-
-        if(
+        if (
             room.id !== "general" &&
             room.participants.size === 0
-        ){
+        ) {
 
             rooms.delete(
                 room.id
@@ -686,7 +536,7 @@ function leaveRoom(
     user.cameraEnabled = false;
 
 
-    if(sendConfirmation){
+    if (sendConfirmation) {
 
         safeSend(user.ws, {
 
@@ -694,12 +544,12 @@ function leaveRoom(
 
             roomId:
                 oldRoomId
+
         });
     }
 
 
     sendRoomList();
-
     sendUsersList();
 }
 
@@ -711,20 +561,14 @@ function leaveRoom(
 function handleChat(user, message) {
 
     const text =
-        String(
-            message.text || ""
-        ).trim();
+        String(message.text || "").trim();
 
 
-    if(!text)
+    if (!text)
         return;
 
 
-    /*
-        Message de lobby
-    */
-
-    if(!user.roomId){
+    if (!user.roomId) {
 
         broadcastLobby({
 
@@ -739,31 +583,20 @@ function handleChat(user, message) {
                 user.username,
 
             text
+
         });
 
         return;
     }
 
 
-    /*
-        Message de salon
-    */
-
     const room =
-        rooms.get(
-            user.roomId
-        );
+        rooms.get(user.roomId);
 
 
-    if(!room)
+    if (!room)
         return;
 
-
-    /*
-        IMPORTANT :
-        on envoie au sender aussi,
-        mais une seule fois.
-    */
 
     broadcastRoom(
         room,
@@ -781,6 +614,7 @@ function handleChat(user, message) {
                 user.username,
 
             text
+
         }
     );
 }
@@ -795,7 +629,8 @@ function updateProfile(user, message) {
     user.description =
         String(
             message.description || ""
-        ).trim()
+        )
+        .trim()
         .substring(0, 500);
 
 
@@ -805,20 +640,18 @@ function updateProfile(user, message) {
 
         user:
             publicUser(user)
+
     });
 
 
-    broadcastUserUpdate(
-        user
-    );
-
+    broadcastUserUpdate(user);
 
     sendUsersList();
 }
 
 
 /* =========================
-   WEBRTC SIGNALING
+   WEBRTC
 ========================= */
 
 function relayToTarget(
@@ -831,7 +664,7 @@ function relayToTarget(
         message.target;
 
 
-    if(!targetId)
+    if (!targetId)
         return;
 
 
@@ -839,20 +672,14 @@ function relayToTarget(
         users.get(targetId);
 
 
-    if(!target)
+    if (!target)
         return;
 
 
-    /*
-        On s'assure que les deux utilisateurs
-        sont dans le même salon.
-    */
-
-    if(
+    if (
         !user.roomId ||
-        target.roomId !==
-            user.roomId
-    ){
+        target.roomId !== user.roomId
+    ) {
 
         return;
     }
@@ -870,6 +697,7 @@ function relayToTarget(
 
             [payloadKey]:
                 message[payloadKey]
+
         }
     );
 }
@@ -879,35 +707,28 @@ function relayToTarget(
    MEDIA STATE
 ========================= */
 
-function updateMediaState(
-    user,
-    message
-) {
+function updateMediaState(user, message) {
 
     user.microphoneEnabled =
         !!message.microphoneEnabled;
-
 
     user.cameraEnabled =
         !!message.cameraEnabled;
 
 
-    if(user.roomId){
+    if (user.roomId) {
 
         const room =
-            rooms.get(
-                user.roomId
-            );
+            rooms.get(user.roomId);
 
 
-        if(room){
+        if (room) {
 
             broadcastRoom(
                 room,
                 {
 
-                    type:
-                        "media-state",
+                    type: "media-state",
 
                     userId:
                         user.id,
@@ -917,6 +738,7 @@ function updateMediaState(
 
                     cameraEnabled:
                         user.cameraEnabled
+
                 },
                 user.id
             );
@@ -929,24 +751,12 @@ function updateMediaState(
 
 
 /* =========================
-   ADMIN
+   ADMIN MUTE
 ========================= */
 
-function isAdmin(user){
+function adminMute(admin, userId) {
 
-    return (
-        user &&
-        user.role === "admin"
-    );
-}
-
-
-function adminMute(
-    admin,
-    userId
-) {
-
-    if(!isAdmin(admin))
+    if (!isAdmin(admin))
         return;
 
 
@@ -954,7 +764,7 @@ function adminMute(
         users.get(userId);
 
 
-    if(!target)
+    if (!target)
         return;
 
 
@@ -962,40 +772,57 @@ function adminMute(
         false;
 
 
+    /*
+        On force réellement le navigateur
+        de la personne à couper son micro.
+    */
+
     safeSend(
         target.ws,
         {
 
-            type:
-                "admin-action",
+            type: "force-media-state",
 
-            message:
-                "Votre microphone a été désactivé par l'administrateur."
+            microphoneEnabled: false,
+
+            cameraEnabled:
+                target.cameraEnabled,
+
+            reason: "admin-mute"
+
         }
     );
 
 
-    broadcastUserUpdate(
-        target
+    safeSend(
+        target.ws,
+        {
+
+            type: "admin-action",
+
+            message:
+                "Votre microphone a été désactivé par l'administrateur."
+
+        }
     );
 
 
-    if(target.roomId){
+    broadcastUserUpdate(target);
+
+
+    if (target.roomId) {
 
         const room =
-            rooms.get(
-                target.roomId
-            );
+            rooms.get(target.roomId);
 
 
-        if(room){
+        if (room) {
 
             broadcastRoom(
                 room,
                 {
 
-                    type:
-                        "media-state",
+                    type: "media-state",
 
                     userId:
                         target.id,
@@ -1005,35 +832,34 @@ function adminMute(
 
                     cameraEnabled:
                         target.cameraEnabled
+
                 }
             );
         }
     }
 
 
-    safeSend(
-        admin.ws,
-        {
+    safeSend(admin.ws, {
 
-            type:
-                "admin-action",
+        type: "admin-action",
 
-            message:
-                "Microphone désactivé."
-        }
-    );
+        message:
+            "Microphone désactivé."
+
+    });
 
 
     sendUsersList();
 }
 
 
-function adminCamera(
-    admin,
-    userId
-) {
+/* =========================
+   ADMIN CAMERA
+========================= */
 
-    if(!isAdmin(admin))
+function adminCamera(admin, userId) {
+
+    if (!isAdmin(admin))
         return;
 
 
@@ -1041,7 +867,7 @@ function adminCamera(
         users.get(userId);
 
 
-    if(!target)
+    if (!target)
         return;
 
 
@@ -1049,40 +875,57 @@ function adminCamera(
         false;
 
 
+    /*
+        Force la désactivation réelle
+        de la caméra du navigateur ciblé.
+    */
+
     safeSend(
         target.ws,
         {
 
-            type:
-                "admin-action",
+            type: "force-media-state",
 
-            message:
-                "Votre caméra a été désactivée par l'administrateur."
+            microphoneEnabled:
+                target.microphoneEnabled,
+
+            cameraEnabled: false,
+
+            reason: "admin-camera"
+
         }
     );
 
 
-    broadcastUserUpdate(
-        target
+    safeSend(
+        target.ws,
+        {
+
+            type: "admin-action",
+
+            message:
+                "Votre caméra a été désactivée par l'administrateur."
+
+        }
     );
 
 
-    if(target.roomId){
+    broadcastUserUpdate(target);
+
+
+    if (target.roomId) {
 
         const room =
-            rooms.get(
-                target.roomId
-            );
+            rooms.get(target.roomId);
 
 
-        if(room){
+        if (room) {
 
             broadcastRoom(
                 room,
                 {
 
-                    type:
-                        "media-state",
+                    type: "media-state",
 
                     userId:
                         target.id,
@@ -1092,35 +935,34 @@ function adminCamera(
 
                     cameraEnabled:
                         false
+
                 }
             );
         }
     }
 
 
-    safeSend(
-        admin.ws,
-        {
+    safeSend(admin.ws, {
 
-            type:
-                "admin-action",
+        type: "admin-action",
 
-            message:
-                "Caméra désactivée."
-        }
-    );
+        message:
+            "Caméra désactivée."
+
+    });
 
 
     sendUsersList();
 }
 
 
-function adminKick(
-    admin,
-    userId
-) {
+/* =========================
+   ADMIN KICK
+========================= */
 
-    if(!isAdmin(admin))
+function adminKick(admin, userId) {
+
+    if (!isAdmin(admin))
         return;
 
 
@@ -1128,19 +970,19 @@ function adminKick(
         users.get(userId);
 
 
-    if(!target)
+    if (!target)
         return;
 
 
-    if(target.id === admin.id){
+    if (target.id === admin.id) {
 
         safeSend(admin.ws, {
 
-            type:
-                "error",
+            type: "error",
 
             message:
                 "Vous ne pouvez pas vous expulser vous-même."
+
         });
 
         return;
@@ -1151,16 +993,16 @@ function adminKick(
         target.ws,
         {
 
-            type:
-                "kicked",
+            type: "kicked",
 
             message:
                 "Vous avez été expulsé par l'administrateur."
+
         }
     );
 
 
-    if(target.roomId){
+    if (target.roomId) {
 
         leaveRoom(
             target,
@@ -1169,43 +1011,40 @@ function adminKick(
     }
 
 
-    safeSend(
-        admin.ws,
-        {
+    safeSend(admin.ws, {
 
-            type:
-                "admin-action",
+        type: "admin-action",
 
-            message:
-                "Utilisateur expulsé."
-        }
-    );
+        message:
+            "Utilisateur expulsé."
+
+    });
 
 
     sendRoomList();
-
     sendUsersList();
 }
 
 
-function adminDeleteRoom(
-    admin,
-    roomId
-) {
+/* =========================
+   DELETE ROOM
+========================= */
 
-    if(!isAdmin(admin))
+function adminDeleteRoom(admin, roomId) {
+
+    if (!isAdmin(admin))
         return;
 
 
-    if(roomId === "general"){
+    if (roomId === "general") {
 
         safeSend(admin.ws, {
 
-            type:
-                "error",
+            type: "error",
 
             message:
                 "Le salon Général ne peut pas être supprimé."
+
         });
 
         return;
@@ -1216,91 +1055,85 @@ function adminDeleteRoom(
         rooms.get(roomId);
 
 
-    if(!room)
+    if (!room)
         return;
 
 
-    /*
-        On prévient tous les participants
-        puis on les remet dans le lobby.
-    */
-
     const participantIds =
-        Array.from(
-            room.participants
+        Array.from(room.participants);
+
+
+    participantIds.forEach(userId => {
+
+        const user =
+            users.get(userId);
+
+
+        if (!user)
+            return;
+
+
+        safeSend(
+            user.ws,
+            {
+
+                type: "room-left",
+
+                roomId:
+                    room.id,
+
+                message:
+                    "Le salon a été supprimé par l'administrateur."
+
+            }
         );
 
 
-    participantIds.forEach(
-        userId => {
+        user.roomId = null;
 
-            const user =
-                users.get(userId);
+        user.microphoneEnabled = false;
 
+        user.cameraEnabled = false;
 
-            if(!user)
-                return;
+    });
 
 
-            safeSend(
-                user.ws,
-                {
-
-                    type:
-                        "room-left",
-
-                    roomId:
-                        room.id,
-
-                    message:
-                        "Le salon a été supprimé par l'administrateur."
-                }
-            );
+    rooms.delete(roomId);
 
 
-            user.roomId = null;
+    safeSend(admin.ws, {
 
-            user.microphoneEnabled =
-                false;
+        type: "admin-action",
 
-            user.cameraEnabled =
-                false;
-        }
-    );
+        message:
+            "Salon supprimé."
 
-
-    rooms.delete(
-        roomId
-    );
-
-
-    safeSend(
-        admin.ws,
-        {
-
-            type:
-                "admin-action",
-
-            message:
-                "Salon supprimé."
-        }
-    );
+    });
 
 
     sendRoomList();
-
     sendUsersList();
 }
 
 
 /* =========================
-   MESSAGE ROUTER
+   ADMIN CHECK
 ========================= */
 
-function handleMessage(
-    ws,
-    message
-) {
+function isAdmin(user) {
+
+    return (
+        user &&
+        user.role === "admin"
+    );
+}
+
+
+/* =========================
+   ROUTER
+========================= */
+
+function handleMessage(ws, message) {
 
     const user =
         ws.userId
@@ -1308,7 +1141,7 @@ function handleMessage(
             : null;
 
 
-    if(message.type === "login"){
+    if (message.type === "login") {
 
         handleLogin(
             ws,
@@ -1319,22 +1152,22 @@ function handleMessage(
     }
 
 
-    if(!user){
+    if (!user) {
 
         safeSend(ws, {
 
-            type:
-                "error",
+            type: "error",
 
             message:
                 "Vous devez être connecté."
+
         });
 
         return;
     }
 
 
-    switch(message.type){
+    switch (message.type) {
 
         case "create-room":
 
@@ -1473,11 +1306,11 @@ function handleMessage(
 
             safeSend(user.ws, {
 
-                type:
-                    "error",
+                type: "error",
 
                 message:
                     "Commande inconnue."
+
             });
     }
 }
@@ -1487,122 +1320,104 @@ function handleMessage(
    CONNECTION
 ========================= */
 
-wss.on(
-    "connection",
-    ws => {
+wss.on("connection", ws => {
+
+    console.log(
+        "Nouvelle connexion WebSocket"
+    );
+
+
+    ws.on("message", raw => {
+
+        try {
+
+            const message =
+                JSON.parse(
+                    raw.toString()
+                );
+
+
+            handleMessage(
+                ws,
+                message
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Message error:",
+                error
+            );
+
+
+            safeSend(
+                ws,
+                {
+
+                    type: "error",
+
+                    message:
+                        "Message invalide."
+
+                }
+            );
+        }
+    });
+
+
+    ws.on("close", () => {
+
+        const userId =
+            ws.userId;
+
+
+        if (!userId)
+            return;
+
+
+        const user =
+            users.get(userId);
+
+
+        if (!user)
+            return;
+
 
         console.log(
-            "Nouvelle connexion WebSocket"
+            "Déconnexion:",
+            user.username
         );
 
 
-        ws.on(
-            "message",
-            raw => {
+        if (user.roomId) {
 
-                try{
-
-                    const message =
-                        JSON.parse(
-                            raw.toString()
-                        );
+            leaveRoom(
+                user,
+                false
+            );
+        }
 
 
-                    handleMessage(
-                        ws,
-                        message
-                    );
-
-                }catch(error){
-
-                    console.error(
-                        "Message error:",
-                        error
-                    );
-
-
-                    safeSend(
-                        ws,
-                        {
-
-                            type:
-                                "error",
-
-                            message:
-                                "Message invalide."
-                        }
-                    );
-                }
-            }
+        users.delete(
+            userId
         );
 
 
-        ws.on(
-            "close",
-            () => {
-
-                const userId =
-                    ws.userId;
+        sendRoomList();
+        sendUsersList();
+    });
 
 
-                if(!userId)
-                    return;
+    ws.on("error", error => {
 
-
-                const user =
-                    users.get(
-                        userId
-                    );
-
-
-                if(!user)
-                    return;
-
-
-                console.log(
-                    "Déconnexion:",
-                    user.username
-                );
-
-
-                if(user.roomId){
-
-                    leaveRoom(
-                        user,
-                        false
-                    );
-                }
-
-
-                users.delete(
-                    userId
-                );
-
-
-                sendRoomList();
-
-                sendUsersList();
-            }
+        console.error(
+            "WebSocket error:",
+            error
         );
 
+    });
+});
 
-        ws.on(
-            "error",
-            error => {
-
-                console.error(
-                    "WebSocket error:",
-                    error
-                );
-            }
-        );
-    }
-);
-
-
-/* =========================
-   START
-========================= */
 
 server.listen(
     PORT,
