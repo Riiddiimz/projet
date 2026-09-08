@@ -38,7 +38,12 @@
         visibility 0s linear 0s;
 }
 
-/* Bouton Général en bas à droite du lobby. */
+/* L'ancien bouton Général de la barre du haut disparaît. */
+#desktopGeneralChatButton{
+    display:none !important;
+}
+
+/* Bouton Général flottant en bas à droite. */
 .general-chat-toggle{
     position:fixed;
     right:20px;
@@ -64,21 +69,93 @@
     font-weight:700;
 
     transition:
-        opacity .2s ease,
-        transform .2s ease,
+        opacity .22s ease,
+        transform .22s ease,
         background .15s ease;
+}
+
+/* Quand le chat est ouvert, le bouton disparaît pour ne jamais passer devant. */
+.general-chat-toggle.chat-open{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transform:translateY(8px) scale(.96);
 }
 
 .general-chat-toggle:hover{
     background:var(--panel3);
 }
 
-/* Quand le chat est ouvert, le bouton reste discret mais disponible. */
 .general-chat-toggle:active{
     transform:scale(.97);
 }
 
-/* Fondu du fond mobile si le backdrop est utilisé. */
+/* =========================================================
+   BOUTON UTILISATEURS
+========================================================= */
+
+.users-sidebar-toggle{
+    position:fixed;
+    left:20px;
+    bottom:20px;
+    z-index:90;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+
+    min-height:44px;
+    padding:0 16px;
+
+    border:1px solid var(--border);
+    border-radius:12px;
+
+    color:var(--text);
+    background:var(--panel2);
+    box-shadow:0 10px 30px rgba(0,0,0,.3);
+
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+
+    transition:
+        opacity .2s ease,
+        transform .2s ease,
+        background .15s ease;
+}
+
+.users-sidebar-toggle:hover{
+    background:var(--panel3);
+}
+
+.users-sidebar-toggle:active{
+    transform:scale(.97);
+}
+
+/* Le panneau utilisateurs se replie avec une animation. */
+.users-sidebar{
+    transition:
+        width .22s ease,
+        flex-basis .22s ease,
+        padding .22s ease,
+        opacity .22s ease;
+}
+
+.lobby-screen.users-hidden .users-sidebar{
+    width:0;
+    flex-basis:0;
+    padding-left:0;
+    padding-right:0;
+    opacity:0;
+    overflow:hidden;
+    border-right-width:0;
+}
+
+/* =========================================================
+   BACKDROP MOBILE
+========================================================= */
+
 .mobile-chat-backdrop{
     opacity:0;
     visibility:hidden;
@@ -110,5 +187,15 @@
     .general-chat-toggle{
         right:14px;
         bottom:14px;
+    }
+
+    .users-sidebar-toggle{
+        left:14px;
+        bottom:14px;
+    }
+
+    .lobby-screen.users-hidden .users-sidebar{
+        width:0;
+        flex-basis:0;
     }
 }
