@@ -16,9 +16,9 @@ let nextUserId = 1;
 let nextRoomId = 1;
 let nextMessageId = 1;
 
-// ============================================================
-// HTTP SERVER
-// ============================================================
+/* ============================================================
+   HTTP SERVER
+============================================================ */
 
 const server = http.createServer((req, res) => {
 
@@ -53,10 +53,7 @@ const server = http.createServer((req, res) => {
                 if (err) {
 
                     res.writeHead(500);
-
-                    res.end(
-                        "Erreur serveur"
-                    );
+                    res.end("Erreur serveur");
 
                     return;
                 }
@@ -77,18 +74,18 @@ const server = http.createServer((req, res) => {
     res.end("Not found");
 });
 
-// ============================================================
-// WEBSOCKET
-// ============================================================
+/* ============================================================
+   WEBSOCKET
+============================================================ */
 
 const wss =
     new WebSocket.Server({
         server
     });
 
-// ============================================================
-// GENERAL ROOM
-// ============================================================
+/* ============================================================
+   GENERAL ROOM
+============================================================ */
 
 const GENERAL_ROOM_ID =
     "general";
@@ -105,9 +102,9 @@ rooms.set(
     }
 );
 
-// ============================================================
-// HELPERS
-// ============================================================
+/* ============================================================
+   HELPERS
+============================================================ */
 
 function safeSend(ws, data) {
 
@@ -198,7 +195,8 @@ function publicUser(user) {
 
     return {
 
-        id: user.id,
+        id:
+            user.id,
 
         username:
             user.username,
@@ -221,9 +219,11 @@ function publicRoom(room) {
 
     return {
 
-        id: room.id,
+        id:
+            room.id,
 
-        name: room.name,
+        name:
+            room.name,
 
         ownerId:
             room.ownerId,
@@ -251,8 +251,10 @@ function sendRoomList() {
     }
 
     broadcast({
-        type: "room-list",
-        rooms: list
+        type:
+            "room-list",
+        rooms:
+            list
     });
 }
 
@@ -271,14 +273,16 @@ function sendUserList() {
     }
 
     broadcast({
-        type: "user-list",
-        users: list
+        type:
+            "user-list",
+        users:
+            list
     });
 }
 
-// ============================================================
-// ROOM MANAGEMENT
-// ============================================================
+/* ============================================================
+   ROOM MANAGEMENT
+============================================================ */
 
 function removeUserFromRoom(user) {
 
@@ -293,7 +297,8 @@ function removeUserFromRoom(user) {
 
     if (!room) {
 
-        user.roomId = null;
+        user.roomId =
+            null;
 
         return;
     }
@@ -305,12 +310,21 @@ function removeUserFromRoom(user) {
     broadcastRoom(
         room.id,
         {
-            type: "user-left",
-            userId: user.id
+            type:
+                "user-left",
+            userId:
+                user.id
         }
     );
 
-    user.roomId = null;
+    user.roomId =
+        null;
+
+    user.microphoneEnabled =
+        false;
+
+    user.cameraEnabled =
+        false;
 
     if (
         !room.permanent &&
@@ -323,6 +337,7 @@ function removeUserFromRoom(user) {
     }
 
     sendRoomList();
+    sendUserList();
 }
 
 function leaveRoom(user) {
@@ -340,7 +355,8 @@ function leaveRoom(user) {
     safeSend(
         user.ws,
         {
-            type: "left-room",
+            type:
+                "left-room",
             roomId
         }
     );
@@ -348,9 +364,9 @@ function leaveRoom(user) {
     sendUserList();
 }
 
-// ============================================================
-// CHAT
-// ============================================================
+/* ============================================================
+   CHAT
+============================================================ */
 
 function createChatMessage(
     user,
@@ -360,7 +376,8 @@ function createChatMessage(
 
     return {
 
-        type: "chat-message",
+        type:
+            "chat-message",
 
         id:
             nextMessageId++,
@@ -381,9 +398,9 @@ function createChatMessage(
     };
 }
 
-// ============================================================
-// SESSION
-// ============================================================
+/* ============================================================
+   SESSION
+============================================================ */
 
 function generateSessionToken() {
 
@@ -400,30 +417,27 @@ function generateSessionToken() {
     );
 }
 
-// ============================================================
-// WEBSOCKET CONNECTION
-// ============================================================
+/* ============================================================
+   WEBSOCKET CONNECTION
+============================================================ */
 
 wss.on(
     "connection",
-    (ws) => {
+    ws => {
 
         let currentUser = null;
 
         safeSend(
             ws,
             {
-                type: "connected"
+                type:
+                    "connected"
             }
         );
 
-        // ====================================================
-        // MESSAGE
-        // ====================================================
-
         ws.on(
             "message",
-            (raw) => {
+            raw => {
 
                 let message;
 
@@ -439,7 +453,8 @@ wss.on(
                     safeSend(
                         ws,
                         {
-                            type: "error",
+                            type:
+                                "error",
                             message:
                                 "Message invalide."
                         }
@@ -448,9 +463,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // RESTORE SESSION
-                // ====================================================
+                /* =================================================
+                   RESTORE SESSION
+                ================================================= */
 
                 if (
                     message.type ===
@@ -503,7 +518,10 @@ wss.on(
                         return;
                     }
 
-                    // Fermer une ancienne connexion
+                    /*
+                     * Une seule connexion active
+                     * pour le même utilisateur.
+                     */
                     if (
                         currentUser.ws &&
                         currentUser.ws !== ws
@@ -535,58 +553,16 @@ wss.on(
                         }
                     );
 
-                    const roomList = [];
+                    sendRoomList();
 
-                    for (
-                        const room
-                        of rooms.values()
-                    ) {
-
-                        roomList.push(
-                            publicRoom(room)
-                        );
-                    }
-
-                    safeSend(
-                        ws,
-                        {
-                            type:
-                                "room-list",
-
-                            rooms:
-                                roomList
-                        }
-                    );
-
-                    const userList = [];
-
-                    for (
-                        const user
-                        of users.values()
-                    ) {
-
-                        userList.push(
-                            publicUser(user)
-                        );
-                    }
-
-                    safeSend(
-                        ws,
-                        {
-                            type:
-                                "user-list",
-
-                            users:
-                                userList
-                        }
-                    );
+                    sendUserList();
 
                     return;
                 }
 
-                // ====================================================
-                // LOGIN
-                // ====================================================
+                /* =================================================
+                   LOGIN
+                ================================================= */
 
                 if (
                     message.type ===
@@ -647,7 +623,14 @@ wss.on(
                         return;
                     }
 
-                    // Empêcher les doublons
+                    /*
+                     * Empêcher deux utilisateurs avec
+                     * le même pseudo.
+                     *
+                     * Un utilisateur temporairement déconnecté
+                     * est considéré comme toujours connecté
+                     * afin que sa session puisse être restaurée.
+                     */
                     for (
                         const existingUser
                         of users.values()
@@ -737,55 +720,9 @@ wss.on(
                         }
                     );
 
-                    // Room list
-                    const roomList = [];
+                    sendRoomList();
 
-                    for (
-                        const room
-                        of rooms.values()
-                    ) {
-
-                        roomList.push(
-                            publicRoom(room)
-                        );
-                    }
-
-                    safeSend(
-                        ws,
-                        {
-                            type:
-                                "room-list",
-
-                            rooms:
-                                roomList
-                        }
-                    );
-
-                    // User list
-                    const userList = [];
-
-                    for (
-                        const connectedUser
-                        of users.values()
-                    ) {
-
-                        userList.push(
-                            publicUser(
-                                connectedUser
-                            )
-                        );
-                    }
-
-                    safeSend(
-                        ws,
-                        {
-                            type:
-                                "user-list",
-
-                            users:
-                                userList
-                        }
-                    );
+                    sendUserList();
 
                     broadcast(
                         {
@@ -800,14 +737,12 @@ wss.on(
                             user.id
                     );
 
-                    sendUserList();
-
                     return;
                 }
 
-                // ====================================================
-                // REQUIRE LOGIN
-                // ====================================================
+                /* =================================================
+                   REQUIRE LOGIN
+                ================================================= */
 
                 if (!currentUser) {
 
@@ -825,9 +760,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // CREATE ROOM
-                // ====================================================
+                /* =================================================
+                   CREATE ROOM
+                ================================================= */
 
                 if (
                     message.type ===
@@ -856,7 +791,9 @@ wss.on(
                         return;
                     }
 
-                    if (name.length > 50) {
+                    if (
+                        name.length > 50
+                    ) {
 
                         safeSend(
                             ws,
@@ -916,9 +853,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // JOIN ROOM
-                // ====================================================
+                /* =================================================
+                   JOIN ROOM
+                ================================================= */
 
                 if (
                     message.type ===
@@ -964,7 +901,6 @@ wss.on(
                     currentUser.roomId =
                         roomId;
 
-                    // Toujours désactivé au début
                     currentUser.microphoneEnabled =
                         false;
 
@@ -1036,9 +972,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // LEAVE ROOM
-                // ====================================================
+                /* =================================================
+                   LEAVE ROOM
+                ================================================= */
 
                 if (
                     message.type ===
@@ -1052,9 +988,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // CHAT
-                // ====================================================
+                /* =================================================
+                   CHAT
+                ================================================= */
 
                 if (
                     message.type ===
@@ -1070,7 +1006,9 @@ wss.on(
                     if (!text)
                         return;
 
-                    if (text.length > 1000) {
+                    if (
+                        text.length > 1000
+                    ) {
 
                         safeSend(
                             ws,
@@ -1088,6 +1026,10 @@ wss.on(
 
                     let roomId = null;
 
+                    /*
+                     * Un utilisateur ne peut envoyer
+                     * dans un salon que s'il y est réellement.
+                     */
                     if (
                         message.roomId &&
                         currentUser.roomId &&
@@ -1108,6 +1050,14 @@ wss.on(
 
                     if (roomId) {
 
+                        /*
+                         * Le serveur envoie le message
+                         * à tous les membres du salon,
+                         * y compris l'expéditeur.
+                         *
+                         * Le frontend ignore son propre message
+                         * pour le compteur de non-lus.
+                         */
                         broadcastRoom(
                             roomId,
                             chatMessage
@@ -1116,6 +1066,11 @@ wss.on(
                         return;
                     }
 
+                    /*
+                     * Discussion générale :
+                     * seuls les utilisateurs du lobby
+                     * reçoivent le message.
+                     */
                     broadcast(
                         chatMessage,
                         user =>
@@ -1125,9 +1080,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // WEBRTC OFFER
-                // ====================================================
+                /* =================================================
+                   WEBRTC OFFER
+                ================================================= */
 
                 if (
                     message.type ===
@@ -1159,9 +1114,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // WEBRTC ANSWER
-                // ====================================================
+                /* =================================================
+                   WEBRTC ANSWER
+                ================================================= */
 
                 if (
                     message.type ===
@@ -1193,9 +1148,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // WEBRTC ICE
-                // ====================================================
+                /* =================================================
+                   WEBRTC ICE
+                ================================================= */
 
                 if (
                     message.type ===
@@ -1227,9 +1182,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // MEDIA STATE
-                // ====================================================
+                /* =================================================
+                   MEDIA STATE
+                ================================================= */
 
                 if (
                     message.type ===
@@ -1237,7 +1192,8 @@ wss.on(
                 ) {
 
                     if (
-                        typeof message.microphoneEnabled ===
+                        typeof
+                        message.microphoneEnabled ===
                         "boolean"
                     ) {
 
@@ -1246,7 +1202,8 @@ wss.on(
                     }
 
                     if (
-                        typeof message.cameraEnabled ===
+                        typeof
+                        message.cameraEnabled ===
                         "boolean"
                     ) {
 
@@ -1282,9 +1239,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // ADMIN SECURITY
-                // ====================================================
+                /* =================================================
+                   ADMIN SECURITY
+                ================================================= */
 
                 if (
                     message.type.startsWith(
@@ -1307,9 +1264,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // ADMIN MUTE
-                // ====================================================
+                /* =================================================
+                   ADMIN MUTE
+                ================================================= */
 
                 if (
                     message.type ===
@@ -1372,9 +1329,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // ADMIN CAMERA
-                // ====================================================
+                /* =================================================
+                   ADMIN CAMERA
+                ================================================= */
 
                 if (
                     message.type ===
@@ -1437,9 +1394,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // ADMIN KICK
-                // ====================================================
+                /* =================================================
+                   ADMIN KICK
+                ================================================= */
 
                 if (
                     message.type ===
@@ -1482,12 +1439,14 @@ wss.on(
                         }
                     );
 
+                    sendUserList();
+
                     return;
                 }
 
-                // ====================================================
-                // ADMIN DELETE ROOM
-                // ====================================================
+                /* =================================================
+                   ADMIN DELETE ROOM
+                ================================================= */
 
                 if (
                     message.type ===
@@ -1508,7 +1467,9 @@ wss.on(
                     if (!room)
                         return;
 
-                    if (room.permanent) {
+                    if (
+                        room.permanent
+                    ) {
 
                         safeSend(
                             ws,
@@ -1567,9 +1528,9 @@ wss.on(
                     return;
                 }
 
-                // ====================================================
-                // ADMIN REFRESH
-                // ====================================================
+                /* =================================================
+                   ADMIN REFRESH
+                ================================================= */
 
                 if (
                     message.type ===
@@ -1619,9 +1580,9 @@ wss.on(
             }
         );
 
-        // ========================================================
-        // DISCONNECT
-        // ========================================================
+        /* ========================================================
+           DISCONNECT
+        ======================================================== */
 
         ws.on(
             "close",
@@ -1630,39 +1591,34 @@ wss.on(
                 if (!currentUser)
                     return;
 
-                /*
-                 * IMPORTANT :
-                 * On ne supprime PAS l'utilisateur immédiatement.
-                 *
-                 * Cela permet à une page rechargée de restaurer
-                 * sa session.
-                 */
-
                 console.log(
                     `${currentUser.username} disconnected temporarily`
                 );
 
                 if (
-                    currentUser.ws === ws
+                    currentUser.ws ===
+                    ws
                 ) {
 
                     currentUser.ws =
                         null;
                 }
 
-                // On garde l'utilisateur en mémoire
-                // pour permettre le refresh.
-                //
-                // Le navigateur se reconnectera avec
-                // son sessionToken.
+                /*
+                 * On conserve l'utilisateur et son salon
+                 * pendant la durée de la session.
+                 *
+                 * Cela permet un refresh de la page
+                 * sans perdre immédiatement la session.
+                 */
             }
         );
     }
 );
 
-// ============================================================
-// CLEANUP DES SESSIONS
-// ============================================================
+/* ============================================================
+   CLEANUP SESSIONS
+============================================================ */
 
 setInterval(
     () => {
@@ -1678,7 +1634,6 @@ setInterval(
             of sessions
         ) {
 
-            // Session valide pendant 30 jours
             if (
                 now -
                 session.createdAt >
@@ -1716,6 +1671,9 @@ setInterval(
                     users.delete(
                         user.id
                     );
+
+                    sendUserList();
+                    sendRoomList();
                 }
             }
         }
@@ -1726,9 +1684,9 @@ setInterval(
     60
 );
 
-// ============================================================
-// START
-// ============================================================
+/* ============================================================
+   START
+============================================================ */
 
 server.listen(
     PORT,
