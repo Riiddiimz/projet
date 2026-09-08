@@ -71,6 +71,7 @@ AUTH
     height:100vh;
 
     display:flex;
+
     align-items:center;
     justify-content:center;
 
@@ -295,6 +296,8 @@ TOPBAR
     border-radius:10px;
 
     padding:7px 11px;
+
+    color:var(--text);
 }
 
 .avatar{
@@ -309,6 +312,7 @@ TOPBAR
     display:flex;
 
     align-items:center;
+
     justify-content:center;
 
     font-size:12px;
@@ -486,10 +490,11 @@ LOBBY
 }
 
 /* ==========================================================
-CHAT SIDEBAR
+CHAT
 ========================================================== */
 
-.chat-sidebar{
+.chat-sidebar,
+.room-chat{
 
     width:340px;
 
@@ -788,11 +793,7 @@ ROOM
         );
 }
 
-.video-grid.cols-5,
-.video-grid.cols-6,
-.video-grid.cols-7,
-.video-grid.cols-8,
-.video-grid.cols-9{
+.video-grid.cols-5{
 
     grid-template-columns:
         repeat(
@@ -865,7 +866,7 @@ ROOM
 }
 
 /* ==========================================================
-ROOM CONTROLS
+CONTROLS
 ========================================================== */
 
 .room-controls{
@@ -929,27 +930,6 @@ ROOM CONTROLS
     color:white;
 
     font-size:19px;
-}
-
-/* ==========================================================
-ROOM CHAT
-========================================================== */
-
-.room-chat{
-
-    width:340px;
-
-    flex-shrink:0;
-
-    background:var(--panel);
-
-    border-left:1px solid var(--border);
-
-    display:flex;
-
-    flex-direction:column;
-
-    min-height:0;
 }
 
 /* ==========================================================
@@ -1147,10 +1127,6 @@ ADMIN
     color:#ff777c;
 }
 
-/* ==========================================================
-EMPTY
-========================================================== */
-
 .empty{
 
     padding:50px 20px;
@@ -1172,11 +1148,6 @@ RESPONSIVE
     .room-chat{
 
         width:280px;
-    }
-
-    .room-screen{
-
-        flex-direction:column;
     }
 }
 
@@ -1337,8 +1308,6 @@ APP
     id="app"
 >
 
-    <!-- TOPBAR -->
-
     <div class="topbar">
 
         <div class="brand">
@@ -1432,8 +1401,6 @@ APP
         </div>
 
 
-        <!-- CHAT GENERAL -->
-
         <div class="chat-sidebar">
 
             <div class="chat-header">
@@ -1495,38 +1462,36 @@ APP
                         class="room-status"
                         id="roomStatus"
                     >
-                        0 participants
+                        1 participant
                     </div>
 
                 </div>
 
             </div>
 
-
             <div
                 class="video-grid cols-1"
                 id="videoGrid"
             ></div>
 
-
             <div class="room-controls">
 
                 <button
-                    class="control-btn"
+                    class="control-btn off"
                     id="microBtn"
                     onclick="toggleMicro()"
                     title="Micro"
                 >
-                    🎤
+                    🔇
                 </button>
 
                 <button
-                    class="control-btn"
+                    class="control-btn off"
                     id="cameraBtn"
                     onclick="toggleCamera()"
                     title="Caméra"
                 >
-                    📹
+                    🚫
                 </button>
 
                 <button
@@ -1541,8 +1506,6 @@ APP
 
         </div>
 
-
-        <!-- ROOM CHAT -->
 
         <div class="room-chat">
 
@@ -1582,7 +1545,7 @@ APP
 
 
 <!-- ========================================================
-PROFILE MODAL
+PROFILE
 ========================================================= -->
 
 <div
@@ -1639,7 +1602,7 @@ PROFILE MODAL
 
 
 <!-- ========================================================
-ADMIN MODAL
+ADMIN
 ========================================================= -->
 
 <div
@@ -1722,13 +1685,15 @@ let users = [];
 
 let localStream = null;
 
-let microphoneEnabled = true;
+let microphoneEnabled = false;
 
-let cameraEnabled = true;
+let cameraEnabled = false;
 
 const peers = new Map();
 
 const pendingCandidates = new Map();
+
+let currentAdminTab = "users";
 
 
 /* ==========================================================
@@ -1736,22 +1701,34 @@ DOM
 ========================================================== */
 
 const authScreen =
-    document.getElementById("authScreen");
+    document.getElementById(
+        "authScreen"
+    );
 
 const app =
-    document.getElementById("app");
+    document.getElementById(
+        "app"
+    );
 
 const lobbyScreen =
-    document.getElementById("lobbyScreen");
+    document.getElementById(
+        "lobbyScreen"
+    );
 
 const roomScreen =
-    document.getElementById("roomScreen");
+    document.getElementById(
+        "roomScreen"
+    );
 
 const roomList =
-    document.getElementById("roomList");
+    document.getElementById(
+        "roomList"
+    );
 
 const videoGrid =
-    document.getElementById("videoGrid");
+    document.getElementById(
+        "videoGrid"
+    );
 
 
 /* ==========================================================
@@ -1763,69 +1740,114 @@ function setLoginMode(mode){
     loginMode = mode;
 
     document
-        .getElementById("userTab")
+        .getElementById(
+            "userTab"
+        )
         .classList.toggle(
             "active",
             mode === "user"
         );
 
     document
-        .getElementById("adminTab")
+        .getElementById(
+            "adminTab"
+        )
         .classList.toggle(
             "active",
             mode === "admin"
         );
 
     document
-        .getElementById("passwordField")
+        .getElementById(
+            "passwordField"
+        )
         .style.display =
             mode === "admin"
                 ? "block"
                 : "none";
-
 }
 
 
 /* ==========================================================
-CONNECT
+CONNECT SOCKET
 ========================================================== */
 
 function connectSocket(){
 
-    return new Promise((resolve,reject)=>{
+    return new Promise(
+        (resolve, reject) => {
 
-        socket =
-            new WebSocket(SERVER_URL);
-
-        socket.onopen = () => {
-
-            resolve();
-        };
-
-        socket.onerror = () => {
-
-            reject(
-                new Error(
-                    "Impossible de se connecter au serveur."
-                )
-            );
-        };
-
-        socket.onclose = () => {
-
-            console.log(
-                "WebSocket fermé"
-            );
-        };
-
-        socket.onmessage =
-            event => {
-
-                handleMessage(
-                    JSON.parse(event.data)
+            socket =
+                new WebSocket(
+                    SERVER_URL
                 );
+
+            let opened = false;
+
+            socket.onopen = () => {
+
+                opened = true;
+
+                resolve();
             };
-    });
+
+            socket.onerror = () => {
+
+                if (!opened) {
+
+                    reject(
+                        new Error(
+                            "Impossible de se connecter au serveur."
+                        )
+                    );
+                }
+            };
+
+            socket.onclose = () => {
+
+                console.log(
+                    "WebSocket fermé"
+                );
+
+                /*
+                 * Si l'utilisateur est connecté,
+                 * on tente automatiquement de reconnecter.
+                 */
+                if (
+                    currentUser &&
+                    localStorage.getItem(
+                        "colincall_session"
+                    )
+                ) {
+
+                    setTimeout(
+                        restoreSession,
+                        1500
+                    );
+                }
+            };
+
+            socket.onmessage =
+                event => {
+
+                    try {
+
+                        handleMessage(
+                            JSON.parse(
+                                event.data
+                            )
+                        );
+
+                    } catch(error) {
+
+                        console.error(
+                            "Message serveur invalide",
+                            error
+                        );
+                    }
+                };
+        }
+    );
 }
 
 
@@ -1835,11 +1857,11 @@ SEND
 
 function send(data){
 
-    if(
+    if (
         !socket ||
         socket.readyState !==
-        WebSocket.OPEN
-    ){
+            WebSocket.OPEN
+    ) {
 
         return;
     }
@@ -1872,13 +1894,14 @@ async function login(){
             .value;
 
     const error =
-        document.getElementById(
-            "loginError"
-        );
+        document
+            .getElementById(
+                "loginError"
+            );
 
     error.textContent = "";
 
-    if(!username){
+    if (!username) {
 
         error.textContent =
             "Entre un nom d'utilisateur.";
@@ -1886,13 +1909,14 @@ async function login(){
         return;
     }
 
-    try{
+    try {
 
         await connectSocket();
 
         send({
 
-            type:"login",
+            type:
+                "login",
 
             username,
 
@@ -1902,10 +1926,62 @@ async function login(){
                     : ""
         });
 
-    }catch(err){
+    } catch(err) {
 
         error.textContent =
             err.message;
+    }
+}
+
+
+/* ==========================================================
+RESTORE SESSION
+========================================================== */
+
+async function restoreSession(){
+
+    const token =
+        localStorage.getItem(
+            "colincall_session"
+        );
+
+    if (!token)
+        return;
+
+    /*
+     * Éviter plusieurs connexions
+     */
+    if (
+        socket &&
+        (
+            socket.readyState ===
+                WebSocket.OPEN ||
+            socket.readyState ===
+                WebSocket.CONNECTING
+        )
+    ) {
+
+        return;
+    }
+
+    try {
+
+        await connectSocket();
+
+        send({
+
+            type:
+                "restore-session",
+
+            token
+        });
+
+    } catch(error) {
+
+        console.error(
+            "Erreur restauration session",
+            error
+        );
     }
 }
 
@@ -1925,22 +2001,54 @@ function handleMessage(message){
             handleLoginSuccess(message);
             break;
 
+        case "session-restored":
+            handleSessionRestored(message);
+            break;
+
+        case "session-invalid":
+
+            localStorage.removeItem(
+                "colincall_session"
+            );
+
+            currentUser = null;
+
+            authScreen.style.display =
+                "flex";
+
+            app.style.display =
+                "none";
+
+            break;
+
         case "login-error":
+
             document
-                .getElementById("loginError")
+                .getElementById(
+                    "loginError"
+                )
                 .textContent =
                     message.message;
+
             break;
 
         case "room-list":
-            rooms = message.rooms || [];
+
+            rooms =
+                message.rooms || [];
+
             renderRooms();
             renderAdmin();
+
             break;
 
         case "user-list":
-            users = message.users || [];
+
+            users =
+                message.users || [];
+
             renderAdmin();
+
             break;
 
         case "room-created":
@@ -1952,26 +2060,89 @@ function handleMessage(message){
             break;
 
         case "room-joined":
-            handleRoomJoined(message);
+
+            handleRoomJoined(
+                message
+            );
+
             break;
 
         case "user-joined":
-            handleUserJoined(message.user);
+
+            handleUserJoined(
+                message.user
+            );
+
             break;
 
         case "user-left":
-            handleUserLeft(message.userId);
+
+            handleUserLeft(
+                message.userId
+            );
+
             break;
 
-        case "left-room":
+        case "chat-message":
+
+            addChatMessage(
+                message
+            );
+
+            break;
+
+        case "offer":
+
+            receiveOffer(
+                message
+            );
+
+            break;
+
+        case "answer":
+
+            receiveAnswer(
+                message
+            );
+
+            break;
+
+        case "candidate":
+
+            receiveCandidate(
+                message
+            );
+
+            break;
+
+        case "remote-media-state":
+
+            handleRemoteMediaState(
+                message
+            );
+
+            break;
+
+        case "force-media-state":
+
+            handleForceMediaState(
+                message
+            );
+
             break;
 
         case "room-deleted":
-            handleRoomDeleted(message);
+
+            handleRoomDeleted(
+                message
+            );
+
             break;
 
         case "force-lobby":
+
             forceLobby();
+
             break;
 
         case "kicked":
@@ -1983,45 +2154,32 @@ function handleMessage(message){
 
             break;
 
-        case "chat-message":
-            addChatMessage(message);
-            break;
-
-        case "offer":
-            receiveOffer(message);
-            break;
-
-        case "answer":
-            receiveAnswer(message);
-            break;
-
-        case "candidate":
-            receiveCandidate(message);
-            break;
-
-        case "remote-media-state":
-            handleRemoteMediaState(message);
-            break;
-
-        case "force-media-state":
-            handleForceMediaState(message);
-            break;
-
         case "admin-data":
 
-            users = message.users || [];
-            rooms = message.rooms || [];
+            users =
+                message.users || [];
+
+            rooms =
+                message.rooms || [];
 
             renderAdmin();
 
             break;
 
-        case "error":
-            console.error(message.message);
+        case "admin-error":
+
+            alert(
+                message.message
+            );
+
             break;
 
-        case "admin-error":
-            alert(message.message);
+        case "error":
+
+            console.error(
+                message.message
+            );
+
             break;
     }
 }
@@ -2033,29 +2191,89 @@ LOGIN SUCCESS
 
 function handleLoginSuccess(message){
 
+    if (
+        message.sessionToken
+    ) {
+
+        localStorage.setItem(
+            "colincall_session",
+            message.sessionToken
+        );
+    }
+
     currentUser =
         message.user;
 
+    /*
+     * Correction importante :
+     * on récupère bien isAdmin.
+     */
+    currentUser.isAdmin =
+        !!message.isAdmin;
+
+    showApplication();
+}
+
+
+/* ==========================================================
+SESSION RESTORED
+========================================================== */
+
+function handleSessionRestored(
+    message
+){
+
+    currentUser =
+        message.user;
+
+    currentUser.isAdmin =
+        !!message.isAdmin;
+
+    showApplication();
+}
+
+
+/* ==========================================================
+SHOW APPLICATION
+========================================================== */
+
+function showApplication(){
+
     document
-        .getElementById("topUsername")
+        .getElementById(
+            "topUsername"
+        )
         .textContent =
             currentUser.username;
 
     document
-        .getElementById("topAvatar")
+        .getElementById(
+            "topAvatar"
+        )
         .textContent =
             getInitials(
                 currentUser.username
             );
 
-    if(message.isAdmin){
+    const adminButton =
+        document.getElementById(
+            "adminButton"
+        );
 
-        document
-            .getElementById(
-                "adminButton"
-            )
-            .style.display =
-                "block";
+    /*
+     * Correction bouton Admin
+     */
+    if (
+        currentUser.isAdmin
+    ) {
+
+        adminButton.style.display =
+            "block";
+
+    } else {
+
+        adminButton.style.display =
+            "none";
     }
 
     authScreen.style.display =
@@ -2078,7 +2296,7 @@ INITIALS
 
 function getInitials(name){
 
-    if(!name)
+    if (!name)
         return "?";
 
     return name
@@ -2109,15 +2327,18 @@ function renderRooms(){
             .trim();
 
     const filtered =
-        rooms.filter(room =>
-            room.name
-                .toLowerCase()
-                .includes(search)
+        rooms.filter(
+            room =>
+                room.name
+                    .toLowerCase()
+                    .includes(search)
         );
 
     roomList.innerHTML = "";
 
-    if(filtered.length === 0){
+    if (
+        filtered.length === 0
+    ) {
 
         roomList.innerHTML = `
             <div class="empty">
@@ -2128,39 +2349,45 @@ function renderRooms(){
         return;
     }
 
-    filtered.forEach(room => {
+    filtered.forEach(
+        room => {
 
-        const card =
-            document.createElement(
-                "div"
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.className =
+                "room-card";
+
+            card.innerHTML = `
+
+                <h3>
+                    ${escapeHtml(
+                        room.name
+                    )}
+                </h3>
+
+                <div
+                    class="room-card-info"
+                >
+                    👥 ${room.userCount}
+                    participant${room.userCount > 1 ? "s" : ""}
+                </div>
+
+                <button
+                    onclick="joinRoom('${room.id}')"
+                >
+                    Rejoindre
+                </button>
+
+            `;
+
+            roomList.appendChild(
+                card
             );
-
-        card.className =
-            "room-card";
-
-        card.innerHTML = `
-
-            <h3>
-                ${escapeHtml(room.name)}
-            </h3>
-
-            <div class="room-card-info">
-
-                👥 ${room.userCount}
-                participant${room.userCount > 1 ? "s" : ""}
-
-            </div>
-
-            <button
-                onclick="joinRoom('${room.id}')"
-            >
-                Rejoindre
-            </button>
-
-        `;
-
-        roomList.appendChild(card);
-    });
+        }
+    );
 }
 
 
@@ -2175,12 +2402,13 @@ function createRoom(){
             "Nom du salon :"
         );
 
-    if(!name)
+    if (!name)
         return;
 
     send({
 
-        type:"create-room",
+        type:
+            "create-room",
 
         name
     });
@@ -2191,50 +2419,119 @@ function createRoom(){
 JOIN ROOM
 ========================================================== */
 
-async function joinRoom(roomId){
+async function joinRoom(
+    roomId
+){
 
-    try{
+    try {
 
         await prepareLocalMedia();
 
+        /*
+         * IMPORTANT :
+         * caméra et micro OFF par défaut.
+         */
+        microphoneEnabled =
+            false;
+
+        cameraEnabled =
+            false;
+
+        localStream
+            .getAudioTracks()
+            .forEach(
+                track => {
+                    track.enabled =
+                        false;
+                }
+            );
+
+        localStream
+            .getVideoTracks()
+            .forEach(
+                track => {
+                    track.enabled =
+                        false;
+                }
+            );
+
+        updateControlButton(
+            "microBtn",
+            false
+        );
+
+        updateControlButton(
+            "cameraBtn",
+            false
+        );
+
         send({
 
-            type:"join-room",
+            type:
+                "join-room",
 
             roomId
         });
 
-    }catch(error){
+    } catch(error) {
 
         alert(
             "Impossible d'accéder à la caméra ou au micro."
         );
 
-        console.error(error);
+        console.error(
+            error
+        );
     }
 }
 
 
 /* ==========================================================
-PREPARE LOCAL MEDIA
+PREPARE MEDIA
 ========================================================== */
 
 async function prepareLocalMedia(){
 
-    if(localStream)
+    if (localStream)
         return;
 
     localStream =
-        await navigator.mediaDevices.getUserMedia({
+        await navigator.mediaDevices
+            .getUserMedia({
 
-            video:true,
+                video:true,
 
-            audio:true
-        });
+                audio:true
+            });
 
-    microphoneEnabled = true;
+    /*
+     * Les tracks sont immédiatement désactivées.
+     */
+    localStream
+        .getAudioTracks()
+        .forEach(
+            track => {
 
-    cameraEnabled = true;
+                track.enabled =
+                    false;
+            }
+        );
+
+    localStream
+        .getVideoTracks()
+        .forEach(
+            track => {
+
+                track.enabled =
+                    false;
+            }
+        );
+
+    microphoneEnabled =
+        false;
+
+    cameraEnabled =
+        false;
 }
 
 
@@ -2242,13 +2539,21 @@ async function prepareLocalMedia(){
 ROOM JOINED
 ========================================================== */
 
-function handleRoomJoined(message){
+function handleRoomJoined(
+    message
+){
 
     currentRoom =
         message.room;
 
     currentUser.roomId =
         currentRoom.id;
+
+    currentUser.microphoneEnabled =
+        false;
+
+    currentUser.cameraEnabled =
+        false;
 
     lobbyScreen.style.display =
         "none";
@@ -2271,12 +2576,11 @@ function handleRoomJoined(message){
 
     videoGrid.innerHTML = "";
 
-    // Local video
     addLocalVideo();
 
-    // Participants déjà présents
     const participants =
-        message.participants || [];
+        message.participants ||
+        [];
 
     participants.forEach(
         participant => {
@@ -2321,11 +2625,14 @@ function addLocalVideo(){
             "video"
         );
 
-    video.autoplay = true;
+    video.autoplay =
+        true;
 
-    video.playsInline = true;
+    video.playsInline =
+        true;
 
-    video.muted = true;
+    video.muted =
+        true;
 
     video.srcObject =
         localStream;
@@ -2353,40 +2660,52 @@ function addLocalVideo(){
     cameraOff.id =
         "localCameraOff";
 
+    cameraOff.style.display =
+        "flex";
+
     cameraOff.textContent =
         "📷 Caméra désactivée";
 
-    card.appendChild(video);
+    card.appendChild(
+        video
+    );
 
-    card.appendChild(name);
+    card.appendChild(
+        name
+    );
 
-    card.appendChild(cameraOff);
+    card.appendChild(
+        cameraOff
+    );
 
-    videoGrid.appendChild(card);
+    videoGrid.appendChild(
+        card
+    );
 
     updateControlButton(
         "microBtn",
-        microphoneEnabled
+        false
     );
 
     updateControlButton(
         "cameraBtn",
-        cameraEnabled
+        false
     );
 }
 
 
 /* ==========================================================
-ADD REMOTE USER
+REMOTE VIDEO
 ========================================================== */
 
 function addVideoUser(user){
 
-    if(
+    if (
         document.getElementById(
-            "video-user-" + user.id
+            "video-user-" +
+            user.id
         )
-    ){
+    ) {
 
         return;
     }
@@ -2408,12 +2727,15 @@ function addVideoUser(user){
             "video"
         );
 
-    video.autoplay = true;
+    video.autoplay =
+        true;
 
-    video.playsInline = true;
+    video.playsInline =
+        true;
 
     video.id =
-        "video-" + user.id;
+        "video-" +
+        user.id;
 
     const name =
         document.createElement(
@@ -2441,19 +2763,26 @@ function addVideoUser(user){
     cameraOff.textContent =
         "📷 Caméra désactivée";
 
-    if(user.cameraEnabled === false){
+    cameraOff.style.display =
+        user.cameraEnabled === false
+            ? "flex"
+            : "none";
 
-        cameraOff.style.display =
-            "flex";
-    }
+    card.appendChild(
+        video
+    );
 
-    card.appendChild(video);
+    card.appendChild(
+        name
+    );
 
-    card.appendChild(name);
+    card.appendChild(
+        cameraOff
+    );
 
-    card.appendChild(cameraOff);
-
-    videoGrid.appendChild(card);
+    videoGrid.appendChild(
+        card
+    );
 }
 
 
@@ -2461,12 +2790,16 @@ function addVideoUser(user){
 USER JOINED
 ========================================================== */
 
-function handleUserJoined(user){
+function handleUserJoined(
+    user
+){
 
-    if(!currentRoom)
+    if (!currentRoom)
         return;
 
-    addVideoUser(user);
+    addVideoUser(
+        user
+    );
 
     updateRoomStatus(
         videoGrid.children.length
@@ -2478,19 +2811,22 @@ function handleUserJoined(user){
 USER LEFT
 ========================================================== */
 
-function handleUserLeft(userId){
+function handleUserLeft(
+    userId
+){
 
     const card =
         document.getElementById(
-            "video-user-" + userId
+            "video-user-" +
+            userId
         );
 
-    if(card){
-
+    if (card)
         card.remove();
-    }
 
-    closePeer(userId);
+    closePeer(
+        userId
+    );
 
     updateRoomStatus(
         videoGrid.children.length
@@ -2499,17 +2835,19 @@ function handleUserLeft(userId){
 
 
 /* ==========================================================
-UPDATE ROOM STATUS
+ROOM STATUS
 ========================================================== */
 
-function updateRoomStatus(count){
+function updateRoomStatus(
+    count
+){
 
     const element =
         document.getElementById(
             "roomStatus"
         );
 
-    if(element){
+    if (element) {
 
         element.textContent =
             count +
@@ -2527,17 +2865,19 @@ function updateRoomStatus(count){
 
 
 /* ==========================================================
-VIDEO GRID LAYOUT
+VIDEO GRID
 ========================================================== */
 
-function updateVideoGridLayout(count){
+function updateVideoGridLayout(
+    count
+){
 
     const grid =
         document.getElementById(
             "videoGrid"
         );
 
-    if(!grid)
+    if (!grid)
         return;
 
     grid.classList.remove(
@@ -2545,38 +2885,40 @@ function updateVideoGridLayout(count){
         "cols-2",
         "cols-3",
         "cols-4",
-        "cols-5",
-        "cols-6",
-        "cols-7",
-        "cols-8",
-        "cols-9"
+        "cols-5"
     );
 
-    if(count <= 1){
+    if (count <= 1) {
 
         grid.classList.add(
             "cols-1"
         );
 
-    }else if(count === 2){
+    } else if (
+        count === 2
+    ) {
 
         grid.classList.add(
             "cols-2"
         );
 
-    }else if(count === 3){
+    } else if (
+        count === 3
+    ) {
 
         grid.classList.add(
             "cols-3"
         );
 
-    }else if(count === 4){
+    } else if (
+        count === 4
+    ) {
 
         grid.classList.add(
             "cols-4"
         );
 
-    }else{
+    } else {
 
         grid.classList.add(
             "cols-5"
@@ -2594,16 +2936,20 @@ async function createConnectionToUser(
     createOffer
 ){
 
-    if(peers.has(user.id)){
+    if (
+        peers.has(user.id)
+    ) {
 
         const existing =
-            peers.get(user.id);
+            peers.get(
+                user.id
+            );
 
-        if(
+        if (
             existing.connection &&
             existing.connection.connectionState !==
                 "closed"
-        ){
+        ) {
 
             return existing.connection;
         }
@@ -2612,7 +2958,8 @@ async function createConnectionToUser(
     const connection =
         new RTCPeerConnection({
 
-            iceServers:[
+            iceServers: [
+
                 {
                     urls:
                         "stun:stun.l.google.com:19302"
@@ -2624,11 +2971,12 @@ async function createConnectionToUser(
         user.id,
         {
             connection,
-            username:user.username
+            username:
+                user.username
         }
     );
 
-    if(localStream){
+    if (localStream) {
 
         localStream
             .getTracks()
@@ -2646,13 +2994,17 @@ async function createConnectionToUser(
     connection.onicecandidate =
         event => {
 
-            if(event.candidate){
+            if (
+                event.candidate
+            ) {
 
                 send({
 
-                    type:"candidate",
+                    type:
+                        "candidate",
 
-                    targetUserId:user.id,
+                    targetUserId:
+                        user.id,
 
                     candidate:
                         event.candidate
@@ -2669,13 +3021,13 @@ async function createConnectionToUser(
                     user.id
                 );
 
-            if(!video)
+            if (!video)
                 return;
 
-            if(
+            if (
                 event.streams &&
                 event.streams[0]
-            ){
+            ) {
 
                 video.srcObject =
                     event.streams[0];
@@ -2688,10 +3040,10 @@ async function createConnectionToUser(
             const state =
                 connection.connectionState;
 
-            if(
+            if (
                 state === "failed" ||
                 state === "closed"
-            ){
+            ) {
 
                 closePeer(
                     user.id
@@ -2699,20 +3051,24 @@ async function createConnectionToUser(
             }
         };
 
-    if(createOffer){
+    if (createOffer) {
 
         const offer =
-            await connection.createOffer();
+            await connection
+                .createOffer();
 
-        await connection.setLocalDescription(
-            offer
-        );
+        await connection
+            .setLocalDescription(
+                offer
+            );
 
         send({
 
-            type:"offer",
+            type:
+                "offer",
 
-            targetUserId:user.id,
+            targetUserId:
+                user.id,
 
             offer
         });
@@ -2723,17 +3079,19 @@ async function createConnectionToUser(
 
 
 /* ==========================================================
-RECEIVE OFFER
+OFFER
 ========================================================== */
 
-async function receiveOffer(message){
+async function receiveOffer(
+    message
+){
 
     const user =
         findUser(
             message.fromUserId
         );
 
-    if(!user)
+    if (!user)
         return;
 
     let peer =
@@ -2743,12 +3101,12 @@ async function receiveOffer(message){
 
     let connection;
 
-    if(peer){
+    if (peer) {
 
         connection =
             peer.connection;
 
-    }else{
+    } else {
 
         connection =
             await createConnectionToUser(
@@ -2757,28 +3115,33 @@ async function receiveOffer(message){
             );
     }
 
-    await connection.setRemoteDescription(
-        new RTCSessionDescription(
-            message.offer
-        )
-    );
+    await connection
+        .setRemoteDescription(
+            new RTCSessionDescription(
+                message.offer
+            )
+        );
 
     await flushPendingCandidates(
         user.id
     );
 
     const answer =
-        await connection.createAnswer();
+        await connection
+            .createAnswer();
 
-    await connection.setLocalDescription(
-        answer
-    );
+    await connection
+        .setLocalDescription(
+            answer
+        );
 
     send({
 
-        type:"answer",
+        type:
+            "answer",
 
-        targetUserId:user.id,
+        targetUserId:
+            user.id,
 
         answer
     });
@@ -2786,24 +3149,27 @@ async function receiveOffer(message){
 
 
 /* ==========================================================
-RECEIVE ANSWER
+ANSWER
 ========================================================== */
 
-async function receiveAnswer(message){
+async function receiveAnswer(
+    message
+){
 
     const peer =
         peers.get(
             message.fromUserId
         );
 
-    if(!peer)
+    if (!peer)
         return;
 
-    await peer.connection.setRemoteDescription(
-        new RTCSessionDescription(
-            message.answer
-        )
-    );
+    await peer.connection
+        .setRemoteDescription(
+            new RTCSessionDescription(
+                message.answer
+            )
+        );
 
     await flushPendingCandidates(
         message.fromUserId
@@ -2812,26 +3178,29 @@ async function receiveAnswer(message){
 
 
 /* ==========================================================
-RECEIVE CANDIDATE
+ICE
 ========================================================== */
 
-async function receiveCandidate(message){
+async function receiveCandidate(
+    message
+){
 
     const peer =
         peers.get(
             message.fromUserId
         );
 
-    if(
+    if (
         !peer ||
-        !peer.connection.remoteDescription
-    ){
+        !peer.connection
+            .remoteDescription
+    ) {
 
-        if(
+        if (
             !pendingCandidates.has(
                 message.fromUserId
             )
-        ){
+        ) {
 
             pendingCandidates.set(
                 message.fromUserId,
@@ -2840,7 +3209,9 @@ async function receiveCandidate(message){
         }
 
         pendingCandidates
-            .get(message.fromUserId)
+            .get(
+                message.fromUserId
+            )
             .push(
                 message.candidate
             );
@@ -2848,15 +3219,16 @@ async function receiveCandidate(message){
         return;
     }
 
-    try{
+    try {
 
-        await peer.connection.addIceCandidate(
-            new RTCIceCandidate(
-                message.candidate
-            )
-        );
+        await peer.connection
+            .addIceCandidate(
+                new RTCIceCandidate(
+                    message.candidate
+                )
+            );
 
-    }catch(error){
+    } catch(error) {
 
         console.error(
             "ICE error",
@@ -2867,7 +3239,7 @@ async function receiveCandidate(message){
 
 
 /* ==========================================================
-FLUSH CANDIDATES
+FLUSH ICE
 ========================================================== */
 
 async function flushPendingCandidates(
@@ -2879,28 +3251,32 @@ async function flushPendingCandidates(
             userId
         );
 
-    if(!list)
+    if (!list)
         return;
 
     const peer =
-        peers.get(userId);
+        peers.get(
+            userId
+        );
 
-    if(!peer)
+    if (!peer)
         return;
 
-    for(
-        const candidate of list
-    ){
+    for (
+        const candidate
+        of list
+    ) {
 
-        try{
+        try {
 
-            await peer.connection.addIceCandidate(
-                new RTCIceCandidate(
-                    candidate
-                )
-            );
+            await peer.connection
+                .addIceCandidate(
+                    new RTCIceCandidate(
+                        candidate
+                    )
+                );
 
-        }catch(error){
+        } catch(error) {
 
             console.error(
                 "ICE flush error",
@@ -2919,11 +3295,14 @@ async function flushPendingCandidates(
 FIND USER
 ========================================================== */
 
-function findUser(userId){
+function findUser(
+    userId
+){
 
     return users.find(
         user =>
-            user.id === userId
+            user.id ===
+            userId
     );
 }
 
@@ -2932,18 +3311,26 @@ function findUser(userId){
 CLOSE PEER
 ========================================================== */
 
-function closePeer(userId){
+function closePeer(
+    userId
+){
 
     const peer =
-        peers.get(userId);
+        peers.get(
+            userId
+        );
 
-    if(peer){
+    if (peer) {
 
-        try{
+        try {
+
             peer.connection.close();
-        }catch(e){}
 
-        peers.delete(userId);
+        } catch(e) {}
+
+        peers.delete(
+            userId
+        );
     }
 
     pendingCandidates.delete(
@@ -2953,12 +3340,12 @@ function closePeer(userId){
 
 
 /* ==========================================================
-MICRO
+MIC
 ========================================================== */
 
 function toggleMicro(){
 
-    if(!localStream)
+    if (!localStream)
         return;
 
     microphoneEnabled =
@@ -2981,7 +3368,8 @@ function toggleMicro(){
 
     send({
 
-        type:"media-state",
+        type:
+            "media-state",
 
         microphoneEnabled,
 
@@ -2996,7 +3384,7 @@ CAMERA
 
 function toggleCamera(){
 
-    if(!localStream)
+    if (!localStream)
         return;
 
     cameraEnabled =
@@ -3022,7 +3410,7 @@ function toggleCamera(){
             "localCameraOff"
         );
 
-    if(localCamera){
+    if (localCamera) {
 
         localCamera.style.display =
             cameraEnabled
@@ -3032,7 +3420,8 @@ function toggleCamera(){
 
     send({
 
-        type:"media-state",
+        type:
+            "media-state",
 
         microphoneEnabled,
 
@@ -3051,9 +3440,11 @@ function updateControlButton(
 ){
 
     const button =
-        document.getElementById(id);
+        document.getElementById(
+            id
+        );
 
-    if(!button)
+    if (!button)
         return;
 
     button.classList.toggle(
@@ -3061,7 +3452,10 @@ function updateControlButton(
         !enabled
     );
 
-    if(id === "microBtn"){
+    if (
+        id ===
+        "microBtn"
+    ) {
 
         button.textContent =
             enabled
@@ -3069,7 +3463,10 @@ function updateControlButton(
                 : "🔇";
     }
 
-    if(id === "cameraBtn"){
+    if (
+        id ===
+        "cameraBtn"
+    ) {
 
         button.textContent =
             enabled
@@ -3080,7 +3477,7 @@ function updateControlButton(
 
 
 /* ==========================================================
-REMOTE MEDIA STATE
+REMOTE MEDIA
 ========================================================== */
 
 function handleRemoteMediaState(
@@ -3093,11 +3490,11 @@ function handleRemoteMediaState(
             message.userId
         );
 
-    if(
+    if (
         cameraOff &&
         typeof message.cameraEnabled ===
-        "boolean"
-    ){
+            "boolean"
+    ) {
 
         cameraOff.style.display =
             message.cameraEnabled
@@ -3115,13 +3512,13 @@ function handleForceMediaState(
     message
 ){
 
-    if(!localStream)
+    if (!localStream)
         return;
 
-    if(
+    if (
         typeof message.microphoneEnabled ===
-        "boolean"
-    ){
+            "boolean"
+    ) {
 
         microphoneEnabled =
             message.microphoneEnabled;
@@ -3142,10 +3539,10 @@ function handleForceMediaState(
         );
     }
 
-    if(
+    if (
         typeof message.cameraEnabled ===
-        "boolean"
-    ){
+            "boolean"
+    ) {
 
         cameraEnabled =
             message.cameraEnabled;
@@ -3170,7 +3567,7 @@ function handleForceMediaState(
                 "localCameraOff"
             );
 
-        if(localCamera){
+        if (localCamera) {
 
             localCamera.style.display =
                 cameraEnabled
@@ -3187,7 +3584,7 @@ LEAVE ROOM
 
 function leaveCurrentRoom(){
 
-    if(!currentRoom)
+    if (!currentRoom)
         return;
 
     const confirmed =
@@ -3195,11 +3592,13 @@ function leaveCurrentRoom(){
             `Voulez-vous vraiment quitter le salon "${currentRoom.name}" ?`
         );
 
-    if(!confirmed)
+    if (!confirmed)
         return;
 
     send({
-        type:"leave-room"
+
+        type:
+            "leave-room"
     });
 
     closeAllPeers();
@@ -3208,7 +3607,7 @@ function leaveCurrentRoom(){
 
     currentRoom = null;
 
-    if(currentUser){
+    if (currentUser) {
 
         currentUser.roomId =
             null;
@@ -3225,22 +3624,24 @@ function leaveCurrentRoom(){
 
 
 /* ==========================================================
-CLOSE ALL PEERS
+CLOSE PEERS
 ========================================================== */
 
 function closeAllPeers(){
 
-    for(
-        const [userId, peer]
+    for (
+        const [
+            userId,
+            peer
+        ]
         of peers
-    ){
+    ) {
 
-        try{
+        try {
 
             peer.connection.close();
 
-        }catch(e){}
-
+        } catch(e) {}
     }
 
     peers.clear();
@@ -3250,12 +3651,12 @@ function closeAllPeers(){
 
 
 /* ==========================================================
-STOP LOCAL MEDIA
+STOP MEDIA
 ========================================================== */
 
 function stopLocalMedia(){
 
-    if(!localStream)
+    if (!localStream)
         return;
 
     localStream
@@ -3267,9 +3668,21 @@ function stopLocalMedia(){
 
     localStream = null;
 
-    microphoneEnabled = true;
+    microphoneEnabled =
+        false;
 
-    cameraEnabled = true;
+    cameraEnabled =
+        false;
+
+    updateControlButton(
+        "microBtn",
+        false
+    );
+
+    updateControlButton(
+        "cameraBtn",
+        false
+    );
 }
 
 
@@ -3281,10 +3694,11 @@ function handleRoomDeleted(
     message
 ){
 
-    if(
+    if (
         currentRoom &&
-        currentRoom.id === message.roomId
-    ){
+        currentRoom.id ===
+            message.roomId
+    ) {
 
         forceLobby();
     }
@@ -3303,7 +3717,7 @@ function forceLobby(){
 
     currentRoom = null;
 
-    if(currentUser){
+    if (currentUser) {
 
         currentUser.roomId =
             null;
@@ -3333,16 +3747,18 @@ function sendLobbyChat(){
     const text =
         input.value.trim();
 
-    if(!text)
+    if (!text)
         return;
 
     send({
 
-        type:"chat",
+        type:
+            "chat",
 
         text,
 
-        roomId:null
+        roomId:
+            null
     });
 
     input.value = "";
@@ -3355,7 +3771,7 @@ ROOM CHAT
 
 function sendRoomChat(){
 
-    if(!currentRoom)
+    if (!currentRoom)
         return;
 
     const input =
@@ -3366,12 +3782,13 @@ function sendRoomChat(){
     const text =
         input.value.trim();
 
-    if(!text)
+    if (!text)
         return;
 
     send({
 
-        type:"chat",
+        type:
+            "chat",
 
         text,
 
@@ -3384,7 +3801,7 @@ function sendRoomChat(){
 
 
 /* ==========================================================
-ADD CHAT MESSAGE
+CHAT MESSAGE
 ========================================================== */
 
 function addChatMessage(
@@ -3397,18 +3814,18 @@ function addChatMessage(
         message.roomId ===
             currentRoom.id;
 
-    if(isRoomMessage){
+    if (isRoomMessage) {
 
         appendChatMessage(
             "roomChat",
             message
         );
 
-        if(
+        if (
             currentUser &&
             message.userId !==
                 currentUser.id
-        ){
+        ) {
 
             showChatNotification(
                 "Message dans le salon",
@@ -3419,18 +3836,18 @@ function addChatMessage(
         return;
     }
 
-    if(!message.roomId){
+    if (!message.roomId) {
 
         appendChatMessage(
             "lobbyChat",
             message
         );
 
-        if(
+        if (
             currentUser &&
             message.userId !==
                 currentUser.id
-        ){
+        ) {
 
             showChatNotification(
                 "Discussion générale",
@@ -3452,16 +3869,14 @@ function appendChatMessage(
 
     const container =
         target === "roomChat"
-
             ? document.getElementById(
                 "roomChatMessages"
             )
-
             : document.getElementById(
                 "lobbyChatMessages"
             );
 
-    if(!container)
+    if (!container)
         return;
 
     const wrapper =
@@ -3508,16 +3923,25 @@ function appendChatMessage(
         ).toLocaleTimeString(
             "fr-FR",
             {
-                hour:"2-digit",
-                minute:"2-digit"
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit"
             }
         );
 
-    wrapper.appendChild(user);
+    wrapper.appendChild(
+        user
+    );
 
-    wrapper.appendChild(text);
+    wrapper.appendChild(
+        text
+    );
 
-    wrapper.appendChild(time);
+    wrapper.appendChild(
+        time
+    );
 
     container.appendChild(
         wrapper
@@ -3595,7 +4019,7 @@ PROFILE
 
 function openProfile(){
 
-    if(!currentUser)
+    if (!currentUser)
         return;
 
     document
@@ -3637,11 +4061,20 @@ ADMIN
 
 function openAdmin(){
 
-    if(
+    /*
+     * Sécurité côté interface
+     */
+    if (
         !currentUser ||
         !currentUser.isAdmin
-    )
+    ) {
+
+        alert(
+            "Accès administrateur refusé."
+        );
+
         return;
+    }
 
     document
         .getElementById(
@@ -3651,7 +4084,8 @@ function openAdmin(){
             "flex";
 
     send({
-        type:"admin-refresh"
+        type:
+            "admin-refresh"
     });
 
     showAdminTab(
@@ -3673,9 +4107,6 @@ function closeAdmin(){
 /* ==========================================================
 ADMIN TAB
 ========================================================== */
-
-let currentAdminTab =
-    "users";
 
 function showAdminTab(
     tab
@@ -3717,14 +4148,19 @@ function renderAdmin(){
             "adminList"
         );
 
-    if(!list)
+    if (!list)
         return;
 
     list.innerHTML = "";
 
-    if(currentAdminTab === "users"){
+    if (
+        currentAdminTab ===
+        "users"
+    ) {
 
-        if(users.length === 0){
+        if (
+            users.length === 0
+        ) {
 
             list.innerHTML = `
                 <div class="empty">
@@ -3735,118 +4171,129 @@ function renderAdmin(){
             return;
         }
 
-        users.forEach(user => {
+        users.forEach(
+            user => {
 
-            const item =
-                document.createElement(
-                    "div"
-                );
+                const item =
+                    document.createElement(
+                        "div"
+                    );
 
-            item.className =
-                "admin-item";
+                item.className =
+                    "admin-item";
 
-            const room =
-                rooms.find(
-                    r =>
-                        r.id ===
-                        user.roomId
-                );
+                const room =
+                    rooms.find(
+                        r =>
+                            r.id ===
+                            user.roomId
+                    );
 
-            item.innerHTML = `
+                item.innerHTML = `
 
-                <div class="admin-item-info">
+                    <div
+                        class="admin-item-info"
+                    >
 
-                    <div class="admin-item-name">
+                        <div
+                            class="admin-item-name"
+                        >
 
-                        ${escapeHtml(
-                            user.username
-                        )}
+                            ${escapeHtml(
+                                user.username
+                            )}
+
+                            ${
+                                user.id ===
+                                currentUser?.id
+                                    ? "(vous)"
+                                    : ""
+                            }
+
+                        </div>
+
+                        <div
+                            class="admin-item-sub"
+                        >
+
+                            ${
+                                room
+                                    ? escapeHtml(
+                                        room.name
+                                    )
+                                    : "Dans le lobby"
+                            }
+
+                            ·
+
+                            ${
+                                user.microphoneEnabled
+                                    ? "🎤 ON"
+                                    : "🔇 OFF"
+                            }
+
+                            ·
+
+                            ${
+                                user.cameraEnabled
+                                    ? "📹 ON"
+                                    : "🚫 OFF"
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="admin-actions"
+                    >
 
                         ${
-                            user.id ===
+                            user.id !==
                             currentUser?.id
-                                ? "(vous)"
+                                ? `
+
+                            <button
+                                class="admin-action"
+                                onclick="adminMute('${user.id}')"
+                            >
+                                🔇 Mute
+                            </button>
+
+                            <button
+                                class="admin-action"
+                                onclick="adminCamera('${user.id}')"
+                            >
+                                🚫 Caméra
+                            </button>
+
+                            <button
+                                class="admin-action danger"
+                                onclick="adminKick('${user.id}')"
+                            >
+                                Expulser
+                            </button>
+
+                            `
                                 : ""
                         }
 
                     </div>
 
-                    <div class="admin-item-sub">
+                `;
 
-                        ${
-                            room
-                                ? escapeHtml(
-                                    room.name
-                                )
-                                : "Dans le lobby"
-                        }
-
-                        ·
-
-                        ${
-                            user.microphoneEnabled
-                                ? "🎤 ON"
-                                : "🔇 OFF"
-                        }
-
-                        ·
-
-                        ${
-                            user.cameraEnabled
-                                ? "📹 ON"
-                                : "🚫 OFF"
-                        }
-
-                    </div>
-
-                </div>
-
-                <div class="admin-actions">
-
-                    ${
-                        user.id !==
-                        currentUser?.id
-                            ? `
-
-                        <button
-                            class="admin-action"
-                            onclick="adminMute('${user.id}')"
-                        >
-                            🔇 Mute
-                        </button>
-
-                        <button
-                            class="admin-action"
-                            onclick="adminCamera('${user.id}')"
-                        >
-                            🚫 Caméra
-                        </button>
-
-                        <button
-                            class="admin-action danger"
-                            onclick="adminKick('${user.id}')"
-                        >
-                            Expulser
-                        </button>
-
-                        `
-                            : ""
-                    }
-
-                </div>
-            `;
-
-            list.appendChild(item);
-        });
+                list.appendChild(
+                    item
+                );
+            }
+        );
 
         return;
     }
 
-    // --------------------------------------------------------
-    // ROOMS
-    // --------------------------------------------------------
-
-    if(rooms.length === 0){
+    if (
+        rooms.length === 0
+    ) {
 
         list.innerHTML = `
             <div class="empty">
@@ -3857,64 +4304,73 @@ function renderAdmin(){
         return;
     }
 
-    rooms.forEach(room => {
+    rooms.forEach(
+        room => {
 
-        const item =
-            document.createElement(
-                "div"
-            );
+            const item =
+                document.createElement(
+                    "div"
+                );
 
-        item.className =
-            "admin-item";
+            item.className =
+                "admin-item";
 
-        item.innerHTML = `
+            item.innerHTML = `
 
-            <div class="admin-item-info">
+                <div
+                    class="admin-item-info"
+                >
 
-                <div class="admin-item-name">
+                    <div
+                        class="admin-item-name"
+                    >
+                        ${escapeHtml(
+                            room.name
+                        )}
+                    </div>
 
-                    ${escapeHtml(room.name)}
+                    <div
+                        class="admin-item-sub"
+                    >
+                        👥 ${room.userCount}
+                        participant${room.userCount > 1 ? "s" : ""}
+
+                        ${
+                            room.permanent
+                                ? " · Permanent"
+                                : ""
+                        }
+                    </div>
 
                 </div>
 
-                <div class="admin-item-sub">
-
-                    👥 ${room.userCount}
-                    participant${room.userCount > 1 ? "s" : ""}
+                <div
+                    class="admin-actions"
+                >
 
                     ${
-                        room.permanent
-                            ? " · Permanent"
+                        !room.permanent
+                            ? `
+
+                        <button
+                            class="admin-action danger"
+                            onclick="adminDeleteRoom('${room.id}')"
+                        >
+                            Supprimer
+                        </button>
+
+                        `
                             : ""
                     }
 
                 </div>
+            `;
 
-            </div>
-
-            <div class="admin-actions">
-
-                ${
-                    !room.permanent
-                        ? `
-
-                    <button
-                        class="admin-action danger"
-                        onclick="adminDeleteRoom('${room.id}')"
-                    >
-                        Supprimer
-                    </button>
-
-                    `
-                        : ""
-                }
-
-            </div>
-
-        `;
-
-        list.appendChild(item);
-    });
+            list.appendChild(
+                item
+            );
+        }
+    );
 }
 
 
@@ -3922,20 +4378,23 @@ function renderAdmin(){
 ADMIN MUTE
 ========================================================== */
 
-function adminMute(userId){
+function adminMute(
+    userId
+){
 
-    if(
+    if (
         !confirm(
             "Couper le microphone de cet utilisateur ?"
         )
-    ){
+    ) {
 
         return;
     }
 
     send({
 
-        type:"admin-mute",
+        type:
+            "admin-mute",
 
         userId
     });
@@ -3946,20 +4405,23 @@ function adminMute(userId){
 ADMIN CAMERA
 ========================================================== */
 
-function adminCamera(userId){
+function adminCamera(
+    userId
+){
 
-    if(
+    if (
         !confirm(
             "Couper la caméra de cet utilisateur ?"
         )
-    ){
+    ) {
 
         return;
     }
 
     send({
 
-        type:"admin-camera",
+        type:
+            "admin-camera",
 
         userId
     });
@@ -3970,20 +4432,23 @@ function adminCamera(userId){
 ADMIN KICK
 ========================================================== */
 
-function adminKick(userId){
+function adminKick(
+    userId
+){
 
-    if(
+    if (
         !confirm(
             "Expulser cet utilisateur ?"
         )
-    ){
+    ) {
 
         return;
     }
 
     send({
 
-        type:"admin-kick",
+        type:
+            "admin-kick",
 
         userId
     });
@@ -3998,18 +4463,19 @@ function adminDeleteRoom(
     roomId
 ){
 
-    if(
+    if (
         !confirm(
             "Supprimer définitivement ce salon ?"
         )
-    ){
+    ) {
 
         return;
     }
 
     send({
 
-        type:"admin-delete-room",
+        type:
+            "admin-delete-room",
 
         roomId
     });
@@ -4020,25 +4486,32 @@ function adminDeleteRoom(
 ESCAPE HTML
 ========================================================== */
 
-function escapeHtml(value){
+function escapeHtml(
+    value
+){
 
     return String(value)
+
         .replace(
             /&/g,
             "&amp;"
         )
+
         .replace(
             /</g,
             "&lt;"
         )
+
         .replace(
             />/g,
             "&gt;"
         )
+
         .replace(
             /"/g,
             "&quot;"
         )
+
         .replace(
             /'/g,
             "&#039;"
@@ -4058,7 +4531,10 @@ document
         "keydown",
         event => {
 
-            if(event.key === "Enter"){
+            if (
+                event.key ===
+                "Enter"
+            ) {
 
                 login();
             }
@@ -4073,7 +4549,10 @@ document
         "keydown",
         event => {
 
-            if(event.key === "Enter"){
+            if (
+                event.key ===
+                "Enter"
+            ) {
 
                 login();
             }
@@ -4082,7 +4561,7 @@ document
 
 
 /* ==========================================================
-MODAL CLICK OUTSIDE
+MODAL OUTSIDE CLICK
 ========================================================== */
 
 document
@@ -4093,10 +4572,10 @@ document
         "click",
         event => {
 
-            if(
+            if (
                 event.target.id ===
                 "profileModal"
-            ){
+            ) {
 
                 closeProfile();
             }
@@ -4111,15 +4590,48 @@ document
         "click",
         event => {
 
-            if(
+            if (
                 event.target.id ===
                 "adminModal"
-            ){
+            ) {
 
                 closeAdmin();
             }
         }
     );
+
+
+/* ==========================================================
+AUTO RESTORE AU CHARGEMENT
+========================================================== */
+
+window.addEventListener(
+    "load",
+    () => {
+
+        const token =
+            localStorage.getItem(
+                "colincall_session"
+            );
+
+        if (token) {
+
+            /*
+             * On masque temporairement
+             * l'écran de connexion.
+             */
+            authScreen.style.display =
+                "none";
+
+            restoreSession();
+
+        } else {
+
+            authScreen.style.display =
+                "flex";
+        }
+    }
+);
 
 </script>
 
