@@ -93,6 +93,11 @@ body:has(#roomScreen[style*="display: flex"]) #roomChatMobileButton{
 .users-sidebar-toggle:hover{background:var(--panel3);}
 .users-sidebar-toggle:active{transform:scale(.97);}
 
+/* Le bouton Utilisateurs est uniquement visible dans le lobby. */
+body:has(#roomScreen[style*="display: flex"]) #usersSidebarToggle{
+    display:none !important;
+}
+
 .users-sidebar{
     transition:width .22s ease,flex-basis .22s ease,padding .22s ease,opacity .22s ease;
 }
