@@ -2,33 +2,40 @@
 (function(){
     const originalPrepareLocalMedia = window.prepareLocalMedia;
 
-    window.prepareLocalMedia = async function(){
-        if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-            alert("Votre navigateur ne permet pas l'accès à la caméra et au microphone.");
-            return false;
-        }
+    /*
+     * On conserve la vraie initialisation WebRTC de room.js.
+     * On coupe ensuite les pistes sans remplacer la fonction originale,
+     * afin de ne pas casser les références utilisées par room.js.
+     */
+    if(typeof originalPrepareLocalMedia === "function"){
+        window.prepareLocalMedia = async function(){
+            const ready = await originalPrepareLocalMedia();
+            if(!ready) return false;
 
-        try{
             if(window.localStream){
-                window.localStream.getTracks().forEach(track => track.stop());
-                window.localStream = null;
+                window.localStream.getAudioTracks().forEach(track => {
+                    track.enabled = false;
+                });
+                window.localStream.getVideoTracks().forEach(track => {
+                    track.enabled = false;
+                });
             }
 
-            const stream = await navigator.mediaDevices.getUserMedia({audio:true, video:true});
-            stream.getAudioTracks().forEach(track => track.enabled = false);
-            stream.getVideoTracks().forEach(track => track.enabled = false);
-
-            window.localStream = stream;
             window.microphoneEnabled = false;
             window.cameraEnabled = false;
-            return true;
-        }catch(error){
-            console.error("Accès média refusé :", error);
-            return false;
-        }
-    };
 
-    const originalToggleUsersSidebar = window.toggleUsersSidebar;
+            if(typeof window.updateLocalCameraDisplay === "function"){
+                window.updateLocalCameraDisplay();
+            }
+            if(typeof window.updateControlButton === "function"){
+                window.updateControlButton("microBtn", false, "🎙️", "🔇");
+                window.updateControlButton("cameraBtn", false, "📹", "🚫");
+            }
+
+            return true;
+        };
+    }
+
     window.toggleUsersSidebar = function(){
         const lobby = document.getElementById("lobbyScreen");
         if(!lobby) return;
