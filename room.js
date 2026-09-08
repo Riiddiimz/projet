@@ -38,7 +38,9 @@ async function prepareLocalMedia(){
             localStream
                 .getTracks()
                 .forEach(track => {
+
                     track.stop();
+
                 });
 
             localStream = null;
@@ -55,6 +57,7 @@ async function prepareLocalMedia(){
         microphoneEnabled = true;
         cameraEnabled = true;
 
+
         return true;
 
     }catch(error){
@@ -64,10 +67,12 @@ async function prepareLocalMedia(){
             error
         );
 
+
         /*
-         * Si l'utilisateur refuse les permissions,
+         * Si l'utilisateur refuse la caméra,
          * on essaye au moins le micro.
          */
+
         try{
 
             localStream =
@@ -76,8 +81,10 @@ async function prepareLocalMedia(){
                     video:false
                 });
 
+
             microphoneEnabled = true;
             cameraEnabled = false;
+
 
             return true;
 
@@ -88,9 +95,11 @@ async function prepareLocalMedia(){
                 secondError
             );
 
+
             alert(
                 "L'accès au microphone et à la caméra est nécessaire pour rejoindre un salon."
             );
+
 
             return false;
         }
@@ -106,6 +115,7 @@ function handleRoomJoined(message){
 
     currentRoom =
         message.room;
+
 
     roomUnreadCount = 0;
 
@@ -125,10 +135,12 @@ function handleRoomJoined(message){
      * Le bouton Général mobile disparaît
      * lorsqu'on est dans un salon.
      */
+
     const generalButton =
         document.getElementById(
             "generalChatToggle"
         );
+
 
     if(generalButton){
 
@@ -141,6 +153,7 @@ function handleRoomJoined(message){
         document.getElementById(
             "roomName"
         );
+
 
     if(roomNameElement){
 
@@ -155,6 +168,7 @@ function handleRoomJoined(message){
             "roomStatus"
         );
 
+
     if(roomStatusElement){
 
         roomStatusElement.textContent =
@@ -166,6 +180,7 @@ function handleRoomJoined(message){
         document.getElementById(
             "roomChatMessages"
         );
+
 
     if(roomMessages){
 
@@ -179,6 +194,11 @@ function handleRoomJoined(message){
 
     addLocalVideo();
 
+
+    /*
+     * Le serveur peut utiliser "users" ou
+     * "participants".
+     */
 
     const participants =
         message.users ||
@@ -220,12 +240,18 @@ function addLocalVideo(){
 
     if(!videoGrid) return;
 
+    if(!currentUser) return;
+
 
     const wrapper =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     wrapper.className =
         "video-card";
+
 
     wrapper.id =
         "video-user-" +
@@ -233,10 +259,15 @@ function addLocalVideo(){
 
 
     const video =
-        document.createElement("video");
+        document.createElement(
+            "video"
+        );
+
 
     video.autoplay = true;
+
     video.playsInline = true;
+
     video.muted = true;
 
 
@@ -248,14 +279,20 @@ function addLocalVideo(){
 
 
     const overlay =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     overlay.className =
         "video-overlay";
 
 
     const name =
-        document.createElement("span");
+        document.createElement(
+            "span"
+        );
+
 
     name.textContent =
         currentUser.username ||
@@ -263,16 +300,21 @@ function addLocalVideo(){
 
 
     const state =
-        document.createElement("span");
+        document.createElement(
+            "span"
+        );
+
 
     state.className =
         "video-media-state";
 
 
     overlay.appendChild(name);
+
     overlay.appendChild(state);
 
     wrapper.appendChild(video);
+
     wrapper.appendChild(overlay);
 
     videoGrid.appendChild(wrapper);
@@ -280,15 +322,17 @@ function addLocalVideo(){
 
     updateLocalCameraDisplay();
 
+
     updateControlButton(
-        "microButton",
+        "microBtn",
         microphoneEnabled,
         "🎙️",
         "🔇"
     );
 
+
     updateControlButton(
-        "cameraButton",
+        "cameraBtn",
         cameraEnabled,
         "📹",
         "🚫"
@@ -304,20 +348,26 @@ function addVideoUser(user){
 
     if(!user || !videoGrid) return;
 
+
     const existing =
         document.getElementById(
             "video-user-" +
             user.id
         );
 
+
     if(existing) return;
 
 
     const wrapper =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     wrapper.className =
         "video-card";
+
 
     wrapper.id =
         "video-user-" +
@@ -325,21 +375,31 @@ function addVideoUser(user){
 
 
     const video =
-        document.createElement("video");
+        document.createElement(
+            "video"
+        );
+
 
     video.autoplay = true;
+
     video.playsInline = true;
 
 
     const overlay =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     overlay.className =
         "video-overlay";
 
 
     const name =
-        document.createElement("span");
+        document.createElement(
+            "span"
+        );
+
 
     name.textContent =
         user.username ||
@@ -347,16 +407,22 @@ function addVideoUser(user){
 
 
     const state =
-        document.createElement("span");
+        document.createElement(
+            "span"
+        );
+
 
     state.className =
         "video-media-state";
 
 
     overlay.appendChild(name);
+
     overlay.appendChild(state);
 
+
     wrapper.appendChild(video);
+
     wrapper.appendChild(overlay);
 
     videoGrid.appendChild(wrapper);
@@ -419,6 +485,7 @@ function updateLocalCameraDisplay(){
             currentUser.id
         );
 
+
     if(!card) return;
 
 
@@ -426,6 +493,7 @@ function updateLocalCameraDisplay(){
         card.querySelector(
             "video"
         );
+
 
     const state =
         card.querySelector(
@@ -467,6 +535,7 @@ function updateRemoteCameraDisplay(
             userId
         );
 
+
     if(!card) return;
 
 
@@ -474,6 +543,7 @@ function updateRemoteCameraDisplay(
         card.querySelector(
             "video"
         );
+
 
     const state =
         card.querySelector(
@@ -483,11 +553,6 @@ function updateRemoteCameraDisplay(
 
     if(video){
 
-        /*
-         * On garde la vidéo disponible même
-         * lorsque l'autre utilisateur coupe
-         * momentanément sa caméra.
-         */
         video.style.display =
             enabled
                 ? "block"
@@ -513,10 +578,7 @@ function updateRoomParticipants(){
 
     if(!currentRoom) return;
 
-    /*
-     * Cette fonction peut être appelée après
-     * une modification de la liste des participants.
-     */
+
     updateVideoGridLayout();
 }
 
@@ -531,7 +593,9 @@ function handleRoomUserJoined(message){
         message.user ||
         message;
 
+
     if(!user || !user.id) return;
+
 
     if(
         currentUser &&
@@ -574,6 +638,7 @@ function handleRoomUserLeft(message){
             userId
         );
 
+
     if(card){
 
         card.remove();
@@ -599,14 +664,18 @@ function createPeerConnection(userId){
 
 
     const configuration = {
+
         iceServers:[
+
             {
                 urls:[
                     "stun:stun.l.google.com:19302",
                     "stun:stun1.l.google.com:19302"
                 ]
             }
+
         ]
+
     };
 
 
@@ -629,7 +698,7 @@ function createPeerConnection(userId){
 
 
     /*
-     * Ajout des pistes locales
+     * Ajout des pistes locales.
      */
 
     if(localStream){
@@ -643,13 +712,14 @@ function createPeerConnection(userId){
                         track,
                         localStream
                     );
+
                 }
             );
     }
 
 
     /*
-     * Piste distante
+     * Piste distante.
      */
 
     peer.ontrack =
@@ -661,6 +731,7 @@ function createPeerConnection(userId){
                     userId
                 );
 
+
             if(!card) return;
 
 
@@ -668,6 +739,7 @@ function createPeerConnection(userId){
                 card.querySelector(
                     "video"
                 );
+
 
             if(!video) return;
 
@@ -684,7 +756,9 @@ function createPeerConnection(userId){
 
 
     /*
-     * ICE candidate
+     * ICE candidate.
+     *
+     * Le serveur attend "targetId".
      */
 
     peer.onicecandidate =
@@ -694,15 +768,21 @@ function createPeerConnection(userId){
 
 
             send({
+
                 type:"candidate",
-                targetUserId:userId,
-                candidate:event.candidate
+
+                targetId:
+                    userId,
+
+                candidate:
+                    event.candidate
+
             });
         };
 
 
     /*
-     * Connexion
+     * Connexion.
      */
 
     peer.onconnectionstatechange =
@@ -734,6 +814,7 @@ async function createOfferForUser(user){
 
     if(!user || !user.id) return;
 
+
     try{
 
         const peer =
@@ -751,10 +832,19 @@ async function createOfferForUser(user){
         );
 
 
+        /*
+         * Le serveur attend "targetId".
+         */
+
         send({
+
             type:"offer",
-            targetUserId:user.id,
+
+            targetId:
+                user.id,
+
             offer
+
         });
 
     }catch(error){
@@ -773,7 +863,13 @@ async function createOfferForUser(user){
 
 async function handleOffer(message){
 
+    /*
+     * Le serveur renvoie l'expéditeur
+     * dans "fromId".
+     */
+
     const userId =
+        message.fromId ||
         message.userId ||
         message.fromUserId ||
         message.senderId;
@@ -811,10 +907,19 @@ async function handleOffer(message){
         );
 
 
+        /*
+         * Le serveur attend "targetId".
+         */
+
         send({
+
             type:"answer",
-            targetUserId:userId,
+
+            targetId:
+                userId,
+
             answer
+
         });
 
     }catch(error){
@@ -833,7 +938,13 @@ async function handleOffer(message){
 
 async function handleAnswer(message){
 
+    /*
+     * Le serveur renvoie l'expéditeur
+     * dans "fromId".
+     */
+
     const userId =
+        message.fromId ||
         message.userId ||
         message.fromUserId ||
         message.senderId;
@@ -880,7 +991,13 @@ async function handleAnswer(message){
 
 async function handleCandidate(message){
 
+    /*
+     * Le serveur renvoie l'expéditeur
+     * dans "fromId".
+     */
+
     const userId =
+        message.fromId ||
         message.userId ||
         message.fromUserId ||
         message.senderId;
@@ -894,6 +1011,11 @@ async function handleCandidate(message){
             userId
         );
 
+
+    /*
+     * Si le peer n'est pas encore prêt,
+     * on garde le candidate en mémoire.
+     */
 
     if(
         !peer ||
@@ -913,17 +1035,24 @@ async function handleCandidate(message){
         }
 
 
-        pendingCandidates
-            .get(userId)
-            .push(
-                message.candidate
-            );
+        if(message.candidate){
+
+            pendingCandidates
+                .get(userId)
+                .push(
+                    message.candidate
+                );
+        }
+
 
         return;
     }
 
 
     try{
+
+        if(!message.candidate) return;
+
 
         await peer.addIceCandidate(
             new RTCIceCandidate(
@@ -1020,6 +1149,7 @@ function closePeer(userId){
         userId
     );
 
+
     pendingCandidates.delete(
         userId
     );
@@ -1077,18 +1207,34 @@ function toggleMicro(){
         );
 
 
+    /*
+     * L'ID réel dans index.html est "microBtn".
+     */
+
     updateControlButton(
-        "microButton",
+        "microBtn",
         microphoneEnabled,
         "🎙️",
         "🔇"
     );
 
 
+    /*
+     * Le serveur attend :
+     * microphoneEnabled
+     * cameraEnabled
+     */
+
     send({
+
         type:"media-state",
-        audio:microphoneEnabled,
-        video:cameraEnabled
+
+        microphoneEnabled:
+            microphoneEnabled,
+
+        cameraEnabled:
+            cameraEnabled
+
     });
 }
 
@@ -1120,18 +1266,34 @@ function toggleCamera(){
     updateLocalCameraDisplay();
 
 
+    /*
+     * L'ID réel dans index.html est "cameraBtn".
+     */
+
     updateControlButton(
-        "cameraButton",
+        "cameraBtn",
         cameraEnabled,
         "📹",
         "🚫"
     );
 
 
+    /*
+     * Le serveur attend :
+     * microphoneEnabled
+     * cameraEnabled
+     */
+
     send({
+
         type:"media-state",
-        audio:microphoneEnabled,
-        video:cameraEnabled
+
+        microphoneEnabled:
+            microphoneEnabled,
+
+        cameraEnabled:
+            cameraEnabled
+
     });
 }
 
@@ -1177,8 +1339,17 @@ function handleRemoteMediaState(
     message
 ){
 
+    /*
+     * Le serveur utilise "userId".
+     *
+     * On accepte aussi fromId pour
+     * rester compatible avec d'autres
+     * messages éventuels.
+     */
+
     const userId =
         message.userId ||
+        message.fromId ||
         message.fromUserId ||
         message.senderId;
 
@@ -1186,8 +1357,12 @@ function handleRemoteMediaState(
     if(!userId) return;
 
 
+    /*
+     * Le serveur envoie "cameraEnabled".
+     */
+
     const videoEnabled =
-        message.video !== false;
+        message.cameraEnabled !== false;
 
 
     updateRemoteCameraDisplay(
@@ -1206,13 +1381,20 @@ function handleForceMediaState(message){
     if(!localStream) return;
 
 
+    /*
+     * Le serveur utilise :
+     *
+     * microphoneEnabled
+     * cameraEnabled
+     */
+
     if(
-        typeof message.audio ===
+        typeof message.microphoneEnabled ===
         "boolean"
     ){
 
         microphoneEnabled =
-            message.audio;
+            message.microphoneEnabled;
 
 
         localStream
@@ -1228,12 +1410,12 @@ function handleForceMediaState(message){
 
 
     if(
-        typeof message.video ===
+        typeof message.cameraEnabled ===
         "boolean"
     ){
 
         cameraEnabled =
-            message.video;
+            message.cameraEnabled;
 
 
         localStream
@@ -1249,7 +1431,7 @@ function handleForceMediaState(message){
 
 
     updateControlButton(
-        "microButton",
+        "microBtn",
         microphoneEnabled,
         "🎙️",
         "🔇"
@@ -1257,7 +1439,7 @@ function handleForceMediaState(message){
 
 
     updateControlButton(
-        "cameraButton",
+        "cameraBtn",
         cameraEnabled,
         "📹",
         "🚫"
@@ -1274,29 +1456,30 @@ function handleForceMediaState(message){
 
 function stopLocalMedia(){
 
-    if(!localStream) return;
+    if(localStream){
 
+        localStream
+            .getTracks()
+            .forEach(
+                track => {
 
-    localStream
-        .getTracks()
-        .forEach(
-            track => {
+                    try{
 
-                try{
+                        track.stop();
 
-                    track.stop();
+                    }catch(error){
 
-                }catch(error){
-
-                    console.error(error);
+                        console.error(error);
+                    }
                 }
-            }
-        );
+            );
+    }
 
 
     localStream = null;
 
     microphoneEnabled = false;
+
     cameraEnabled = false;
 }
 
@@ -1311,9 +1494,12 @@ function leaveCurrentRoom(){
 
 
     send({
+
         type:"leave-room",
+
         roomId:
             currentRoom.id
+
     });
 
 
@@ -1322,7 +1508,10 @@ function leaveCurrentRoom(){
     stopLocalMedia();
 
 
-    videoGrid.innerHTML = "";
+    if(videoGrid){
+
+        videoGrid.innerHTML = "";
+    }
 
 
     currentRoom = null;
@@ -1335,6 +1524,7 @@ function leaveCurrentRoom(){
     roomScreen.style.display =
         "none";
 
+
     lobbyScreen.style.display =
         "flex";
 
@@ -1345,6 +1535,7 @@ function leaveCurrentRoom(){
 
 
     renderRooms();
+
     renderOnlineUsers();
 }
 
@@ -1360,7 +1551,10 @@ function forceLeaveRoom(message){
     stopLocalMedia();
 
 
-    videoGrid.innerHTML = "";
+    if(videoGrid){
+
+        videoGrid.innerHTML = "";
+    }
 
 
     currentRoom = null;
@@ -1373,6 +1567,7 @@ function forceLeaveRoom(message){
     roomScreen.style.display =
         "none";
 
+
     lobbyScreen.style.display =
         "flex";
 
@@ -1383,13 +1578,25 @@ function forceLeaveRoom(message){
 
 
     renderRooms();
+
     renderOnlineUsers();
 
 
-    if(message && message.reason){
+    /*
+     * Le serveur utilise actuellement
+     * "message" pour transmettre le texte.
+     * On accepte également "reason".
+     */
+
+    const reason =
+        message?.message ||
+        message?.reason;
+
+
+    if(reason){
 
         alert(
-            message.reason
+            reason
         );
     }
 }
@@ -1401,9 +1608,7 @@ function forceLeaveRoom(message){
 
 function handleRoomDeleted(message){
 
-    if(
-        !currentRoom
-    ){
+    if(!currentRoom){
 
         renderRooms();
 
@@ -1436,7 +1641,10 @@ function handleRoomDeleted(message){
     stopLocalMedia();
 
 
-    videoGrid.innerHTML = "";
+    if(videoGrid){
+
+        videoGrid.innerHTML = "";
+    }
 
 
     currentRoom = null;
@@ -1449,6 +1657,7 @@ function handleRoomDeleted(message){
     roomScreen.style.display =
         "none";
 
+
     lobbyScreen.style.display =
         "flex";
 
@@ -1459,6 +1668,7 @@ function handleRoomDeleted(message){
 
 
     renderRooms();
+
     renderOnlineUsers();
 
 
