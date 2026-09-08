@@ -2,736 +2,175 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Col'inCall</title>
-
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="chat-ui.css">
 </head>
 
 <body>
 
-<!-- =========================================================
-     AUTH
-========================================================= -->
-
 <div id="authScreen" class="auth-screen">
-
     <div class="auth-card">
-
-        <div class="auth-logo">
-            Col'inCall
-        </div>
-
-        <div class="auth-subtitle">
-            Communication simple et instantanée
-        </div>
-
+        <div class="auth-logo">Col'inCall</div>
+        <div class="auth-subtitle">Communication simple et instantanée</div>
         <div class="auth-form">
-
-            <input
-                id="usernameInput"
-                type="text"
-                placeholder="Nom d'utilisateur"
-                autocomplete="username"
-            >
-
-            <input
-                id="passwordInput"
-                type="password"
-                placeholder="Code"
-                autocomplete="current-password"
-            >
-
-            <button
-                class="primary-btn"
-                onclick="login()"
-            >
-                Se connecter
-            </button>
-
-            <div
-                id="loginError"
-                class="login-error"
-            ></div>
-
+            <input id="usernameInput" type="text" placeholder="Nom d'utilisateur" autocomplete="username">
+            <input id="passwordInput" type="password" placeholder="Code" autocomplete="current-password">
+            <button class="primary-btn" onclick="login()">Se connecter</button>
+            <div id="loginError" class="login-error"></div>
         </div>
-
     </div>
-
 </div>
 
-
-<!-- =========================================================
-     APPLICATION
-========================================================= -->
-
-<div
-    id="app"
-    class="app"
-    style="display:none;"
->
-
-    <!-- =====================================================
-         TOPBAR
-    ====================================================== -->
-
-    <header class="topbar">
-
-        <div class="brand">
-            <div class="brand-title">
-                Col'inCall
-            </div>
-
-            <div class="brand-status">
-                ● Connecté
-            </div>
-        </div>
-
-
-        <div class="top-actions">
-
-            <!-- CHAT GENERAL PC -->
-
-            <button
-                id="desktopGeneralChatButton"
-                class="top-btn desktop-chat-button"
-                onclick="toggleLobbyChat()"
-            >
-                💬 Général
-            </button>
-
-
-            <!-- CHAT ROOM PC -->
-
-            <button
-                id="desktopRoomChatButton"
-                class="top-btn desktop-chat-button"
-                onclick="toggleRoomChat()"
-            >
-                💬 Chat
-
-                <span
-                    id="desktopRoomChatUnread"
-                    class="chat-badge"
-                >
-                    0
-                </span>
-            </button>
-
-
-            <!-- ADMIN -->
-
-            <button
-                id="adminButton"
-                class="top-btn"
-                style="display:none;"
-                onclick="openAdmin()"
-            >
-                ⚙️ Admin
-            </button>
-
-
-            <!-- PROFIL -->
-
-            <button
-                class="top-btn profile-top"
-                onclick="openProfile()"
-            >
-
-                <span
-                    id="topAvatar"
-                    class="avatar"
-                >
-                    ?
-                </span>
-
-                <span
-                    id="topUsername"
-                    class="profile-name"
-                >
-                    Profil
-                </span>
-
-            </button>
-
-        </div>
-
-    </header>
-
-
-    <!-- =====================================================
-         LOBBY
-    ====================================================== -->
-
-    <main
-        id="lobbyScreen"
-        class="lobby-screen"
-    >
-
-        <!-- USERS -->
-
-        <aside class="users-sidebar">
-
-            <div class="sidebar-title-row">
-
-                <div class="sidebar-title">
-                    Utilisateurs
-                </div>
-
-                <div
-                    id="onlineUsersCount"
-                    class="online-count"
-                >
-                    0
-                </div>
-
-            </div>
-
-
-            <div
-                id="onlineUsersList"
-                class="online-users-list"
-            ></div>
-
-        </aside>
-
-
-        <!-- LOBBY MAIN -->
-
-        <section class="lobby-main">
-
-            <div class="lobby-header">
-
-                <div>
-
-                    <h1>
-                        Salons
-                    </h1>
-
-                    <p>
-                        Rejoignez une conversation
-                    </p>
-
-                </div>
-
-
-                <button
-                    class="primary-btn create-room-btn"
-                    onclick="createRoom()"
-                >
-                    ＋ Créer un salon
-                </button>
-
-            </div>
-
-
-            <!-- SEARCH -->
-
-            <div class="room-toolbar">
-
-                <input
-                    id="roomSearch"
-                    class="room-search"
-                    type="text"
-                    placeholder="Rechercher un salon..."
-                >
-
-            </div>
-
-
-            <!-- ROOM LIST -->
-
-            <div
-                id="roomList"
-                class="room-list"
-            ></div>
-
-        </section>
-
-
-        <!-- GENERAL CHAT -->
-
-        <aside
-            id="lobbyChat"
-            class="chat-sidebar"
-        >
-
-            <div class="chat-header">
-
-                <div>
-
-                    <div class="chat-title">
-                        Général
-                    </div>
-
-                    <div class="chat-subtitle">
-                        Discussion générale
-                    </div>
-
-                </div>
-
-
-                <button
-                    class="chat-close"
-                    onclick="closeGeneralChat()"
-                >
-                    ×
-                </button>
-
-            </div>
-
-
-            <div
-                id="lobbyChatMessages"
-                class="chat-messages"
-            ></div>
-
-
-            <div class="chat-input-area">
-
-                <input
-                    id="lobbyChatInput"
-                    type="text"
-                    placeholder="Écrire un message..."
-                    autocomplete="off"
-                >
-
-                <button
-                    class="chat-send"
-                    onclick="sendLobbyChat()"
-                >
-                    ➤
-                </button>
-
-            </div>
-
-        </aside>
-
-    </main>
-
-
-    <!-- =====================================================
-         ROOM
-    ====================================================== -->
-
-    <main
-        id="roomScreen"
-        class="room-screen"
-        style="display:none;"
-    >
-
-        <!-- ROOM HEADER -->
-
-        <div class="room-header">
-
-            <button
-                class="back-btn"
-                onclick="leaveCurrentRoom()"
-            >
-                ←
-            </button>
-
-
-            <div class="room-header-info">
-
-                <div
-                    id="roomName"
-                    class="room-title"
-                >
-                    Salon
-                </div>
-
-                <div
-                    id="roomStatus"
-                    class="room-status"
-                >
-                    Vous êtes connecté
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- VIDEO GRID -->
-
-        <div
-            id="videoGrid"
-            class="video-grid"
-        ></div>
-
-
-        <!-- ROOM BOTTOM CONTROLS -->
-
-        <div class="room-bottom-controls">
-
-            <button
-                id="microBtn"
-                class="media-btn"
-                onclick="toggleMicro()"
-                title="Microphone"
-            >
-                🎙️
-            </button>
-
-
-            <button
-                id="cameraBtn"
-                class="media-btn"
-                onclick="toggleCamera()"
-                title="Caméra"
-            >
-                📷
-            </button>
-
-
-            <button
-                class="leave-btn"
-                onclick="leaveCurrentRoom()"
-                title="Quitter le salon"
-            >
-                ☎
-            </button>
-
-        </div>
-
-
-        <!-- ROOM CHAT -->
-
-        <aside
-            id="roomChat"
-            class="chat-sidebar room-chat"
-        >
-
-            <div class="chat-header">
-
-                <div>
-
-                    <div class="chat-title">
-                        Chat du salon
-                    </div>
-
-                    <div class="chat-subtitle">
-                        Discussion du salon
-                    </div>
-
-                </div>
-
-
-                <button
-                    class="chat-close"
-                    onclick="closeRoomChat()"
-                >
-                    ×
-                </button>
-
-            </div>
-
-
-            <div
-                id="roomChatMessages"
-                class="chat-messages"
-            ></div>
-
-
-            <div class="chat-input-area">
-
-                <input
-                    id="roomChatInput"
-                    type="text"
-                    placeholder="Écrire un message..."
-                    autocomplete="off"
-                >
-
-                <button
-                    class="chat-send"
-                    onclick="sendRoomChat()"
-                >
-                    ➤
-                </button>
-
-            </div>
-
-        </aside>
-
-
-        <!-- MOBILE ROOM CHAT BUTTON -->
-
-        <button
-            id="roomChatMobileButton"
-            class="room-chat-mobile-button"
-            onclick="toggleRoomChat()"
-            title="Chat du salon"
-        >
-
-            💬 Chat
-
-            <span
-                id="roomChatUnread"
-                class="chat-badge"
-            >
-                0
-            </span>
-
+<div id="app" class="app" style="display:none;">
+
+<header class="topbar">
+    <div class="brand">
+        <div class="brand-title">Col'inCall</div>
+        <div class="brand-status">● Connecté</div>
+    </div>
+
+    <div class="top-actions">
+        <button id="desktopGeneralChatButton" class="top-btn desktop-chat-button" onclick="toggleLobbyChat()">💬 Général</button>
+        <button id="desktopRoomChatButton" class="top-btn desktop-chat-button" onclick="toggleRoomChat()">
+            💬 Chat <span id="desktopRoomChatUnread" class="chat-badge">0</span>
         </button>
+        <button id="adminButton" class="top-btn" style="display:none;" onclick="openAdmin()">⚙️ Admin</button>
+        <button class="top-btn profile-top" onclick="openProfile()">
+            <span id="topAvatar" class="avatar">?</span>
+            <span id="topUsername" class="profile-name">Profil</span>
+        </button>
+    </div>
+</header>
 
-    </main>
+<main id="lobbyScreen" class="lobby-screen">
+    <aside class="users-sidebar">
+        <div class="sidebar-title-row">
+            <div class="sidebar-title">Utilisateurs</div>
+            <div id="onlineUsersCount" class="online-count">0</div>
+        </div>
+        <div id="onlineUsersList" class="online-users-list"></div>
+    </aside>
 
+    <section class="lobby-main">
+        <div class="lobby-header">
+            <div>
+                <h1>Salons</h1>
+                <p>Rejoignez une conversation</p>
+            </div>
+            <button class="primary-btn create-room-btn" onclick="createRoom()">＋ Créer un salon</button>
+        </div>
 
-    <!-- =====================================================
-         MOBILE GENERAL CHAT BUTTON
-    ====================================================== -->
+        <div class="room-toolbar">
+            <input id="roomSearch" class="room-search" type="text" placeholder="Rechercher un salon...">
+        </div>
 
-    <button
-        id="generalChatToggle"
-        class="general-chat-toggle"
-        onclick="toggleLobbyChat()"
-    >
-        💬 Général
+        <div id="roomList" class="room-list"></div>
+    </section>
+
+    <aside id="lobbyChat" class="chat-sidebar">
+        <div class="chat-header">
+            <div>
+                <div class="chat-title">Général</div>
+                <div class="chat-subtitle">Discussion générale</div>
+            </div>
+            <button class="chat-close" onclick="closeGeneralChat()">×</button>
+        </div>
+        <div id="lobbyChatMessages" class="chat-messages"></div>
+        <div class="chat-input-area">
+            <input id="lobbyChatInput" type="text" placeholder="Écrire un message..." autocomplete="off">
+            <button class="chat-send" onclick="sendLobbyChat()">➤</button>
+        </div>
+    </aside>
+</main>
+
+<main id="roomScreen" class="room-screen" style="display:none;">
+    <div class="room-header">
+        <button class="back-btn" onclick="leaveCurrentRoom()">←</button>
+        <div class="room-header-info">
+            <div id="roomName" class="room-title">Salon</div>
+            <div id="roomStatus" class="room-status">Vous êtes connecté</div>
+        </div>
+    </div>
+
+    <div id="videoGrid" class="video-grid"></div>
+
+    <div class="room-bottom-controls">
+        <button id="microBtn" class="media-btn" onclick="toggleMicro()" title="Microphone">🎙️</button>
+        <button id="cameraBtn" class="media-btn" onclick="toggleCamera()" title="Caméra">📷</button>
+        <button class="leave-btn" onclick="leaveCurrentRoom()" title="Quitter le salon">☎</button>
+    </div>
+
+    <aside id="roomChat" class="chat-sidebar room-chat">
+        <div class="chat-header">
+            <div>
+                <div class="chat-title">Chat du salon</div>
+                <div class="chat-subtitle">Discussion du salon</div>
+            </div>
+            <button class="chat-close" onclick="closeRoomChat()">×</button>
+        </div>
+        <div id="roomChatMessages" class="chat-messages"></div>
+        <div class="chat-input-area">
+            <input id="roomChatInput" type="text" placeholder="Écrire un message..." autocomplete="off">
+            <button class="chat-send" onclick="sendRoomChat()">➤</button>
+        </div>
+    </aside>
+
+    <button id="roomChatMobileButton" class="room-chat-mobile-button" onclick="toggleRoomChat()" title="Chat du salon">
+        💬 Chat <span id="roomChatUnread" class="chat-badge">0</span>
     </button>
+</main>
 
+<button id="generalChatToggle" class="general-chat-toggle" onclick="toggleLobbyChat()">💬 Général</button>
+<div id="mobileChatBackdrop" class="mobile-chat-backdrop" onclick="closeMobileChat()"></div>
 
-    <!-- =====================================================
-         MOBILE CHAT BACKDROP
-    ====================================================== -->
-
-    <div
-        id="mobileChatBackdrop"
-        class="mobile-chat-backdrop"
-        onclick="closeMobileChat()"
-    ></div>
-
-
-    <!-- =====================================================
-         PROFILE MODAL
-    ====================================================== -->
-
-    <div
-        id="profileModal"
-        class="modal"
-        onclick="closeModalOutside(event,'profileModal')"
-    >
-
-        <div class="modal-card profile-modal-card">
-
-            <button
-                class="modal-close"
-                onclick="closeProfile()"
-            >
-                ×
-            </button>
-
-
-            <div class="profile-modal-content">
-
-                <div
-                    id="profileAvatar"
-                    class="profile-avatar"
-                >
-                    ?
-                </div>
-
-
-                <button
-                    class="secondary-btn"
-                    onclick="triggerAvatarPicker()"
-                >
-                    Changer la photo
-                </button>
-
-
-                <input
-                    id="avatarFileInput"
-                    type="file"
-                    accept="image/*"
-                    style="display:none;"
-                    onchange="handleAvatarFile(event)"
-                >
-
-
-                <div
-                    id="profileUsername"
-                    class="profile-username"
-                >
-                    Utilisateur
-                </div>
-
-
-                <div
-                    id="profileId"
-                    class="profile-id"
-                ></div>
-
-
-                <textarea
-                    id="profileDescriptionInput"
-                    class="profile-description-input"
-                    placeholder="Votre description..."
-                    maxlength="300"
-                ></textarea>
-
-
-                <button
-                    class="primary-btn"
-                    onclick="saveProfile()"
-                >
-                    Enregistrer
-                </button>
-
-
-                <button
-                    class="secondary-btn logout-btn"
-                    onclick="logout()"
-                >
-                    Se déconnecter
-                </button>
-
-            </div>
-
+<div id="profileModal" class="modal" onclick="closeModalOutside(event,'profileModal')">
+    <div class="modal-card profile-modal-card">
+        <button class="modal-close" onclick="closeProfile()">×</button>
+        <div class="profile-modal-content">
+            <div id="profileAvatar" class="profile-avatar">?</div>
+            <button class="secondary-btn" onclick="triggerAvatarPicker()">Changer la photo</button>
+            <input id="avatarFileInput" type="file" accept="image/*" style="display:none;" onchange="handleAvatarFile(event)">
+            <div id="profileUsername" class="profile-username">Utilisateur</div>
+            <div id="profileId" class="profile-id"></div>
+            <textarea id="profileDescriptionInput" class="profile-description-input" placeholder="Votre description..." maxlength="300"></textarea>
+            <button class="primary-btn" onclick="saveProfile()">Enregistrer</button>
+            <button class="secondary-btn logout-btn" onclick="logout()">Se déconnecter</button>
         </div>
-
     </div>
-
-
-    <!-- =====================================================
-         OTHER USER PROFILE
-    ====================================================== -->
-
-    <div
-        id="userProfileModal"
-        class="modal"
-        onclick="closeModalOutside(event,'userProfileModal')"
-    >
-
-        <div class="modal-card">
-
-            <button
-                class="modal-close"
-                onclick="closeUserProfile()"
-            >
-                ×
-            </button>
-
-
-            <div class="profile-modal-content">
-
-                <div
-                    id="viewProfileAvatar"
-                    class="profile-avatar"
-                >
-                    ?
-                </div>
-
-
-                <div
-                    id="viewProfileUsername"
-                    class="profile-username"
-                >
-                    Utilisateur
-                </div>
-
-
-                <div
-                    id="viewProfileDescription"
-                    class="view-profile-description"
-                >
-                    Aucune description.
-                </div>
-
-
-                <div
-                    id="viewProfileAdminActions"
-                    class="admin-actions profile-admin-actions"
-                ></div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         ADMIN MODAL
-    ====================================================== -->
-
-    <div
-        id="adminModal"
-        class="modal"
-        onclick="closeModalOutside(event,'adminModal')"
-    >
-
-        <div class="modal-card admin-modal-card">
-
-            <button
-                class="modal-close"
-                onclick="closeAdmin()"
-            >
-                ×
-            </button>
-
-
-            <div class="admin-header">
-
-                <div>
-
-                    <div class="modal-title">
-                        Administration
-                    </div>
-
-                    <div class="modal-subtitle">
-                        Gestion des utilisateurs et salons
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ADMIN TABS -->
-
-            <div class="admin-tabs">
-
-                <button
-                    id="adminUsersTab"
-                    class="admin-tab active"
-                    onclick="switchAdminTab('users')"
-                >
-                    Utilisateurs
-                </button>
-
-
-                <button
-                    id="adminRoomsTab"
-                    class="admin-tab"
-                    onclick="switchAdminTab('rooms')"
-                >
-                    Salons
-                </button>
-
-            </div>
-
-
-            <div
-                id="adminList"
-                class="admin-list"
-            ></div>
-
-        </div>
-
-    </div>
-
-
 </div>
 
+<div id="userProfileModal" class="modal" onclick="closeModalOutside(event,'userProfileModal')">
+    <div class="modal-card">
+        <button class="modal-close" onclick="closeUserProfile()">×</button>
+        <div class="profile-modal-content">
+            <div id="viewProfileAvatar" class="profile-avatar">?</div>
+            <div id="viewProfileUsername" class="profile-username">Utilisateur</div>
+            <div id="viewProfileDescription" class="view-profile-description">Aucune description.</div>
+            <div id="viewProfileAdminActions" class="admin-actions profile-admin-actions"></div>
+        </div>
+    </div>
+</div>
 
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
+<div id="adminModal" class="modal" onclick="closeModalOutside(event,'adminModal')">
+    <div class="modal-card admin-modal-card">
+        <button class="modal-close" onclick="closeAdmin()">×</button>
+        <div class="admin-header">
+            <div>
+                <div class="modal-title">Administration</div>
+                <div class="modal-subtitle">Gestion des utilisateurs et salons</div>
+            </div>
+        </div>
+        <div class="admin-tabs">
+            <button id="adminUsersTab" class="admin-tab active" onclick="switchAdminTab('users')">Utilisateurs</button>
+            <button id="adminRoomsTab" class="admin-tab" onclick="switchAdminTab('rooms')">Salons</button>
+        </div>
+        <div id="adminList" class="admin-list"></div>
+    </div>
+</div>
+
+</div>
 
 <script src="chat.js"></script>
 <script src="room.js"></script>
