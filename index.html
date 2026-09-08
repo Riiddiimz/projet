@@ -1,1556 +1,1707 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
+<meta charset="UTF-8">
 
-    <meta charset="UTF-8">
+<meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
+<title>Col'inCall</title>
 
-    <title>Col'inCall</title>
+<style>
 
-    <style>
+/* =========================================================
+   VARIABLES
+========================================================= */
 
-        /* =====================================================
-           RESET
-        ===================================================== */
+:root {
+    --bg:#07080d;
+    --surface:#11131b;
+    --surface2:#181b25;
+    --surface3:#202430;
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    --border:rgba(255,255,255,.09);
 
-        :root {
+    --text:#fff;
+    --muted:#9298aa;
 
-            --background: #07080c;
-            --surface: #11131a;
-            --surface-2: #181b24;
+    --accent:#6d63ff;
+    --accent2:#847cff;
 
-            --border: rgba(255,255,255,.08);
+    --green:#32d47a;
+    --red:#ff4757;
+    --orange:#ffad33;
+}
 
-            --text: #ffffff;
-            --muted: #9297a7;
 
-            --accent: #6d63ff;
-            --accent-hover: #7b72ff;
+/* =========================================================
+   RESET
+========================================================= */
 
-            --green: #31d879;
-            --red: #ff4757;
+* {
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
-        }
+html,
+body {
+    width:100%;
+    height:100%;
+    overflow:hidden;
 
-        html,
-        body {
+    background:
+        radial-gradient(
+            circle at 50% -20%,
+            rgba(109,99,255,.18),
+            transparent 42%
+        ),
+        var(--bg);
 
-            width: 100%;
-            height: 100%;
+    color:var(--text);
 
-            overflow: hidden;
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
 
-            background:
-                radial-gradient(
-                    circle at 50% -20%,
-                    rgba(109,99,255,.16),
-                    transparent 40%
-                ),
-                var(--background);
+button,
+input,
+textarea {
+    font:inherit;
+}
 
-            color: var(--text);
+button {
+    cursor:pointer;
+}
 
-            font-family:
-                Inter,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                sans-serif;
 
-        }
+/* =========================================================
+   UTILS
+========================================================= */
 
-        button,
-        input {
+.hidden {
+    display:none !important;
+}
 
-            font: inherit;
 
-        }
+/* =========================================================
+   LOGIN
+========================================================= */
 
-        button {
+.login-screen {
+    width:100%;
+    height:100dvh;
 
-            cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-        }
+    padding:20px;
+}
 
+.login-box {
+    width:100%;
+    max-width:460px;
 
-        /* =====================================================
-           COMMON
-        ===================================================== */
+    text-align:center;
+}
 
-        .hidden {
+.logo {
+    width:76px;
+    height:76px;
 
-            display: none !important;
+    margin:0 auto 22px;
 
-        }
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
+    border-radius:23px;
 
-        /* =====================================================
-           LANDING / PSEUDO
-        ===================================================== */
+    background:
+        linear-gradient(
+            135deg,
+            #8178ff,
+            #5047d8
+        );
 
-        .screen {
+    box-shadow:
+        0 25px 70px
+        rgba(109,99,255,.3);
 
-            width: 100%;
-            height: 100dvh;
+    font-size:34px;
+}
 
-            display: flex;
+.login-box h1 {
+    font-size:40px;
+    letter-spacing:-1.7px;
+}
 
-            align-items: center;
-            justify-content: center;
+.login-subtitle {
+    margin-top:9px;
+    margin-bottom:32px;
 
-            padding: 20px;
+    color:var(--muted);
 
-        }
+    font-size:14px;
+}
 
-        .welcome {
 
-            width: 100%;
-            max-width: 460px;
+/* =========================================================
+   LOGIN MODE
+========================================================= */
 
-            text-align: center;
+.login-modes {
+    display:grid;
 
-        }
+    grid-template-columns:1fr 1fr;
 
-        .logo {
+    gap:9px;
 
-            width: 70px;
-            height: 70px;
+    margin-bottom:18px;
+}
 
-            margin: 0 auto 22px;
+.login-mode {
+    height:52px;
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    border:1px solid var(--border);
 
-            border-radius: 22px;
+    border-radius:14px;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #8178ff,
-                    #5047d8
-                );
+    background:
+        rgba(255,255,255,.04);
 
-            box-shadow:
-                0 20px 60px
-                rgba(109,99,255,.3);
+    color:var(--muted);
 
-            font-size: 32px;
+    font-weight:700;
 
-        }
+    transition:.2s;
+}
 
-        .welcome h1 {
+.login-mode.active {
+    background:
+        rgba(109,99,255,.18);
 
-            font-size: 38px;
+    border-color:
+        rgba(109,99,255,.45);
 
-            letter-spacing: -1.5px;
+    color:white;
+}
 
-            margin-bottom: 10px;
 
-        }
+/* =========================================================
+   INPUTS
+========================================================= */
 
-        .welcome-description {
+.login-input {
+    width:100%;
 
-            color: var(--muted);
+    height:60px;
 
-            font-size: 15px;
+    padding:0 18px;
 
-            line-height: 1.5;
+    margin-bottom:10px;
 
-            margin-bottom: 30px;
+    border:1px solid var(--border);
 
-        }
+    outline:none;
 
-        .pseudo-box {
+    border-radius:15px;
 
-            padding: 7px;
+    background:
+        rgba(255,255,255,.055);
 
-            display: flex;
+    color:white;
 
-            gap: 8px;
+    font-size:16px;
 
-            border-radius: 17px;
+    transition:.2s;
+}
 
-            background:
-                rgba(255,255,255,.045);
+.login-input:focus {
+    border-color:
+        rgba(109,99,255,.7);
 
-            border:
-                1px solid var(--border);
+    background:
+        rgba(255,255,255,.075);
+}
 
-            backdrop-filter: blur(20px);
+.login-input::placeholder {
+    color:#686d7c;
+}
 
-        }
+.login-button {
+    width:100%;
 
-        .pseudo-input {
+    height:58px;
 
-            flex: 1;
+    margin-top:7px;
 
-            min-width: 0;
+    border:none;
 
-            height: 50px;
+    border-radius:15px;
 
-            padding: 0 15px;
+    background:var(--accent);
 
-            border: none;
-            outline: none;
+    color:white;
 
-            border-radius: 12px;
+    font-weight:800;
 
-            background:
-                rgba(255,255,255,.05);
+    font-size:15px;
+}
 
-            color: white;
+.login-button:hover {
+    background:var(--accent2);
+}
 
-        }
+.login-error {
+    margin-top:12px;
 
-        .pseudo-input::placeholder {
+    color:#ff6875;
 
-            color: #686d7b;
+    font-size:12px;
+}
 
-        }
 
-        .primary-button {
+/* =========================================================
+   HEADER
+========================================================= */
 
-            height: 50px;
+.app {
+    width:100%;
+    height:100dvh;
 
-            padding: 0 20px;
+    display:flex;
+    flex-direction:column;
+}
 
-            border: none;
+.header {
+    height:66px;
+    min-height:66px;
 
-            border-radius: 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
 
-            background: var(--accent);
+    padding:0 20px;
 
-            color: white;
+    background:
+        rgba(7,8,13,.85);
 
-            font-weight: 700;
+    border-bottom:
+        1px solid var(--border);
 
-            transition: .2s;
+    backdrop-filter:blur(20px);
 
-        }
+    z-index:100;
+}
 
-        .primary-button:hover {
+.brand {
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
 
-            background: var(--accent-hover);
+.brand-logo {
+    width:36px;
+    height:36px;
 
-            transform: translateY(-1px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-        }
+    border-radius:11px;
 
-        .error {
+    background:
+        linear-gradient(
+            135deg,
+            #8178ff,
+            #5047d8
+        );
+}
 
-            color: #ff6b78;
+.brand-name {
+    font-size:17px;
+    font-weight:800;
+}
 
-            font-size: 12px;
+.header-right {
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
 
-            margin-top: 12px;
+.admin-button {
+    height:38px;
 
-        }
+    padding:0 13px;
 
+    border:
+        1px solid
+        rgba(109,99,255,.35);
 
-        /* =====================================================
-           ROOMS
-        ===================================================== */
+    border-radius:11px;
 
-        .rooms-screen {
+    background:
+        rgba(109,99,255,.13);
 
-            width: 100%;
-            height: 100dvh;
+    color:#b7b1ff;
 
-            display: flex;
-            flex-direction: column;
+    font-size:12px;
+    font-weight:800;
+}
 
-        }
+.user-avatar-button {
+    width:40px;
+    height:40px;
 
-        .rooms-header {
+    border:1px solid var(--border);
 
-            height: 70px;
-            min-height: 70px;
+    border-radius:50%;
 
-            display: flex;
+    overflow:hidden;
 
-            align-items: center;
-            justify-content: space-between;
+    background:
+        rgba(255,255,255,.07);
 
-            padding: 0 24px;
+    color:white;
 
-            border-bottom:
-                1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-            background:
-                rgba(7,8,12,.8);
+    font-size:12px;
+    font-weight:800;
+}
 
-            backdrop-filter:
-                blur(20px);
+.user-avatar-button img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
 
-        }
 
-        .brand {
+/* =========================================================
+   PAGES
+========================================================= */
 
-            display: flex;
+.page {
+    flex:1;
+    min-height:0;
 
-            align-items: center;
+    overflow:auto;
+}
 
-            gap: 10px;
+.page-content {
+    width:100%;
+    max-width:950px;
 
-        }
+    margin:auto;
 
-        .brand-logo {
+    padding:38px 22px;
+}
 
-            width: 36px;
-            height: 36px;
 
-            border-radius: 11px;
+/* =========================================================
+   ROOMS
+========================================================= */
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+.page-title {
+    margin-bottom:24px;
+}
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #8178ff,
-                    #5047d8
-                );
+.page-title h1 {
+    font-size:29px;
+    letter-spacing:-.8px;
+}
 
-            font-size: 17px;
+.page-title p {
+    margin-top:6px;
 
-        }
+    color:var(--muted);
 
-        .brand-name {
+    font-size:13px;
+}
 
-            font-size: 18px;
+.search-row {
+    display:flex;
+    gap:10px;
 
-            font-weight: 800;
+    margin-bottom:20px;
+}
 
-        }
+.search-input {
+    flex:1;
 
-        .profile {
+    min-width:0;
 
-            display: flex;
+    height:58px;
 
-            align-items: center;
+    padding:0 18px;
 
-            gap: 9px;
+    border:1px solid var(--border);
 
-            color: var(--muted);
+    outline:none;
 
-            font-size: 13px;
+    border-radius:15px;
 
-        }
+    background:
+        rgba(255,255,255,.05);
 
-        .profile-avatar {
+    color:white;
 
-            width: 32px;
-            height: 32px;
+    font-size:15px;
+}
 
-            border-radius: 50%;
+.create-button {
+    height:58px;
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    padding:0 18px;
 
-            background:
-                rgba(109,99,255,.18);
+    border:1px solid
+        rgba(109,99,255,.35);
 
-            color: #aaa4ff;
+    border-radius:15px;
 
-            font-size: 12px;
+    background:
+        rgba(109,99,255,.14);
 
-            font-weight: 800;
+    color:#bbb6ff;
 
-        }
+    font-weight:800;
 
+    white-space:nowrap;
+}
 
-        .rooms-content {
+.rooms {
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
 
-            width: 100%;
-            max-width: 900px;
+.room {
+    min-height:82px;
 
-            flex: 1;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
 
-            min-height: 0;
+    gap:15px;
 
-            margin: 0 auto;
+    padding:14px 16px;
 
-            padding: 35px 24px;
+    border:
+        1px solid var(--border);
 
-            overflow-y: auto;
+    border-radius:16px;
 
-        }
+    background:
+        rgba(255,255,255,.035);
 
-        .rooms-title {
+    transition:.2s;
+}
 
-            margin-bottom: 22px;
+.room:hover {
+    background:
+        rgba(255,255,255,.06);
+}
 
-        }
+.room-left {
+    min-width:0;
 
-        .rooms-title h1 {
+    display:flex;
+    align-items:center;
 
-            font-size: 28px;
+    gap:13px;
+}
 
-            letter-spacing: -.7px;
+.room-icon {
+    width:48px;
+    height:48px;
 
-        }
+    flex-shrink:0;
 
-        .rooms-title p {
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-            color: var(--muted);
+    border-radius:14px;
 
-            margin-top: 5px;
+    background:
+        rgba(255,255,255,.06);
 
-            font-size: 13px;
+    font-size:20px;
+}
 
-        }
+.room-text {
+    min-width:0;
+}
 
-        .rooms-actions {
+.room-name {
+    font-weight:750;
+    margin-bottom:5px;
+}
 
-            display: flex;
+.room-description {
+    color:var(--muted);
 
-            gap: 10px;
+    font-size:11px;
 
-            margin-bottom: 22px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
 
-        }
+.room-right {
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
 
-        .search {
+.room-count {
+    color:var(--muted);
 
-            flex: 1;
+    font-size:12px;
 
-            height: 46px;
+    white-space:nowrap;
+}
 
-            padding: 0 14px;
+.join-room {
+    height:38px;
 
-            border:
-                1px solid var(--border);
+    padding:0 14px;
 
-            outline: none;
+    border:none;
 
-            border-radius: 13px;
+    border-radius:11px;
 
-            background:
-                rgba(255,255,255,.04);
+    background:
+        rgba(109,99,255,.16);
 
-            color: white;
+    color:#bdb8ff;
 
-        }
+    font-size:12px;
+    font-weight:800;
+}
 
-        .create-room {
+.join-room:disabled {
+    opacity:.4;
+    cursor:not-allowed;
+}
 
-            height: 46px;
 
-            padding: 0 17px;
+/* =========================================================
+   ADMIN NAV
+========================================================= */
 
-            border: none;
+.admin-nav {
+    display:flex;
 
-            border-radius: 13px;
+    gap:6px;
 
-            background:
-                rgba(109,99,255,.15);
+    margin-bottom:24px;
 
-            border:
-                1px solid rgba(109,99,255,.3);
+    padding:5px;
 
-            color: #b8b3ff;
+    width:max-content;
 
-            font-weight: 700;
+    border:
+        1px solid var(--border);
 
-        }
+    border-radius:14px;
 
-        .rooms-list {
+    background:
+        rgba(255,255,255,.035);
+}
 
-            display: flex;
+.admin-nav button {
+    height:38px;
 
-            flex-direction: column;
+    padding:0 15px;
 
-            gap: 8px;
+    border:none;
 
-        }
+    border-radius:10px;
 
-        .room {
+    background:transparent;
 
-            width: 100%;
+    color:var(--muted);
 
-            min-height: 76px;
+    font-size:12px;
+    font-weight:750;
+}
 
-            padding: 13px 15px;
+.admin-nav button.active {
+    background:
+        rgba(109,99,255,.18);
 
-            display: flex;
+    color:white;
+}
 
-            align-items: center;
 
-            justify-content: space-between;
+/* =========================================================
+   ADMIN LIST
+========================================================= */
 
-            gap: 15px;
+.admin-item {
+    min-height:70px;
 
-            border:
-                1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
 
-            border-radius: 16px;
+    padding:12px 15px;
 
-            background:
-                rgba(255,255,255,.035);
+    border:
+        1px solid var(--border);
 
-            transition: .2s;
+    border-radius:14px;
 
-        }
+    background:
+        rgba(255,255,255,.035);
+}
 
-        .room:hover {
+.admin-item-left {
+    display:flex;
+    align-items:center;
+    gap:11px;
+}
 
-            background:
-                rgba(255,255,255,.06);
+.admin-avatar {
+    width:40px;
+    height:40px;
 
-            border-color:
-                rgba(255,255,255,.13);
+    border-radius:50%;
 
-            transform: translateY(-1px);
+    overflow:hidden;
 
-        }
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-        .room-info {
+    background:
+        rgba(109,99,255,.17);
 
-            min-width: 0;
+    color:#aaa5ff;
 
-            display: flex;
+    font-size:12px;
+    font-weight:800;
+}
 
-            align-items: center;
+.admin-avatar img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
 
-            gap: 13px;
+.admin-name {
+    font-weight:700;
+    font-size:13px;
+}
 
-        }
+.admin-meta {
+    color:var(--muted);
+    font-size:10px;
+    margin-top:3px;
+}
 
-        .room-icon {
+.danger-button {
+    height:35px;
 
-            width: 44px;
-            height: 44px;
+    padding:0 11px;
 
-            flex-shrink: 0;
+    border:
+        1px solid
+        rgba(255,71,87,.2);
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    border-radius:10px;
 
-            border-radius: 13px;
+    background:
+        rgba(255,71,87,.1);
 
-            background:
-                rgba(255,255,255,.06);
+    color:#ff7180;
 
-            font-size: 18px;
+    font-size:11px;
+    font-weight:800;
+}
 
-        }
 
-        .room-name {
+/* =========================================================
+   CALL
+========================================================= */
 
-            font-weight: 700;
+.call-screen {
+    width:100%;
+    height:100dvh;
 
-            margin-bottom: 4px;
+    display:flex;
+    flex-direction:column;
 
-            overflow: hidden;
+    background:#050609;
+}
 
-            white-space: nowrap;
+.call-header {
+    height:58px;
+    min-height:58px;
 
-            text-overflow: ellipsis;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
 
-        }
+    padding:0 15px;
 
-        .room-description {
+    border-bottom:
+        1px solid var(--border);
 
-            color: var(--muted);
+    background:
+        rgba(7,8,13,.9);
 
-            font-size: 11px;
+    z-index:30;
+}
 
-            overflow: hidden;
+.call-info {
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
 
-            white-space: nowrap;
+.online {
+    width:7px;
+    height:7px;
 
-            text-overflow: ellipsis;
+    border-radius:50%;
 
-        }
+    background:var(--green);
 
-        .room-right {
+    box-shadow:
+        0 0 9px
+        rgba(50,212,122,.7);
+}
 
-            display: flex;
+.call-room-name {
+    font-size:14px;
+    font-weight:800;
+}
 
-            align-items: center;
+.call-count {
+    margin-left:5px;
 
-            gap: 12px;
+    color:var(--muted);
 
-        }
+    font-size:10px;
+}
 
-        .participants {
+.call-main {
+    flex:1;
+    min-height:0;
 
-            color: var(--muted);
+    display:flex;
 
-            font-size: 12px;
+    position:relative;
+}
 
-            white-space: nowrap;
+.video-area {
+    flex:1;
+    min-width:0;
+    min-height:0;
 
-        }
+    position:relative;
 
-        .join-button {
+    overflow:hidden;
+}
 
-            height: 36px;
+.video-grid {
+    width:100%;
+    height:100%;
 
-            padding: 0 13px;
+    display:grid;
 
-            border: none;
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(300px,1fr)
+        );
 
-            border-radius: 10px;
+    grid-auto-rows:
+        minmax(220px,1fr);
 
-            background:
-                rgba(109,99,255,.14);
+    gap:8px;
 
-            color: #b4afff;
+    padding:8px;
 
-            font-weight: 700;
+    overflow:auto;
+}
 
-        }
+.video-card {
+    position:relative;
 
-        .join-button:hover {
+    min-width:0;
+    min-height:0;
 
-            background:
-                rgba(109,99,255,.25);
+    overflow:hidden;
 
-        }
+    border-radius:17px;
 
-        .join-button.full {
+    background:#08090d;
 
-            opacity: .45;
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+}
 
-            cursor: not-allowed;
+.video-card video {
+    position:absolute;
 
-        }
+    inset:0;
 
-        .empty-rooms {
+    width:100%;
+    height:100%;
 
-            padding: 50px 20px;
+    object-fit:cover;
 
-            text-align: center;
+    display:block;
+}
 
-            color: var(--muted);
+.video-label {
+    position:absolute;
 
-        }
+    left:10px;
+    bottom:10px;
 
+    padding:6px 9px;
 
-        /* =====================================================
-           CALL SCREEN
-        ===================================================== */
+    border-radius:9px;
 
-        .call-screen {
+    background:
+        rgba(0,0,0,.55);
 
-            width: 100%;
-            height: 100dvh;
+    backdrop-filter:blur(10px);
 
-            display: flex;
-            flex-direction: column;
+    font-size:10px;
+    font-weight:700;
 
-        }
+    z-index:3;
+}
 
-        .call-header {
 
-            height: 62px;
-            min-height: 62px;
+/* =========================================================
+   MOBILE VIDEO LAYOUT
+========================================================= */
 
-            padding: 0 16px;
+@media(max-width:700px) {
 
-            display: flex;
+    .video-grid {
+        grid-template-columns:1fr;
+        grid-auto-rows:auto;
 
-            align-items: center;
-            justify-content: space-between;
+        overflow:hidden;
+    }
 
-            background:
-                rgba(7,8,12,.86);
+    .video-grid.two {
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
 
-            border-bottom:
-                1px solid var(--border);
+        grid-template-rows:1fr;
 
-            backdrop-filter:
-                blur(20px);
+        gap:5px;
+    }
 
-            z-index: 20;
+    .video-grid.two
+    .video-card {
+        height:
+            calc(100dvh - 125px);
+    }
 
-        }
+    .video-grid.three {
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
 
-        .call-room {
+        grid-auto-rows:
+            minmax(180px,1fr);
 
-            display: flex;
+        overflow:auto;
+    }
 
-            align-items: center;
+}
 
-            gap: 9px;
 
-        }
+/* =========================================================
+   CALL CONTROLS
+========================================================= */
 
-        .call-room-name {
+.controls {
+    position:absolute;
 
-            font-size: 15px;
+    left:50%;
+    bottom:14px;
 
-            font-weight: 750;
+    transform:
+        translateX(-50%);
 
-        }
+    display:flex;
 
-        .call-room-count {
+    gap:7px;
 
-            color: var(--muted);
+    padding:7px;
 
-            font-size: 11px;
+    border-radius:16px;
 
-        }
+    background:
+        rgba(17,18,25,.94);
 
-        .online {
+    border:
+        1px solid
+        rgba(255,255,255,.1);
 
-            width: 7px;
-            height: 7px;
+    backdrop-filter:blur(20px);
 
-            border-radius: 50%;
+    box-shadow:
+        0 15px 50px
+        rgba(0,0,0,.4);
 
-            background: var(--green);
+    z-index:40;
+}
 
-            box-shadow:
-                0 0 10px
-                rgba(49,216,121,.7);
+.control {
+    width:43px;
+    height:43px;
 
-        }
+    border:none;
 
+    border-radius:12px;
 
-        .call-main {
+    background:
+        rgba(255,255,255,.07);
 
-            flex: 1;
+    color:white;
 
-            min-height: 0;
+    font-size:17px;
+}
 
-            display: flex;
+.control.off {
+    background:
+        rgba(255,71,87,.17);
 
-            position: relative;
+    color:#ff7180;
+}
 
-        }
+.control.leave {
+    width:49px;
 
-        .video-area {
+    background:
+        var(--red);
+}
 
-            flex: 1;
 
-            min-width: 0;
-            min-height: 0;
+/* =========================================================
+   CHAT
+========================================================= */
 
-            position: relative;
+.chat-panel {
+    width:330px;
+    min-width:330px;
 
-            overflow: hidden;
+    height:100%;
 
-        }
+    display:flex;
+    flex-direction:column;
 
-        .video-grid {
+    background:
+        rgba(15,16,22,.98);
 
-            width: 100%;
-            height: 100%;
+    border-left:
+        1px solid var(--border);
 
-            display: grid;
+    z-index:50;
+}
 
-            grid-template-columns:
-                repeat(
-                    auto-fit,
-                    minmax(300px,1fr)
-                );
+.chat-header {
+    height:60px;
+    min-height:60px;
 
-            grid-auto-rows:
-                minmax(220px,1fr);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
 
-            gap: 10px;
+    padding:0 14px;
 
-            padding: 10px;
+    border-bottom:
+        1px solid var(--border);
+}
 
-            overflow: auto;
+.chat-title {
+    font-size:13px;
+    font-weight:800;
+}
 
-        }
+.chat-subtitle {
+    color:var(--muted);
+    font-size:10px;
+    margin-top:3px;
+}
 
-        .video-card {
+.chat-close {
+    display:none;
 
-            position: relative;
+    width:34px;
+    height:34px;
 
-            min-width: 0;
-            min-height: 0;
+    border:none;
 
-            overflow: hidden;
+    border-radius:10px;
 
-            border-radius: 18px;
+    background:
+        rgba(255,255,255,.06);
 
-            background: #050507;
+    color:white;
+}
 
-            border:
-                1px solid
-                rgba(255,255,255,.08);
+.messages {
+    flex:1;
+    min-height:0;
 
-        }
+    padding:14px;
 
-        /*
-            IMPORTANT :
-            aucune déformation de la caméra
-        */
+    overflow:auto;
+}
 
-        .video-card video {
+.message {
+    margin-bottom:12px;
+}
 
-            position: absolute;
+.message.me {
+    text-align:right;
+}
 
-            inset: 0;
+.message-author {
+    color:var(--muted);
 
-            width: 100%;
-            height: 100%;
+    font-size:9px;
 
-            display: block;
+    margin-bottom:4px;
+}
 
-            object-fit: cover;
+.message-bubble {
+    display:inline-block;
 
-            object-position: center;
+    max-width:85%;
 
-            background: #050507;
+    padding:9px 11px;
 
-        }
+    border-radius:13px;
 
-        .video-name {
+    background:
+        rgba(255,255,255,.07);
 
-            position: absolute;
+    font-size:12px;
 
-            left: 10px;
-            bottom: 10px;
+    word-break:break-word;
+}
 
-            padding: 6px 9px;
+.message.me
+.message-bubble {
+    background:
+        var(--accent);
+}
 
-            border-radius: 9px;
+.chat-form {
+    display:flex;
 
-            background:
-                rgba(0,0,0,.5);
+    gap:7px;
 
-            backdrop-filter:
-                blur(10px);
+    padding:9px;
 
-            font-size: 11px;
+    border-top:
+        1px solid var(--border);
+}
 
-            font-weight: 650;
+.chat-input {
+    flex:1;
+    min-width:0;
 
-            z-index: 2;
+    height:43px;
 
-        }
+    border:
+        1px solid var(--border);
 
+    outline:none;
 
-        /* =====================================================
-           CALL CONTROLS
-        ===================================================== */
+    border-radius:12px;
 
-        .controls {
+    background:
+        rgba(255,255,255,.04);
 
-            position: absolute;
+    color:white;
 
-            left: 50%;
-            bottom: 17px;
+    padding:0 11px;
 
-            transform:
-                translateX(-50%);
+    font-size:12px;
+}
 
-            display: flex;
+.send {
+    width:43px;
 
-            align-items: center;
+    border:none;
 
-            gap: 8px;
+    border-radius:12px;
 
-            padding: 8px;
+    background:var(--accent);
 
-            border-radius: 17px;
+    color:white;
+}
 
-            background:
-                rgba(17,18,25,.92);
 
-            border:
-                1px solid
-                rgba(255,255,255,.1);
+/* =========================================================
+   CHAT MOBILE
+========================================================= */
 
-            backdrop-filter:
-                blur(20px);
+.chat-toggle {
+    display:none;
 
-            box-shadow:
-                0 18px 50px
-                rgba(0,0,0,.4);
+    position:absolute;
 
-            z-index: 30;
+    right:12px;
+    bottom:13px;
 
-        }
+    width:48px;
+    height:48px;
 
-        .control {
+    border:none;
 
-            width: 44px;
-            height: 44px;
+    border-radius:15px;
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    background:
+        rgba(20,21,29,.95);
 
-            border: none;
+    color:white;
 
-            border-radius: 13px;
+    font-size:18px;
 
-            background:
-                rgba(255,255,255,.07);
+    z-index:41;
+}
 
-            color: white;
+.badge {
+    position:absolute;
 
-            font-size: 18px;
+    top:-5px;
+    right:-5px;
 
-        }
+    min-width:20px;
+    height:20px;
 
-        .control:hover {
+    padding:0 5px;
 
-            background:
-                rgba(255,255,255,.13);
+    display:none;
 
-        }
+    align-items:center;
+    justify-content:center;
 
-        .control.off {
+    border-radius:10px;
 
-            background:
-                rgba(255,71,87,.17);
+    background:var(--red);
 
-            color:
-                #ff6c79;
+    border:
+        2px solid
+        #07080d;
 
-        }
+    font-size:9px;
+    font-weight:800;
+}
 
-        .leave {
+.badge.show {
+    display:flex;
+}
 
-            width: 50px;
 
-            background:
-                var(--red);
+/* =========================================================
+   MODAL
+========================================================= */
 
-        }
+.modal-overlay {
+    position:fixed;
 
-        .leave:hover {
+    inset:0;
 
-            background:
-                #ff3447;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-        }
+    padding:20px;
 
+    background:
+        rgba(0,0,0,.68);
 
-        /* =====================================================
-           CHAT
-        ===================================================== */
+    backdrop-filter:blur(10px);
 
-        .chat-panel {
+    z-index:500;
+}
 
-            width: 330px;
-            min-width: 330px;
+.modal {
+    width:100%;
+    max-width:420px;
 
-            height: 100%;
+    max-height:
+        calc(100dvh - 40px);
 
-            display: flex;
-            flex-direction: column;
+    overflow:auto;
 
-            background:
-                rgba(15,16,22,.97);
+    padding:22px;
 
-            border-left:
-                1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-            z-index: 50;
+    border-radius:22px;
 
-        }
+    background:
+        #12141c;
 
-        .chat-header {
+    box-shadow:
+        0 30px 100px
+        rgba(0,0,0,.6);
+}
 
-            height: 62px;
-            min-height: 62px;
+.modal-top {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 
-            padding: 0 15px;
+    margin-bottom:20px;
+}
 
-            display: flex;
+.modal-title {
+    font-size:17px;
+    font-weight:800;
+}
 
-            align-items: center;
-            justify-content: space-between;
+.close-modal {
+    width:34px;
+    height:34px;
 
-            border-bottom:
-                1px solid var(--border);
+    border:none;
 
-        }
+    border-radius:10px;
 
-        .chat-title {
+    background:
+        rgba(255,255,255,.06);
 
-            font-weight: 750;
+    color:white;
+}
 
-            font-size: 14px;
+.profile-center {
+    text-align:center;
+}
 
-        }
+.profile-avatar-large {
+    width:105px;
+    height:105px;
 
-        .chat-subtitle {
+    margin:0 auto 14px;
 
-            color: var(--muted);
+    position:relative;
 
-            font-size: 10px;
+    border-radius:50%;
 
-            margin-top: 2px;
+    overflow:hidden;
 
-        }
+    border:
+        2px solid
+        rgba(255,255,255,.1);
 
-        .chat-close {
+    background:
+        rgba(109,99,255,.15);
 
-            display: none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-            width: 34px;
-            height: 34px;
+    color:#aaa5ff;
 
-            border: none;
+    font-size:30px;
+    font-weight:800;
 
-            border-radius: 10px;
+    cursor:pointer;
+}
 
-            background:
-                rgba(255,255,255,.06);
+.profile-avatar-large img {
+    width:100%;
+    height:100%;
 
-            color: white;
+    object-fit:cover;
+}
 
-        }
+.profile-avatar-action {
+    position:absolute;
 
-        .messages {
+    right:0;
+    bottom:0;
 
-            flex: 1;
+    width:32px;
+    height:32px;
 
-            min-height: 0;
+    border:
+        2px solid #12141c;
 
-            padding: 15px;
+    border-radius:50%;
 
-            overflow-y: auto;
+    background:
+        var(--accent);
 
-        }
+    color:white;
 
-        .message {
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-            margin-bottom: 12px;
+    font-size:12px;
+}
 
-        }
+.profile-name {
+    font-size:19px;
+    font-weight:800;
+}
 
-        .message.me {
+.profile-description {
+    margin-top:5px;
 
-            text-align: right;
+    color:var(--muted);
 
-        }
+    font-size:12px;
 
-        .message-author {
+    line-height:1.5;
+}
 
-            color: var(--muted);
+.profile-section {
+    margin-top:22px;
+}
 
-            font-size: 10px;
+.profile-section label {
+    display:block;
 
-            margin-bottom: 4px;
+    margin-bottom:7px;
 
-        }
+    color:var(--muted);
 
-        .message-bubble {
+    font-size:11px;
+}
 
-            display: inline-block;
+.profile-textarea {
+    width:100%;
 
-            max-width: 85%;
+    min-height:90px;
 
-            padding: 9px 11px;
+    resize:vertical;
 
-            border-radius: 13px;
+    padding:11px;
 
-            background:
-                rgba(255,255,255,.07);
+    border:
+        1px solid var(--border);
 
-            font-size: 12px;
+    outline:none;
 
-            line-height: 1.4;
+    border-radius:12px;
 
-            word-break: break-word;
+    background:
+        rgba(255,255,255,.04);
 
-        }
+    color:white;
 
-        .message.me
-        .message-bubble {
+    font-size:12px;
+}
 
-            background:
-                var(--accent);
+.save-profile {
+    width:100%;
 
-        }
+    height:46px;
 
-        .chat-form {
+    margin-top:10px;
 
-            display: flex;
+    border:none;
 
-            gap: 7px;
+    border-radius:12px;
 
-            padding: 10px;
+    background:var(--accent);
 
-            border-top:
-                1px solid var(--border);
+    color:white;
 
-        }
+    font-weight:800;
+}
 
-        .chat-input {
+.profile-actions {
+    display:flex;
+    flex-direction:column;
 
-            flex: 1;
+    gap:7px;
 
-            min-width: 0;
+    margin-top:20px;
+}
 
-            height: 42px;
+.profile-action {
+    height:43px;
 
-            border:
-                1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-            outline: none;
+    border-radius:11px;
 
-            border-radius: 12px;
+    background:
+        rgba(255,255,255,.05);
 
-            padding: 0 11px;
+    color:white;
 
-            background:
-                rgba(255,255,255,.04);
+    text-align:left;
 
-            color: white;
+    padding:0 13px;
 
-            font-size: 12px;
+    font-size:12px;
+    font-weight:700;
+}
 
-        }
+.profile-action.danger {
+    color:#ff7180;
 
-        .send {
+    background:
+        rgba(255,71,87,.09);
 
-            width: 42px;
-            height: 42px;
+    border-color:
+        rgba(255,71,87,.2);
+}
 
-            border: none;
+.profile-action.warning {
+    color:#ffc266;
 
-            border-radius: 12px;
+    background:
+        rgba(255,173,51,.08);
 
-            background:
-                var(--accent);
+    border-color:
+        rgba(255,173,51,.2);
+}
 
-            color: white;
+.profile-action.success {
+    color:#61e39a;
+}
 
-        }
 
+/* =========================================================
+   ADMIN SIDEBAR
+========================================================= */
 
-        /* =====================================================
-           MOBILE CHAT BUTTON
-        ===================================================== */
+.admin-panel {
+    position:fixed;
 
-        .chat-toggle {
+    top:66px;
+    right:0;
+    bottom:0;
 
-            position: absolute;
+    width:300px;
 
-            right: 13px;
-            bottom: 17px;
+    padding:15px;
 
-            width: 49px;
-            height: 49px;
+    background:
+        #11131b;
 
-            display: none;
+    border-left:
+        1px solid var(--border);
 
-            align-items: center;
-            justify-content: center;
+    box-shadow:
+        -20px 0 60px
+        rgba(0,0,0,.3);
 
-            border: none;
+    z-index:200;
+}
 
-            border-radius: 15px;
+.admin-panel h3 {
+    margin-bottom:15px;
+}
 
-            background:
-                rgba(20,21,29,.94);
+.admin-panel button {
+    width:100%;
 
-            color: white;
+    height:45px;
 
-            box-shadow:
-                0 15px 35px
-                rgba(0,0,0,.35);
+    margin-bottom:7px;
 
-            z-index: 31;
+    border:
+        1px solid var(--border);
 
-            font-size: 19px;
+    border-radius:11px;
 
-        }
+    background:
+        rgba(255,255,255,.04);
 
-        .badge {
+    color:white;
 
-            position: absolute;
+    text-align:left;
 
-            top: -5px;
-            right: -5px;
+    padding:0 13px;
 
-            min-width: 20px;
-            height: 20px;
+    font-size:12px;
+    font-weight:700;
+}
 
-            padding: 0 5px;
+.admin-panel button.active {
+    background:
+        rgba(109,99,255,.16);
+}
 
-            display: none;
+.admin-panel-close {
+    margin-top:15px !important;
 
-            align-items: center;
-            justify-content: center;
+    color:#ff7180 !important;
+}
 
-            border-radius: 10px;
 
-            background:
-                var(--red);
+/* =========================================================
+   MOBILE
+========================================================= */
 
-            border:
-                2px solid
-                var(--background);
+@media(max-width:700px) {
 
-            font-size: 9px;
+    .header {
+        height:58px;
+        min-height:58px;
 
-            font-weight: 800;
+        padding:0 12px;
+    }
 
-        }
+    .brand-name {
+        font-size:15px;
+    }
 
-        .badge.show {
+    .admin-button {
+        height:35px;
+        padding:0 9px;
+    }
 
-            display: flex;
+    .user-avatar-button {
+        width:37px;
+        height:37px;
+    }
 
-        }
+    .page-content {
+        padding:
+            25px 13px;
+    }
 
+    .page-title h1 {
+        font-size:25px;
+    }
 
-        /* =====================================================
-           MOBILE
-        ===================================================== */
+    .search-row {
+        flex-direction:column;
+    }
 
-        @media (max-width: 700px) {
+    .search-input {
+        height:60px;
+        font-size:15px;
+    }
 
-            .welcome h1 {
+    .create-button {
+        width:100%;
+    }
 
-                font-size: 31px;
+    .room {
+        padding:12px;
+    }
 
-            }
+    .room-right {
+        gap:6px;
+    }
 
-            .pseudo-box {
+    .room-count {
+        display:none;
+    }
 
-                flex-direction: column;
+    .join-room {
+        padding:0 11px;
+    }
 
-            }
+    .chat-panel {
+        position:absolute;
 
-            .pseudo-input {
+        left:0;
+        right:0;
+        bottom:0;
 
-                width: 100%;
+        width:100%;
+        min-width:0;
 
-            }
+        height:
+            min(72dvh,620px);
 
-            .rooms-header {
+        border:none;
 
-                height: 58px;
-                min-height: 58px;
+        border-top:
+            1px solid var(--border);
 
-                padding:
-                    0 13px;
+        border-radius:
+            22px 22px 0 0;
 
-            }
+        transform:
+            translateY(105%);
 
-            .profile {
+        transition:
+            transform .25s ease;
+    }
 
-                font-size: 11px;
+    .chat-panel.open {
+        transform:
+            translateY(0);
+    }
 
-            }
+    .chat-close {
+        display:flex;
 
-            .rooms-content {
+        align-items:center;
+        justify-content:center;
+    }
 
-                padding:
-                    25px 13px;
+    .chat-toggle {
+        display:flex;
 
-            }
+        align-items:center;
+        justify-content:center;
+    }
 
-            .rooms-title h1 {
+    .admin-panel {
+        top:58px;
 
-                font-size: 24px;
+        width:100%;
+    }
 
-            }
+}
 
-            .rooms-actions {
 
-                flex-direction: column;
+/* =========================================================
+   CAMERA INPUT
+========================================================= */
 
-            }
+#avatarFile {
+    display:none;
+}
 
-            .create-room {
-
-                width: 100%;
-
-            }
-
-            .room {
-
-                min-height: 72px;
-
-                padding:
-                    11px;
-
-            }
-
-            .room-icon {
-
-                width: 40px;
-                height: 40px;
-
-            }
-
-            .room-right {
-
-                gap: 7px;
-
-            }
-
-            .participants {
-
-                font-size: 10px;
-
-            }
-
-            .join-button {
-
-                padding:
-                    0 10px;
-
-            }
-
-
-            /* ==============================
-               CALL
-            ============================== */
-
-            .call-header {
-
-                height: 55px;
-                min-height: 55px;
-
-            }
-
-            .video-grid {
-
-                grid-template-columns: 1fr;
-
-                grid-auto-rows: auto;
-
-                gap: 7px;
-
-                padding: 7px;
-
-                overflow: hidden;
-
-            }
-
-            /*
-                UNE PERSONNE
-            */
-
-            .video-grid
-            .video-card {
-
-                height:
-                    calc(100dvh - 138px);
-
-            }
-
-
-            /*
-                DEUX PERSONNES
-
-                Côte à côte,
-                sans étirer les vidéos.
-            */
-
-            .video-grid.two-users {
-
-                grid-template-columns:
-                    repeat(
-                        2,
-                        minmax(0,1fr)
-                    );
-
-                grid-template-rows:
-                    1fr;
-
-                gap: 6px;
-
-            }
-
-            .video-grid.two-users
-            .video-card {
-
-                height:
-                    calc(100dvh - 138px);
-
-                min-height: 0;
-
-            }
-
-
-            /*
-                3+ PERSONNES
-            */
-
-            .video-grid.three-plus {
-
-                grid-template-columns:
-                    repeat(
-                        2,
-                        minmax(0,1fr)
-                    );
-
-                grid-auto-rows:
-                    minmax(180px,1fr);
-
-                overflow-y: auto;
-
-            }
-
-            .video-grid.three-plus
-            .video-card {
-
-                height: auto;
-
-                min-height: 180px;
-
-            }
-
-
-            .controls {
-
-                bottom: 11px;
-
-                gap: 6px;
-
-                padding: 7px;
-
-            }
-
-            .control {
-
-                width: 40px;
-                height: 40px;
-
-                border-radius: 12px;
-
-                font-size: 16px;
-
-            }
-
-            .leave {
-
-                width: 46px;
-
-            }
-
-
-            /* ==============================
-               CHAT
-            ============================== */
-
-            .chat-toggle {
-
-                display: flex;
-
-            }
-
-            .chat-panel {
-
-                position: absolute;
-
-                left: 0;
-                right: 0;
-                bottom: 0;
-
-                width: 100%;
-                min-width: 0;
-
-                height:
-                    min(72dvh,620px);
-
-                border-left: none;
-
-                border-top:
-                    1px solid var(--border);
-
-                border-radius:
-                    22px 22px 0 0;
-
-                transform:
-                    translateY(105%);
-
-                transition:
-                    transform .25s ease;
-
-                box-shadow:
-                    0 -20px 60px
-                    rgba(0,0,0,.5);
-
-            }
-
-            .chat-panel.open {
-
-                transform:
-                    translateY(0);
-
-            }
-
-            .chat-close {
-
-                display: flex;
-
-                align-items: center;
-                justify-content: center;
-
-            }
-
-        }
-
-
-        @media (max-width: 390px) {
-
-            .video-grid.two-users {
-
-                gap: 5px;
-
-                padding: 5px;
-
-            }
-
-            .video-grid.two-users
-            .video-card {
-
-                height:
-                    calc(100dvh - 132px);
-
-                border-radius: 14px;
-
-            }
-
-            .controls {
-
-                bottom: 9px;
-
-            }
-
-        }
-
-    </style>
-
+</style>
 </head>
 
 
 <body>
 
 
-<!-- =========================================================
-     PSEUDO
-========================================================= -->
+<!-- =======================================================
+     LOGIN
+======================================================= -->
 
 <section
-    id="pseudoScreen"
-    class="screen"
+    id="loginScreen"
+    class="login-screen"
 >
 
-    <div class="welcome">
+    <div class="login-box">
 
         <div class="logo">
             ✦
@@ -1560,31 +1711,52 @@
             Col'inCall
         </h1>
 
-        <p class="welcome-description">
-
-            Discutez, partagez votre caméra
-            et retrouvez-vous simplement
-            dans des salons.
-
+        <p class="login-subtitle">
+            Connectez-vous pour rejoindre la conversation.
         </p>
 
 
-        <form
-            id="pseudoForm"
-            class="pseudo-box"
-        >
+        <div class="login-modes">
+
+            <button
+                id="userMode"
+                class="login-mode active"
+            >
+                👤 Utilisateur
+            </button>
+
+            <button
+                id="adminMode"
+                class="login-mode"
+            >
+                🛡️ Admin
+            </button>
+
+        </div>
+
+
+        <form id="loginForm">
 
             <input
-                id="pseudoInput"
-                class="pseudo-input"
+                id="loginPseudo"
+                class="login-input"
                 type="text"
                 maxlength="24"
                 autocomplete="nickname"
-                placeholder="Votre pseudo..."
+                placeholder="Votre pseudo"
+            >
+
+            <input
+                id="adminCode"
+                class="login-input hidden"
+                type="password"
+                inputmode="numeric"
+                maxlength="5"
+                placeholder="Code administrateur"
             >
 
             <button
-                class="primary-button"
+                class="login-button"
                 type="submit"
             >
                 Continuer
@@ -1594,11 +1766,9 @@
 
 
         <div
-            id="pseudoError"
-            class="error hidden"
-        >
-            Entrez un pseudo pour continuer.
-        </div>
+            id="loginError"
+            class="login-error hidden"
+        ></div>
 
     </div>
 
@@ -1606,77 +1776,98 @@
 
 
 
-<!-- =========================================================
-     ROOMS
-========================================================= -->
+<!-- =======================================================
+     APPLICATION
+======================================================= -->
 
 <section
-    id="roomsScreen"
-    class="rooms-screen hidden"
+    id="app"
+    class="app hidden"
 >
 
 
-    <header class="rooms-header">
+<header class="header">
 
-        <div class="brand">
+    <div class="brand">
 
-            <div class="brand-logo">
-                ✦
-            </div>
-
-            <div class="brand-name">
-                Col'inCall
-            </div>
-
+        <div class="brand-logo">
+            ✦
         </div>
 
+        <div class="brand-name">
+            Col'inCall
+        </div>
 
-        <div class="profile">
+    </div>
 
-            <div
-                id="profileAvatar"
-                class="profile-avatar"
-            >
+
+    <div class="header-right">
+
+        <button
+            id="adminButton"
+            class="admin-button hidden"
+        >
+            🛡️ Admin
+        </button>
+
+
+        <button
+            id="profileButton"
+            class="user-avatar-button"
+        >
+            <span id="headerAvatarLetter">
                 V
-            </div>
-
-            <span id="profileName">
-                Vous
             </span>
 
-        </div>
+            <img
+                id="headerAvatarImage"
+                class="hidden"
+                alt=""
+            >
+        </button>
 
-    </header>
+    </div>
+
+</header>
 
 
-    <main class="rooms-content">
 
-        <div class="rooms-title">
+<!-- =======================================================
+     ROOMS PAGE
+======================================================= -->
+
+<main
+    id="roomsPage"
+    class="page"
+>
+
+    <div class="page-content">
+
+        <div class="page-title">
 
             <h1>
-                Rejoindre un salon
+                Salons
             </h1>
 
             <p>
-                Choisissez une conversation et
-                rejoignez les autres participants.
+                Choisissez un salon pour rejoindre la conversation.
             </p>
 
         </div>
 
 
-        <div class="rooms-actions">
+        <div class="search-row">
 
             <input
-                id="searchInput"
-                class="search"
+                id="searchRoom"
+                class="search-input"
                 type="search"
-                placeholder="🔎 Rechercher un salon..."
+                placeholder="🔎  Rechercher un salon..."
             >
 
             <button
                 id="createRoomButton"
-                class="create-room"
+                class="create-button"
             >
                 ＋ Créer un salon
             </button>
@@ -1685,55 +1876,107 @@
 
 
         <div
-            id="roomsList"
-            class="rooms-list"
+            id="rooms"
+            class="rooms"
+        ></div>
+
+    </div>
+
+</main>
+
+
+
+<!-- =======================================================
+     ADMIN PAGE
+======================================================= -->
+
+<main
+    id="adminPage"
+    class="page hidden"
+>
+
+    <div class="page-content">
+
+        <div class="page-title">
+
+            <h1>
+                Administration
+            </h1>
+
+            <p>
+                Gérez les salons et les utilisateurs de Col'inCall.
+            </p>
+
+        </div>
+
+
+        <div class="admin-nav">
+
+            <button
+                id="adminRoomsTab"
+                class="active"
+            >
+                🏠 Salons
+            </button>
+
+            <button
+                id="adminUsersTab"
+            >
+                👥 Users
+            </button>
+
+        </div>
+
+
+        <div
+            id="adminRooms"
         ></div>
 
 
         <div
-            id="emptyRooms"
-            class="empty-rooms hidden"
-        >
-            Aucun salon trouvé.
-        </div>
+            id="adminUsers"
+            class="hidden"
+        ></div>
 
-    </main>
+    </div>
+
+</main>
+
 
 </section>
 
 
 
-<!-- =========================================================
+<!-- =======================================================
      CALL
-========================================================= -->
+======================================================= -->
 
 <section
     id="callScreen"
     class="call-screen hidden"
 >
 
-
     <header class="call-header">
 
-        <div class="call-room">
+        <div class="call-info">
 
             <span class="online"></span>
 
             <div>
 
-                <div
+                <span
                     id="callRoomName"
                     class="call-room-name"
                 >
                     Général
-                </div>
+                </span>
 
-                <div
-                    id="callRoomCount"
-                    class="call-room-count"
+                <span
+                    id="callCount"
+                    class="call-count"
                 >
                     1 participant
-                </div>
+                </span>
 
             </div>
 
@@ -1747,21 +1990,17 @@
 
         <section class="video-area">
 
-
             <div
                 id="videoGrid"
                 class="video-grid"
             ></div>
 
 
-            <!-- CONTROLS -->
-
             <div class="controls">
 
                 <button
                     id="micButton"
                     class="control"
-                    title="Micro"
                 >
                     🎙️
                 </button>
@@ -1769,7 +2008,6 @@
                 <button
                     id="cameraButton"
                     class="control"
-                    title="Caméra"
                 >
                     📹
                 </button>
@@ -1777,15 +2015,12 @@
                 <button
                     id="leaveButton"
                     class="control leave"
-                    title="Quitter"
                 >
                     ☎
                 </button>
 
             </div>
 
-
-            <!-- MOBILE CHAT -->
 
             <button
                 id="chatToggle"
@@ -1803,11 +2038,8 @@
 
             </button>
 
-
         </section>
 
-
-        <!-- CHAT -->
 
         <aside
             id="chatPanel"
@@ -1827,7 +2059,6 @@
                     </div>
 
                 </div>
-
 
                 <button
                     id="chatClose"
@@ -1853,7 +2084,6 @@
                 <input
                     id="chatInput"
                     class="chat-input"
-                    type="text"
                     maxlength="500"
                     autocomplete="off"
                     placeholder="Écrire un message..."
@@ -1861,7 +2091,6 @@
 
                 <button
                     class="send"
-                    type="submit"
                 >
                     ➤
                 </button>
@@ -1870,15 +2099,229 @@
 
         </aside>
 
-
     </main>
 
 </section>
 
 
 
-<script>
+<!-- =======================================================
+     PROFILE MODAL
+======================================================= -->
 
+<div
+    id="profileModal"
+    class="modal-overlay hidden"
+>
+
+    <div class="modal">
+
+        <div class="modal-top">
+
+            <div class="modal-title">
+                Mon profil
+            </div>
+
+            <button
+                id="closeProfile"
+                class="close-modal"
+            >
+                ✕
+            </button>
+
+        </div>
+
+
+        <div class="profile-center">
+
+            <label
+                for="avatarFile"
+                id="profileAvatarLarge"
+                class="profile-avatar-large"
+            >
+
+                <span
+                    id="profileAvatarLetter"
+                >
+                    V
+                </span>
+
+                <img
+                    id="profileAvatarImage"
+                    class="hidden"
+                    alt=""
+                >
+
+                <span class="profile-avatar-action">
+                    📷
+                </span>
+
+            </label>
+
+
+            <input
+                id="avatarFile"
+                type="file"
+                accept="image/*"
+                capture="user"
+            >
+
+
+            <div
+                id="profileNameDisplay"
+                class="profile-name"
+            >
+                Vous
+            </div>
+
+        </div>
+
+
+        <div class="profile-section">
+
+            <label>
+                Description
+            </label>
+
+            <textarea
+                id="profileDescription"
+                class="profile-textarea"
+                maxlength="160"
+                placeholder="Parlez un peu de vous..."
+            ></textarea>
+
+
+            <button
+                id="saveProfile"
+                class="save-profile"
+            >
+                Enregistrer le profil
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =======================================================
+     USER PROFILE MODAL
+======================================================= -->
+
+<div
+    id="userProfileModal"
+    class="modal-overlay hidden"
+>
+
+    <div class="modal">
+
+        <div class="modal-top">
+
+            <div class="modal-title">
+                Profil
+            </div>
+
+            <button
+                id="closeUserProfile"
+                class="close-modal"
+            >
+                ✕
+            </button>
+
+        </div>
+
+
+        <div class="profile-center">
+
+            <div
+                id="viewUserAvatar"
+                class="profile-avatar-large"
+            >
+
+                <span
+                    id="viewUserAvatarLetter"
+                >
+                    U
+                </span>
+
+                <img
+                    id="viewUserAvatarImage"
+                    class="hidden"
+                    alt=""
+                >
+
+            </div>
+
+
+            <div
+                id="viewUserName"
+                class="profile-name"
+            >
+                Utilisateur
+            </div>
+
+
+            <div
+                id="viewUserDescription"
+                class="profile-description"
+            >
+                Aucune description.
+            </div>
+
+        </div>
+
+
+        <div
+            id="adminUserActions"
+            class="profile-actions hidden"
+        >
+
+            <button
+                id="kickUserButton"
+                class="profile-action danger"
+            >
+                🚫 Expulser cet utilisateur
+            </button>
+
+            <button
+                id="muteUserButton"
+                class="profile-action warning"
+            >
+                🔇 Couper le microphone
+            </button>
+
+            <button
+                id="cameraUserButton"
+                class="profile-action warning"
+            >
+                📹 Couper la caméra
+            </button>
+
+            <button
+                id="unmuteUserButton"
+                class="profile-action success"
+            >
+                🔊 Réactiver le microphone
+            </button>
+
+            <button
+                id="cameraOnUserButton"
+                class="profile-action success"
+            >
+                📹 Réactiver la caméra
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
 
 /* =========================================================
    CONFIG
@@ -1894,28 +2337,31 @@ const SERVER_URL =
 
 let socket = null;
 
-let localStream = null;
+let username = "";
+
+let isAdmin = false;
 
 let currentRoom = null;
 
-let username = "";
+let localStream = null;
 
 let clientId = null;
 
-let unreadCount = 0;
+let selectedUserId = null;
 
 let chatOpen = false;
 
-
-/*
-    WebRTC connections
-*/
+let unreadCount = 0;
 
 const peers = new Map();
 
+let roomsData = [];
+
+let usersData = [];
+
 
 /* =========================================================
-   WEBRTC CONFIG
+   WEBRTC
 ========================================================= */
 
 const rtcConfig = {
@@ -1933,17 +2379,27 @@ const rtcConfig = {
 
 
 /* =========================================================
-   DOM
+   ELEMENTS
 ========================================================= */
 
-const pseudoScreen =
+const loginScreen =
     document.getElementById(
-        "pseudoScreen"
+        "loginScreen"
     );
 
-const roomsScreen =
+const app =
     document.getElementById(
-        "roomsScreen"
+        "app"
+    );
+
+const roomsPage =
+    document.getElementById(
+        "roomsPage"
+    );
+
+const adminPage =
+    document.getElementById(
+        "adminPage"
     );
 
 const callScreen =
@@ -1951,142 +2407,136 @@ const callScreen =
         "callScreen"
     );
 
-const pseudoForm =
+const userMode =
     document.getElementById(
-        "pseudoForm"
+        "userMode"
     );
 
-const pseudoInput =
+const adminMode =
     document.getElementById(
-        "pseudoInput"
+        "adminMode"
     );
 
-const pseudoError =
+const loginPseudo =
     document.getElementById(
-        "pseudoError"
+        "loginPseudo"
     );
 
-const roomsList =
+const adminCode =
     document.getElementById(
-        "roomsList"
+        "adminCode"
     );
 
-const emptyRooms =
+const loginForm =
     document.getElementById(
-        "emptyRooms"
+        "loginForm"
     );
 
-const searchInput =
+const loginError =
     document.getElementById(
-        "searchInput"
+        "loginError"
     );
 
-const createRoomButton =
+const rooms =
     document.getElementById(
-        "createRoomButton"
+        "rooms"
     );
 
-const profileName =
+const searchRoom =
     document.getElementById(
-        "profileName"
+        "searchRoom"
     );
 
-const profileAvatar =
+const profileButton =
     document.getElementById(
-        "profileAvatar"
+        "profileButton"
     );
 
-const callRoomName =
+const adminButton =
     document.getElementById(
-        "callRoomName"
+        "adminButton"
     );
 
-const callRoomCount =
+const adminRooms =
     document.getElementById(
-        "callRoomCount"
+        "adminRooms"
     );
 
-const videoGrid =
+const adminUsers =
     document.getElementById(
-        "videoGrid"
+        "adminUsers"
     );
 
-const micButton =
+const profileModal =
     document.getElementById(
-        "micButton"
+        "profileModal"
     );
 
-const cameraButton =
+const userProfileModal =
     document.getElementById(
-        "cameraButton"
-    );
-
-const leaveButton =
-    document.getElementById(
-        "leaveButton"
-    );
-
-const chatPanel =
-    document.getElementById(
-        "chatPanel"
-    );
-
-const chatToggle =
-    document.getElementById(
-        "chatToggle"
-    );
-
-const chatClose =
-    document.getElementById(
-        "chatClose"
-    );
-
-const unreadBadge =
-    document.getElementById(
-        "unreadBadge"
-    );
-
-const messages =
-    document.getElementById(
-        "messages"
-    );
-
-const chatForm =
-    document.getElementById(
-        "chatForm"
-    );
-
-const chatInput =
-    document.getElementById(
-        "chatInput"
+        "userProfileModal"
     );
 
 
 /* =========================================================
-   ROOMS
+   LOGIN MODE
 ========================================================= */
 
-let availableRooms = [];
+userMode.onclick =
+    () => {
+
+        userMode.classList.add(
+            "active"
+        );
+
+        adminMode.classList.remove(
+            "active"
+        );
+
+        adminCode.classList.add(
+            "hidden"
+        );
+
+    };
+
+
+adminMode.onclick =
+    () => {
+
+        adminMode.classList.add(
+            "active"
+        );
+
+        userMode.classList.remove(
+            "active"
+        );
+
+        adminCode.classList.remove(
+            "hidden"
+        );
+
+    };
 
 
 /* =========================================================
-   PSEUDO
+   LOGIN
 ========================================================= */
 
-pseudoForm.addEventListener(
+loginForm.addEventListener(
     "submit",
-    async event => {
+    event => {
 
         event.preventDefault();
 
-        const value =
-            pseudoInput.value.trim();
+
+        const pseudo =
+            loginPseudo.value.trim();
 
 
-        if (!value) {
+        if (!pseudo) {
 
-            pseudoError.classList.remove(
-                "hidden"
+            showLoginError(
+                "Veuillez renseigner un pseudo."
             );
 
             return;
@@ -2094,77 +2544,54 @@ pseudoForm.addEventListener(
         }
 
 
-        if (value.length < 2) {
-
-            pseudoError.textContent =
-                "Le pseudo doit contenir au moins 2 caractères.";
-
-            pseudoError.classList.remove(
-                "hidden"
+        isAdmin =
+            adminMode.classList.contains(
+                "active"
             );
-
-            return;
-
-        }
 
 
         username =
-            value.slice(0, 24);
+            pseudo.slice(0,24);
 
 
-        localStorage.setItem(
-            "colincall_username",
-            username
+        /*
+            Pour l'admin, le code est envoyé
+            au serveur et jamais stocké côté client.
+        */
+
+        connectSocket(
+            true
         );
-
-
-        profileName.textContent =
-            username;
-
-        profileAvatar.textContent =
-            username
-                .charAt(0)
-                .toUpperCase();
-
-
-        pseudoScreen.classList.add(
-            "hidden"
-        );
-
-        roomsScreen.classList.remove(
-            "hidden"
-        );
-
-
-        connectLobby();
 
     }
 );
 
 
 /* =========================================================
-   RESTORE PSEUDO
+   LOGIN ERROR
 ========================================================= */
 
-const savedUsername =
-    localStorage.getItem(
-        "colincall_username"
+function showLoginError(
+    message
+) {
+
+    loginError.textContent =
+        message;
+
+    loginError.classList.remove(
+        "hidden"
     );
-
-
-if (savedUsername) {
-
-    pseudoInput.value =
-        savedUsername;
 
 }
 
 
 /* =========================================================
-   LOBBY WEBSOCKET
+   CONNECT SOCKET
 ========================================================= */
 
-function connectLobby() {
+function connectSocket(
+    authenticate = false
+) {
 
     if (socket) {
 
@@ -2184,446 +2611,27 @@ function connectLobby() {
     socket.onopen =
         () => {
 
-            send({
+            if (authenticate) {
 
-                type:
-                    "get-rooms"
+                send({
 
-            });
+                    type:
+                        "login",
 
-        };
+                    name:
+                        username,
 
+                    admin:
+                        isAdmin,
 
-    socket.onmessage =
-        event => {
+                    code:
+                        isAdmin
+                            ? adminCode.value
+                            : ""
 
-            try {
-
-                const data =
-                    JSON.parse(
-                        event.data
-                    );
-
-
-                handleLobbyMessage(
-                    data
-                );
-
-            } catch (error) {
-
-                console.error(
-                    error
-                );
+                });
 
             }
-
-        };
-
-
-    socket.onerror =
-        error => {
-
-            console.error(
-                "WebSocket:",
-                error
-            );
-
-        };
-
-}
-
-
-/* =========================================================
-   LOBBY MESSAGES
-========================================================= */
-
-function handleLobbyMessage(
-    data
-) {
-
-    switch (
-        data.type
-    ) {
-
-
-        case "rooms":
-
-            availableRooms =
-                data.rooms || [];
-
-            renderRooms();
-
-            break;
-
-
-        case "room-created":
-
-            if (data.room) {
-
-                joinRoom(
-                    data.room.id
-                );
-
-            }
-
-            break;
-
-
-        case "room-updated":
-
-            availableRooms =
-                data.rooms || [];
-
-            renderRooms();
-
-            break;
-
-    }
-
-}
-
-
-/* =========================================================
-   RENDER ROOMS
-========================================================= */
-
-function renderRooms() {
-
-    const search =
-        searchInput.value
-            .trim()
-            .toLowerCase();
-
-
-    const filtered =
-        availableRooms.filter(
-            room => {
-
-                return room.name
-                    .toLowerCase()
-                    .includes(search);
-
-            }
-        );
-
-
-    roomsList.innerHTML =
-        "";
-
-
-    emptyRooms.classList.toggle(
-        "hidden",
-        filtered.length !== 0
-    );
-
-
-    filtered.forEach(
-        room => {
-
-            const element =
-                document.createElement(
-                    "div"
-                );
-
-            element.className =
-                "room";
-
-
-            const icon =
-                document.createElement(
-                    "div"
-                );
-
-            icon.className =
-                "room-icon";
-
-            icon.textContent =
-                room.icon || "💬";
-
-
-            const info =
-                document.createElement(
-                    "div"
-                );
-
-            info.className =
-                "room-info";
-
-
-            const text =
-                document.createElement(
-                    "div"
-                );
-
-
-            const name =
-                document.createElement(
-                    "div"
-                );
-
-            name.className =
-                "room-name";
-
-            name.textContent =
-                room.name;
-
-
-            const description =
-                document.createElement(
-                    "div"
-                );
-
-            description.className =
-                "room-description";
-
-            description.textContent =
-                room.description ||
-                "Salon Col'inCall";
-
-
-            text.appendChild(
-                name
-            );
-
-            text.appendChild(
-                description
-            );
-
-
-            info.appendChild(
-                icon
-            );
-
-            info.appendChild(
-                text
-            );
-
-
-            const right =
-                document.createElement(
-                    "div"
-                );
-
-            right.className =
-                "room-right";
-
-
-            const participants =
-                document.createElement(
-                    "span"
-                );
-
-            participants.className =
-                "participants";
-
-            participants.textContent =
-                `${room.count} / ${room.max} 👤`;
-
-
-            const button =
-                document.createElement(
-                    "button"
-                );
-
-            button.className =
-                "join-button";
-
-
-            if (
-                room.count >=
-                room.max
-            ) {
-
-                button.textContent =
-                    "Complet";
-
-                button.classList.add(
-                    "full"
-                );
-
-                button.disabled =
-                    true;
-
-            } else {
-
-                button.textContent =
-                    "Rejoindre";
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        joinRoom(
-                            room.id
-                        );
-
-                    }
-                );
-
-            }
-
-
-            right.appendChild(
-                participants
-            );
-
-            right.appendChild(
-                button
-            );
-
-
-            element.appendChild(
-                info
-            );
-
-            element.appendChild(
-                right
-            );
-
-
-            roomsList.appendChild(
-                element
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-searchInput.addEventListener(
-    "input",
-    renderRooms
-);
-
-
-/* =========================================================
-   CREATE ROOM
-========================================================= */
-
-createRoomButton.addEventListener(
-    "click",
-    () => {
-
-        const name =
-            prompt(
-                "Nom du salon :"
-            );
-
-
-        if (!name) {
-            return;
-        }
-
-
-        const cleanName =
-            name
-                .trim()
-                .slice(0, 30);
-
-
-        if (!cleanName) {
-            return;
-        }
-
-
-        send({
-
-            type:
-                "create-room",
-
-            name:
-                cleanName,
-
-            description:
-                "Salon créé par " +
-                username,
-
-            icon:
-                "💬"
-
-        });
-
-    }
-);
-
-
-/* =========================================================
-   JOIN ROOM
-========================================================= */
-
-function joinRoom(
-    roomId
-) {
-
-    currentRoom =
-        roomId;
-
-
-    /*
-        Si la socket actuelle est
-        celle du lobby, on la réutilise.
-    */
-
-    if (
-        socket &&
-        socket.readyState ===
-            WebSocket.OPEN
-    ) {
-
-        send({
-
-            type:
-                "join-room",
-
-            room:
-                roomId,
-
-            name:
-                username
-
-        });
-
-    } else {
-
-        connectCallSocket();
-
-    }
-
-}
-
-
-/* =========================================================
-   CALL SOCKET
-========================================================= */
-
-function connectCallSocket() {
-
-    socket =
-        new WebSocket(
-            SERVER_URL
-        );
-
-
-    socket.onopen =
-        () => {
-
-            send({
-
-                type:
-                    "join-room",
-
-                room:
-                    currentRoom,
-
-                name:
-                    username
-
-            });
 
         };
 
@@ -2639,11 +2647,11 @@ function connectCallSocket() {
                     );
 
 
-                await handleCallMessage(
+                await handleMessage(
                     data
                 );
 
-            } catch (error) {
+            } catch(error) {
 
                 console.error(
                     error
@@ -2654,11 +2662,11 @@ function connectCallSocket() {
         };
 
 
-    socket.onclose =
+    socket.onerror =
         () => {
 
-            console.log(
-                "Connexion fermée"
+            showLoginError(
+                "Impossible de contacter le serveur."
             );
 
         };
@@ -2670,7 +2678,9 @@ function connectCallSocket() {
    SEND
 ========================================================= */
 
-function send(data) {
+function send(
+    data
+) {
 
     if (
         socket &&
@@ -2679,7 +2689,9 @@ function send(data) {
     ) {
 
         socket.send(
-            JSON.stringify(data)
+            JSON.stringify(
+                data
+            )
         );
 
     }
@@ -2688,70 +2700,99 @@ function send(data) {
 
 
 /* =========================================================
-   CALL MESSAGE
+   SERVER MESSAGES
 ========================================================= */
 
-async function handleCallMessage(
+async function handleMessage(
     data
 ) {
 
-    switch (
-        data.type
-    ) {
+    switch(data.type) {
+
+
+        case "login-result":
+
+            if (!data.success) {
+
+                showLoginError(
+                    data.message ||
+                    "Connexion refusée."
+                );
+
+                return;
+
+            }
+
+
+            loginScreen.classList.add(
+                "hidden"
+            );
+
+            app.classList.remove(
+                "hidden"
+            );
+
+
+            adminButton.classList.toggle(
+                "hidden",
+                !isAdmin
+            );
+
+
+            loadProfile();
+
+            send({
+                type:"get-rooms"
+            });
+
+            break;
+
+
+        case "rooms":
+
+            roomsData =
+                data.rooms || [];
+
+            renderRooms();
+
+            if (
+                isAdmin
+            ) {
+
+                renderAdminRooms();
+
+            }
+
+            break;
+
+
+        case "users":
+
+            usersData =
+                data.users || [];
+
+            renderAdminUsers();
+
+            break;
+
+
+        case "room-updated":
+
+            roomsData =
+                data.rooms || [];
+
+            renderRooms();
+
+            renderAdminRooms();
+
+            break;
 
 
         case "joined-room":
 
-            clientId =
-                data.id;
-
-
-            callRoomName.textContent =
-                data.roomName ||
-                currentRoom;
-
-
-            roomsScreen.classList.add(
-                "hidden"
+            await enterCall(
+                data
             );
-
-            callScreen.classList.remove(
-                "hidden"
-            );
-
-
-            await startCamera();
-
-            updateCallCount(
-                data.count ||
-                1
-            );
-
-
-            /*
-                Connexion aux utilisateurs
-                déjà présents.
-            */
-
-            if (
-                Array.isArray(
-                    data.users
-                )
-            ) {
-
-                data.users.forEach(
-                    user => {
-
-                        createPeer(
-                            user.id,
-                            true,
-                            user.name
-                        );
-
-                    }
-                );
-
-            }
 
             break;
 
@@ -2760,8 +2801,10 @@ async function handleCallMessage(
 
             createPeer(
                 data.id,
-                false,
-                data.name
+                true,
+                data.name,
+                data.avatar,
+                data.description
             );
 
             updateCallCount(
@@ -2777,7 +2820,9 @@ async function handleCallMessage(
                 createPeer(
                     data.sender,
                     false,
-                    data.senderName
+                    data.senderName,
+                    data.senderAvatar,
+                    data.senderDescription
                 );
 
 
@@ -2809,7 +2854,6 @@ async function handleCallMessage(
             });
 
             break;
-
         }
 
 
@@ -2821,17 +2865,15 @@ async function handleCallMessage(
                 );
 
 
-            if (!peer) {
-                return;
+            if(peer) {
+
+                await peer.setRemoteDescription(
+                    data.answer
+                );
+
             }
 
-
-            await peer.setRemoteDescription(
-                data.answer
-            );
-
             break;
-
         }
 
 
@@ -2854,18 +2896,11 @@ async function handleCallMessage(
                         data.candidate
                     );
 
-                } catch (error) {
-
-                    console.error(
-                        error
-                    );
-
-                }
+                } catch {}
 
             }
 
             break;
-
         }
 
 
@@ -2874,7 +2909,6 @@ async function handleCallMessage(
             removePeer(
                 data.id
             );
-
 
             updateCallCount(
                 data.count
@@ -2890,6 +2924,317 @@ async function handleCallMessage(
             );
 
             break;
+
+
+        case "profile-updated":
+
+            /*
+                Actualise l'affichage du profil
+                dans les autres clients.
+            */
+
+            break;
+
+
+        case "admin-users":
+
+            usersData =
+                data.users || [];
+
+            renderAdminUsers();
+
+            break;
+
+
+        case "kicked":
+
+            alert(
+                "Vous avez été expulsé du salon."
+            );
+
+            leaveCall();
+
+            break;
+
+
+        case "admin-action-result":
+
+            if (!data.success) {
+
+                alert(
+                    data.message ||
+                    "Action impossible."
+                );
+
+            }
+
+            break;
+
+    }
+
+}
+
+
+/* =========================================================
+   ROOMS
+========================================================= */
+
+function renderRooms() {
+
+    const query =
+        searchRoom.value
+            .trim()
+            .toLowerCase();
+
+
+    rooms.innerHTML =
+        "";
+
+
+    const filtered =
+        roomsData.filter(
+            room =>
+                room.name
+                    .toLowerCase()
+                    .includes(query)
+        );
+
+
+    if (!filtered.length) {
+
+        rooms.innerHTML = `
+            <div style="
+                text-align:center;
+                padding:50px;
+                color:#9298aa;
+                font-size:13px;
+            ">
+                Aucun salon trouvé.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    filtered.forEach(
+        room => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "room";
+
+
+            item.innerHTML = `
+
+                <div class="room-left">
+
+                    <div class="room-icon">
+                        ${room.icon || "💬"}
+                    </div>
+
+                    <div class="room-text">
+
+                        <div class="room-name">
+                            ${escapeHtml(room.name)}
+                        </div>
+
+                        <div class="room-description">
+                            ${escapeHtml(room.description || "Salon Col'inCall")}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="room-right">
+
+                    <span class="room-count">
+                        ${room.count} / ${room.max} 👤
+                    </span>
+
+                    <button
+                        class="join-room"
+                        ${room.count >= room.max ? "disabled" : ""}
+                    >
+                        ${
+                            room.count >= room.max
+                                ? "Complet"
+                                : "Rejoindre"
+                        }
+                    </button>
+
+                </div>
+
+            `;
+
+
+            item.querySelector(
+                ".join-room"
+            ).onclick =
+                () => {
+
+                    joinRoom(
+                        room.id
+                    );
+
+                };
+
+
+            rooms.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+searchRoom.addEventListener(
+    "input",
+    renderRooms
+);
+
+
+/* =========================================================
+   CREATE ROOM
+========================================================= */
+
+document
+.getElementById(
+    "createRoomButton"
+)
+.addEventListener(
+    "click",
+    () => {
+
+        const name =
+            prompt(
+                "Nom du nouveau salon :"
+            );
+
+
+        if (!name) {
+            return;
+        }
+
+
+        send({
+
+            type:
+                "create-room",
+
+            name:
+                name.trim(),
+
+            description:
+                "Salon Col'inCall",
+
+            icon:
+                "💬"
+
+        });
+
+    }
+);
+
+
+/* =========================================================
+   JOIN ROOM
+========================================================= */
+
+function joinRoom(
+    roomId
+) {
+
+    currentRoom =
+        roomId;
+
+
+    send({
+
+        type:
+            "join-room",
+
+        room:
+            roomId,
+
+        name:
+            username,
+
+        profile:
+            getProfile()
+
+    });
+
+}
+
+
+/* =========================================================
+   ENTER CALL
+========================================================= */
+
+async function enterCall(
+    data
+) {
+
+    roomsPage.classList.add(
+        "hidden"
+    );
+
+    adminPage.classList.add(
+        "hidden"
+    );
+
+    callScreen.classList.remove(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "callRoomName"
+    ).textContent =
+        data.roomName;
+
+
+    await startCamera();
+
+
+    clientId =
+        data.id;
+
+
+    updateCallCount(
+        data.count
+    );
+
+
+    if (
+        Array.isArray(
+            data.users
+        )
+    ) {
+
+        data.users.forEach(
+            user => {
+
+                createPeer(
+                    user.id,
+                    true,
+                    user.name,
+                    user.avatar,
+                    user.description
+                );
+
+            }
+        );
 
     }
 
@@ -2909,22 +3254,17 @@ async function startCamera() {
                 .mediaDevices
                 .getUserMedia({
 
-                    video: {
-
-                        facingMode:
-                            "user",
-
-                        width: {
-                            ideal: 1280
+                    video:{
+                        facingMode:"user",
+                        width:{
+                            ideal:1280
                         },
-
-                        height: {
-                            ideal: 720
+                        height:{
+                            ideal:720
                         }
-
                     },
 
-                    audio: true
+                    audio:true
 
                 });
 
@@ -2932,11 +3272,12 @@ async function startCamera() {
         addVideo(
             "local",
             localStream,
-            username
+            username,
+            getProfile().avatar
         );
 
 
-    } catch (error) {
+    } catch(error) {
 
         console.error(
             error
@@ -2952,13 +3293,14 @@ async function startCamera() {
 
 
 /* =========================================================
-   VIDEO
+   ADD VIDEO
 ========================================================= */
 
 function addVideo(
     id,
     stream,
-    name
+    name,
+    avatar
 ) {
 
     let card =
@@ -2967,17 +3309,12 @@ function addVideo(
         );
 
 
-    if (card) {
+    if(card) {
 
-        const video =
-            card.querySelector(
-                "video"
-            );
-
-        video.srcObject =
+        card.querySelector(
+            "video"
+        ).srcObject =
             stream;
-
-        updateVideoLayout();
 
         return;
 
@@ -3020,11 +3357,34 @@ function addVideo(
         );
 
     label.className =
-        "video-name";
+        "video-label";
 
     label.textContent =
         name ||
         "Participant";
+
+
+    /*
+        Clic sur le profil
+    */
+
+    if(
+        id !== "local"
+    ) {
+
+        label.style.cursor =
+            "pointer";
+
+        label.onclick =
+            () => {
+
+                openUserProfile(
+                    id
+                );
+
+            };
+
+    }
 
 
     card.appendChild(
@@ -3047,31 +3407,7 @@ function addVideo(
 
 
 /* =========================================================
-   REMOVE VIDEO
-========================================================= */
-
-function removeVideo(
-    id
-) {
-
-    const card =
-        document.getElementById(
-            "video-" + id
-        );
-
-
-    if (card) {
-        card.remove();
-    }
-
-
-    updateVideoLayout();
-
-}
-
-
-/* =========================================================
-   LAYOUT
+   VIDEO LAYOUT
 ========================================================= */
 
 function updateVideoLayout() {
@@ -3083,24 +3419,28 @@ function updateVideoLayout() {
 
 
     videoGrid.classList.remove(
-        "two-users",
-        "three-plus"
+        "two",
+        "three"
     );
 
 
-    if (count === 2) {
+    if(
+        count === 2
+    ) {
 
         videoGrid.classList.add(
-            "two-users"
+            "two"
         );
 
     }
 
 
-    if (count >= 3) {
+    if(
+        count >= 3
+    ) {
 
         videoGrid.classList.add(
-            "three-plus"
+            "three"
         );
 
     }
@@ -3113,33 +3453,10 @@ function updateVideoLayout() {
 }
 
 
-/* =========================================================
-   COUNT
-========================================================= */
-
-function updateCallCount(
-    count
-) {
-
-    if (
-        typeof count !==
-        "number"
-    ) {
-
-        count =
-            videoGrid.querySelectorAll(
-                ".video-card"
-            ).length;
-
-    }
-
-
-    callRoomCount.textContent =
-        count <= 1
-            ? "1 participant"
-            : `${count} participants`;
-
-}
+const videoGrid =
+    document.getElementById(
+        "videoGrid"
+    );
 
 
 /* =========================================================
@@ -3149,13 +3466,13 @@ function updateCallCount(
 function createPeer(
     peerId,
     initiator,
-    name
+    name,
+    avatar,
+    description
 ) {
 
-    if (
-        peers.has(
-            peerId
-        )
+    if(
+        peers.has(peerId)
     ) {
 
         return peers.get(
@@ -3177,11 +3494,7 @@ function createPeer(
     );
 
 
-    /*
-        Local tracks
-    */
-
-    if (localStream) {
+    if(localStream) {
 
         localStream
             .getTracks()
@@ -3199,10 +3512,6 @@ function createPeer(
     }
 
 
-    /*
-        Remote stream
-    */
-
     peer.ontrack =
         event => {
 
@@ -3210,13 +3519,13 @@ function createPeer(
                 event.streams[0];
 
 
-            if (stream) {
+            if(stream) {
 
                 addVideo(
                     peerId,
                     stream,
-                    name ||
-                    "Participant"
+                    name,
+                    avatar
                 );
 
             }
@@ -3224,14 +3533,10 @@ function createPeer(
         };
 
 
-    /*
-        ICE
-    */
-
     peer.onicecandidate =
         event => {
 
-            if (
+            if(
                 event.candidate
             ) {
 
@@ -3253,32 +3558,7 @@ function createPeer(
         };
 
 
-    /*
-        Connection
-    */
-
-    peer.onconnectionstatechange =
-        () => {
-
-            if (
-                peer.connectionState ===
-                "failed"
-            ) {
-
-                try {
-                    peer.restartIce();
-                } catch {}
-
-            }
-
-        };
-
-
-    /*
-        Create offer
-    */
-
-    if (initiator) {
+    if(initiator) {
 
         peer.createOffer()
             .then(
@@ -3304,9 +3584,6 @@ function createPeer(
                     });
 
                 }
-            )
-            .catch(
-                console.error
             );
 
     }
@@ -3331,7 +3608,7 @@ function removePeer(
         );
 
 
-    if (peer) {
+    if(peer) {
 
         peer.close();
 
@@ -3342,9 +3619,36 @@ function removePeer(
     }
 
 
-    removeVideo(
-        id
-    );
+    const card =
+        document.getElementById(
+            "video-" + id
+        );
+
+
+    if(card) {
+        card.remove();
+    }
+
+
+    updateVideoLayout();
+
+}
+
+
+/* =========================================================
+   COUNT
+========================================================= */
+
+function updateCallCount(
+    count
+) {
+
+    document.getElementById(
+        "callCount"
+    ).textContent =
+        count <= 1
+            ? "1 participant"
+            : `${count} participants`;
 
 }
 
@@ -3353,13 +3657,15 @@ function removePeer(
    MICRO
 ========================================================= */
 
-micButton.addEventListener(
-    "click",
+document
+.getElementById(
+    "micButton"
+)
+.onclick =
     () => {
 
-        if (!localStream) {
+        if(!localStream)
             return;
-        }
 
 
         const track =
@@ -3367,41 +3673,47 @@ micButton.addEventListener(
                 .getAudioTracks()[0];
 
 
-        if (!track) {
+        if(!track)
             return;
-        }
 
 
         track.enabled =
             !track.enabled;
 
 
-        micButton.classList.toggle(
+        const button =
+            document.getElementById(
+                "micButton"
+            );
+
+
+        button.classList.toggle(
             "off",
             !track.enabled
         );
 
 
-        micButton.textContent =
+        button.textContent =
             track.enabled
                 ? "🎙️"
                 : "🔇";
 
-    }
-);
+    };
 
 
 /* =========================================================
    CAMERA
 ========================================================= */
 
-cameraButton.addEventListener(
-    "click",
+document
+.getElementById(
+    "cameraButton"
+)
+.onclick =
     () => {
 
-        if (!localStream) {
+        if(!localStream)
             return;
-        }
 
 
         const track =
@@ -3409,48 +3721,61 @@ cameraButton.addEventListener(
                 .getVideoTracks()[0];
 
 
-        if (!track) {
+        if(!track)
             return;
-        }
 
 
         track.enabled =
             !track.enabled;
 
 
-        cameraButton.classList.toggle(
+        const button =
+            document.getElementById(
+                "cameraButton"
+            );
+
+
+        button.classList.toggle(
             "off",
             !track.enabled
         );
 
 
-        cameraButton.textContent =
+        button.textContent =
             track.enabled
                 ? "📹"
                 : "🚫";
 
-    }
-);
+    };
 
 
 /* =========================================================
-   CHAT SEND
+   CHAT
 ========================================================= */
 
-chatForm.addEventListener(
+document
+.getElementById(
+    "chatForm"
+)
+.addEventListener(
     "submit",
     event => {
 
         event.preventDefault();
 
 
-        const text =
-            chatInput.value.trim();
+        const input =
+            document.getElementById(
+                "chatInput"
+            );
 
 
-        if (!text) {
+        const message =
+            input.value.trim();
+
+
+        if(!message)
             return;
-        }
 
 
         send({
@@ -3458,20 +3783,19 @@ chatForm.addEventListener(
             type:
                 "chat",
 
-            message:
-                text
+            message
 
         });
 
 
         addMessage(
             username,
-            text,
+            message,
             true
         );
 
 
-        chatInput.value =
+        input.value =
             "";
 
     }
@@ -3487,21 +3811,17 @@ function receiveChat(
 ) {
 
     addMessage(
-        data.name ||
-            "Participant",
-
-        data.message ||
-            "",
-
+        data.name,
+        data.message,
         false
     );
 
 
-    if (!chatOpen) {
+    if(!chatOpen) {
 
         unreadCount++;
 
-        updateUnread();
+        updateBadge();
 
     }
 
@@ -3509,7 +3829,7 @@ function receiveChat(
 
 
 /* =========================================================
-   ADD MESSAGE
+   MESSAGE
 ========================================================= */
 
 function addMessage(
@@ -3518,12 +3838,12 @@ function addMessage(
     mine
 ) {
 
-    const message =
+    const element =
         document.createElement(
             "div"
         );
 
-    message.className =
+    element.className =
         "message" +
         (
             mine
@@ -3532,113 +3852,113 @@ function addMessage(
         );
 
 
-    const authorElement =
-        document.createElement(
-            "div"
+    element.innerHTML = `
+
+        <div class="message-author">
+            ${escapeHtml(
+                mine
+                    ? "Vous"
+                    : author
+            )}
+        </div>
+
+        <div class="message-bubble">
+            ${escapeHtml(text)}
+        </div>
+
+    `;
+
+
+    document
+        .getElementById(
+            "messages"
+        )
+        .appendChild(
+            element
         );
 
-    authorElement.className =
-        "message-author";
 
-    authorElement.textContent =
-        mine
-            ? "Vous"
-            : author;
-
-
-    const bubble =
-        document.createElement(
-            "div"
+    const messageBox =
+        document.getElementById(
+            "messages"
         );
 
-    bubble.className =
-        "message-bubble";
 
-    bubble.textContent =
-        text;
-
-
-    message.appendChild(
-        authorElement
-    );
-
-    message.appendChild(
-        bubble
-    );
-
-
-    messages.appendChild(
-        message
-    );
-
-
-    messages.scrollTop =
-        messages.scrollHeight;
+    messageBox.scrollTop =
+        messageBox.scrollHeight;
 
 }
 
 
 /* =========================================================
-   CHAT OPEN
+   CHAT TOGGLE
 ========================================================= */
 
-chatToggle.addEventListener(
-    "click",
+document
+.getElementById(
+    "chatToggle"
+)
+.onclick =
     () => {
 
         chatOpen =
             !chatOpen;
 
 
-        chatPanel.classList.toggle(
-            "open",
-            chatOpen
-        );
+        document
+            .getElementById(
+                "chatPanel"
+            )
+            .classList.toggle(
+                "open",
+                chatOpen
+            );
 
 
-        if (chatOpen) {
+        if(chatOpen) {
 
             unreadCount =
                 0;
 
-            updateUnread();
+            updateBadge();
 
         }
 
-    }
-);
+    };
 
 
-/* =========================================================
-   CHAT CLOSE
-========================================================= */
-
-chatClose.addEventListener(
-    "click",
+document
+.getElementById(
+    "chatClose"
+)
+.onclick =
     () => {
 
         chatOpen =
             false;
 
-        chatPanel.classList.remove(
-            "open"
+        document
+            .getElementById(
+                "chatPanel"
+            )
+            .classList.remove(
+                "open"
+            );
+
+    };
+
+
+function updateBadge() {
+
+    const badge =
+        document.getElementById(
+            "unreadBadge"
         );
 
-    }
-);
 
+    if(unreadCount <= 0) {
 
-/* =========================================================
-   UNREAD
-========================================================= */
-
-function updateUnread() {
-
-    if (
-        unreadCount <= 0
-    ) {
-
-        unreadBadge.classList.remove(
+        badge.classList.remove(
             "show"
         );
 
@@ -3647,12 +3967,11 @@ function updateUnread() {
     }
 
 
-    unreadBadge.classList.add(
+    badge.classList.add(
         "show"
     );
 
-
-    unreadBadge.textContent =
+    badge.textContent =
         unreadCount > 99
             ? "99+"
             : unreadCount;
@@ -3661,26 +3980,881 @@ function updateUnread() {
 
 
 /* =========================================================
+   PROFILE
+========================================================= */
+
+function getProfile() {
+
+    return {
+
+        avatar:
+            localStorage.getItem(
+                "colincall_avatar"
+            ) || "",
+
+        description:
+            localStorage.getItem(
+                "colincall_description"
+            ) || ""
+
+    };
+
+}
+
+
+function loadProfile() {
+
+    const profile =
+        getProfile();
+
+
+    updateHeaderAvatar(
+        profile.avatar
+    );
+
+}
+
+
+/* =========================================================
+   OPEN PROFILE
+========================================================= */
+
+profileButton.onclick =
+    () => {
+
+        const profile =
+            getProfile();
+
+
+        document.getElementById(
+            "profileNameDisplay"
+        ).textContent =
+            username;
+
+
+        document.getElementById(
+            "profileDescription"
+        ).value =
+            profile.description;
+
+
+        setProfileAvatar(
+            profile.avatar
+        );
+
+
+        profileModal.classList.remove(
+            "hidden"
+        );
+
+    };
+
+
+document
+.getElementById(
+    "closeProfile"
+)
+.onclick =
+    () => {
+
+        profileModal.classList.add(
+            "hidden"
+        );
+
+    };
+
+
+/* =========================================================
+   AVATAR
+========================================================= */
+
+document
+.getElementById(
+    "avatarFile"
+)
+.addEventListener(
+    "change",
+    event => {
+
+        const file =
+            event.target.files[0];
+
+
+        if(!file)
+            return;
+
+
+        if(
+            !file.type.startsWith(
+                "image/"
+            )
+        )
+            return;
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            () => {
+
+                const data =
+                    reader.result;
+
+
+                localStorage.setItem(
+                    "colincall_avatar",
+                    data
+                );
+
+
+                setProfileAvatar(
+                    data
+                );
+
+
+                updateHeaderAvatar(
+                    data
+                );
+
+
+                send({
+
+                    type:
+                        "profile-update",
+
+                    profile:
+                        getProfile()
+
+                });
+
+            };
+
+
+        reader.readAsDataURL(
+            file
+        );
+
+    }
+);
+
+
+/* =========================================================
+   PROFILE SAVE
+========================================================= */
+
+document
+.getElementById(
+    "saveProfile"
+)
+.onclick =
+    () => {
+
+        const description =
+            document
+                .getElementById(
+                    "profileDescription"
+                )
+                .value
+                .trim()
+                .slice(0,160);
+
+
+        localStorage.setItem(
+            "colincall_description",
+            description
+        );
+
+
+        send({
+
+            type:
+                "profile-update",
+
+            profile:
+                getProfile()
+
+        });
+
+
+        profileModal.classList.add(
+            "hidden"
+        );
+
+    };
+
+
+/* =========================================================
+   PROFILE AVATAR DISPLAY
+========================================================= */
+
+function setProfileAvatar(
+    avatar
+) {
+
+    const image =
+        document.getElementById(
+            "profileAvatarImage"
+        );
+
+    const letter =
+        document.getElementById(
+            "profileAvatarLetter"
+        );
+
+
+    if(avatar) {
+
+        image.src =
+            avatar;
+
+        image.classList.remove(
+            "hidden"
+        );
+
+        letter.classList.add(
+            "hidden"
+        );
+
+    } else {
+
+        image.classList.add(
+            "hidden"
+        );
+
+        letter.classList.remove(
+            "hidden"
+        );
+
+        letter.textContent =
+            username
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+}
+
+
+function updateHeaderAvatar(
+    avatar
+) {
+
+    const image =
+        document.getElementById(
+            "headerAvatarImage"
+        );
+
+    const letter =
+        document.getElementById(
+            "headerAvatarLetter"
+        );
+
+
+    if(avatar) {
+
+        image.src =
+            avatar;
+
+        image.classList.remove(
+            "hidden"
+        );
+
+        letter.classList.add(
+            "hidden"
+        );
+
+    } else {
+
+        image.classList.add(
+            "hidden"
+        );
+
+        letter.classList.remove(
+            "hidden"
+        );
+
+        letter.textContent =
+            username
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+}
+
+
+/* =========================================================
+   OPEN USER PROFILE
+========================================================= */
+
+function openUserProfile(
+    userId
+) {
+
+    selectedUserId =
+        userId;
+
+
+    const user =
+        usersData.find(
+            u =>
+                u.id ===
+                userId
+        );
+
+
+    if(!user) {
+
+        /*
+            Fallback si le serveur n'a pas encore
+            envoyé la liste admin.
+        */
+
+        document.getElementById(
+            "viewUserName"
+        ).textContent =
+            "Participant";
+
+        document.getElementById(
+            "viewUserDescription"
+        ).textContent =
+            "Utilisateur du salon.";
+
+    } else {
+
+        document.getElementById(
+            "viewUserName"
+        ).textContent =
+            user.name;
+
+
+        document.getElementById(
+            "viewUserDescription"
+        ).textContent =
+            user.description ||
+            "Aucune description.";
+
+
+        setViewUserAvatar(
+            user
+        );
+
+    }
+
+
+    document
+        .getElementById(
+            "adminUserActions"
+        )
+        .classList.toggle(
+            "hidden",
+            !isAdmin
+        );
+
+
+    userProfileModal.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+function setViewUserAvatar(
+    user
+) {
+
+    const image =
+        document.getElementById(
+            "viewUserAvatarImage"
+        );
+
+    const letter =
+        document.getElementById(
+            "viewUserAvatarLetter"
+        );
+
+
+    if(user.avatar) {
+
+        image.src =
+            user.avatar;
+
+        image.classList.remove(
+            "hidden"
+        );
+
+        letter.classList.add(
+            "hidden"
+        );
+
+    } else {
+
+        image.classList.add(
+            "hidden"
+        );
+
+        letter.classList.remove(
+            "hidden"
+        );
+
+        letter.textContent =
+            user.name
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+}
+
+
+document
+.getElementById(
+    "closeUserProfile"
+)
+.onclick =
+    () => {
+
+        userProfileModal.classList.add(
+            "hidden"
+        );
+
+    };
+
+
+/* =========================================================
+   ADMIN ACTIONS
+========================================================= */
+
+document
+.getElementById(
+    "kickUserButton"
+)
+.onclick =
+    () => {
+
+        if(!selectedUserId)
+            return;
+
+
+        send({
+
+            type:
+                "admin-kick",
+
+            target:
+                selectedUserId
+
+        });
+
+
+        userProfileModal.classList.add(
+            "hidden"
+        );
+
+    };
+
+
+document
+.getElementById(
+    "muteUserButton"
+)
+.onclick =
+    () => {
+
+        if(!selectedUserId)
+            return;
+
+
+        send({
+
+            type:
+                "admin-mute",
+
+            target:
+                selectedUserId
+
+        });
+
+    };
+
+
+document
+.getElementById(
+    "cameraUserButton"
+)
+.onclick =
+    () => {
+
+        if(!selectedUserId)
+            return;
+
+
+        send({
+
+            type:
+                "admin-camera",
+
+            target:
+                selectedUserId,
+
+            enabled:
+                false
+
+        });
+
+    };
+
+
+document
+.getElementById(
+    "unmuteUserButton"
+)
+.onclick =
+    () => {
+
+        if(!selectedUserId)
+            return;
+
+
+        send({
+
+            type:
+                "admin-mute",
+
+            target:
+                selectedUserId,
+
+            enabled:
+                true
+
+        });
+
+    };
+
+
+document
+.getElementById(
+    "cameraOnUserButton"
+)
+.onclick =
+    () => {
+
+        if(!selectedUserId)
+            return;
+
+
+        send({
+
+            type:
+                "admin-camera",
+
+            target:
+                selectedUserId,
+
+            enabled:
+                true
+
+        });
+
+    };
+
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+adminButton.onclick =
+    () => {
+
+        roomsPage.classList.add(
+            "hidden"
+        );
+
+        adminPage.classList.remove(
+            "hidden"
+        );
+
+
+        send({
+            type:"get-users"
+        });
+
+    };
+
+
+document
+.getElementById(
+    "adminRoomsTab"
+)
+.onclick =
+    () => {
+
+        document
+            .getElementById(
+                "adminRoomsTab"
+            )
+            .classList.add(
+                "active"
+            );
+
+        document
+            .getElementById(
+                "adminUsersTab"
+            )
+            .classList.remove(
+                "active"
+            );
+
+        adminRooms.classList.remove(
+            "hidden"
+        );
+
+        adminUsers.classList.add(
+            "hidden"
+        );
+
+    };
+
+
+document
+.getElementById(
+    "adminUsersTab"
+)
+.onclick =
+    () => {
+
+        document
+            .getElementById(
+                "adminUsersTab"
+            )
+            .classList.add(
+                "active"
+            );
+
+        document
+            .getElementById(
+                "adminRoomsTab"
+            )
+            .classList.remove(
+                "active"
+            );
+
+        adminUsers.classList.remove(
+            "hidden"
+        );
+
+        adminRooms.classList.add(
+            "hidden"
+        );
+
+
+        send({
+            type:"get-users"
+        });
+
+    };
+
+
+/* =========================================================
+   ADMIN ROOMS
+========================================================= */
+
+function renderAdminRooms() {
+
+    adminRooms.innerHTML =
+        "";
+
+
+    roomsData.forEach(
+        room => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "admin-item";
+
+
+            item.innerHTML = `
+
+                <div>
+
+                    <div class="admin-name">
+                        ${escapeHtml(room.name)}
+                    </div>
+
+                    <div class="admin-meta">
+                        ${room.count} participant(s)
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="danger-button"
+                >
+                    Supprimer
+                </button>
+
+            `;
+
+
+            item.querySelector(
+                ".danger-button"
+            ).onclick =
+                () => {
+
+                    if(
+                        confirm(
+                            `Supprimer le salon "${room.name}" ?`
+                        )
+                    ) {
+
+                        send({
+
+                            type:
+                                "admin-delete-room",
+
+                            room:
+                                room.id
+
+                        });
+
+                    }
+
+                };
+
+
+            adminRooms.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ADMIN USERS
+========================================================= */
+
+function renderAdminUsers() {
+
+    adminUsers.innerHTML =
+        "";
+
+
+    usersData.forEach(
+        user => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "admin-item";
+
+
+            item.innerHTML = `
+
+                <div class="admin-item-left">
+
+                    <div class="admin-avatar">
+
+                        ${
+                            user.avatar
+                                ? `<img src="${user.avatar}">`
+                                : escapeHtml(
+                                    user.name
+                                        .charAt(0)
+                                        .toUpperCase()
+                                )
+                        }
+
+                    </div>
+
+                    <div>
+
+                        <div class="admin-name">
+                            ${escapeHtml(user.name)}
+                        </div>
+
+                        <div class="admin-meta">
+                            ${
+                                user.roomName
+                                    ? escapeHtml(user.roomName)
+                                    : "Dans le lobby"
+                            }
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="danger-button"
+                >
+                    Kick
+                </button>
+
+            `;
+
+
+            item.querySelector(
+                ".danger-button"
+            ).onclick =
+                () => {
+
+                    send({
+
+                        type:
+                            "admin-kick",
+
+                        target:
+                            user.id
+
+                    });
+
+                };
+
+
+            adminUsers.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
    LEAVE
 ========================================================= */
 
-leaveButton.addEventListener(
-    "click",
-    leaveCall
-);
+document
+.getElementById(
+    "leaveButton"
+)
+.onclick =
+    leaveCall;
 
 
 function leaveCall() {
 
     send({
-
-        type:
-            "leave"
-
+        type:"leave"
     });
 
 
-    if (localStream) {
+    if(localStream) {
 
         localStream
             .getTracks()
@@ -3715,35 +4889,67 @@ function leaveCall() {
         "hidden"
     );
 
-    roomsScreen.classList.remove(
+    roomsPage.classList.remove(
         "hidden"
     );
 
 
-    connectLobby();
+    if(isAdmin) {
+
+        /*
+            L'admin revient sur l'espace admin
+            ou les salons.
+        */
+
+        roomsPage.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    send({
+        type:"get-rooms"
+    });
 
 }
 
 
 /* =========================================================
-   PAGE VISIBILITY
+   ESCAPE
 ========================================================= */
 
-document.addEventListener(
-    "visibilitychange",
-    () => {
+function escapeHtml(
+    value
+) {
 
-        /*
-            Rien ici volontairement.
-            La connexion reste active lorsque
-            l'utilisateur change d'application.
-        */
+    return String(
+        value || ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
 
-    }
-);
+}
 
 </script>
 
 </body>
-
 </html>
