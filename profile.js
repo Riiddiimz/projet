@@ -2,6 +2,11 @@
    PROFILE
 ========================================================= */
 
+
+/* =========================================================
+   MON PROFIL
+========================================================= */
+
 function openProfile(){
 
     if(!currentUser) return;
@@ -11,10 +16,15 @@ function openProfile(){
         currentUser.avatarUrl;
 
 
+    /* =====================================================
+       AVATAR
+    ===================================================== */
+
     const avatar =
         document.getElementById(
             "profileAvatar"
         );
+
 
     if(avatar){
 
@@ -25,10 +35,15 @@ function openProfile(){
     }
 
 
+    /* =====================================================
+       USERNAME
+    ===================================================== */
+
     const username =
         document.getElementById(
             "profileUsername"
         );
+
 
     if(username){
 
@@ -38,25 +53,34 @@ function openProfile(){
     }
 
 
+    /* =====================================================
+       ID
+    ===================================================== */
+
     const id =
         document.getElementById(
             "profileId"
         );
 
+
     if(id){
 
         id.textContent =
             currentUser.id
-                ? "ID : " +
-                  currentUser.id
+                ? "ID : " + currentUser.id
                 : "";
     }
 
+
+    /* =====================================================
+       DESCRIPTION
+    ===================================================== */
 
     const description =
         document.getElementById(
             "profileDescriptionInput"
         );
+
 
     if(description){
 
@@ -66,10 +90,15 @@ function openProfile(){
     }
 
 
+    /* =====================================================
+       MODAL
+    ===================================================== */
+
     const modal =
         document.getElementById(
             "profileModal"
         );
+
 
     if(modal){
 
@@ -79,12 +108,17 @@ function openProfile(){
 }
 
 
+/* =========================================================
+   FERMER MON PROFIL
+========================================================= */
+
 function closeProfile(){
 
     const modal =
         document.getElementById(
             "profileModal"
         );
+
 
     if(modal){
 
@@ -95,11 +129,23 @@ function closeProfile(){
 
     pendingAvatarUrl =
         undefined;
+
+
+    const input =
+        document.getElementById(
+            "avatarFileInput"
+        );
+
+
+    if(input){
+
+        input.value = "";
+    }
 }
 
 
 /* =========================================================
-   AVATAR
+   CHOISIR UN AVATAR
 ========================================================= */
 
 function triggerAvatarPicker(){
@@ -109,6 +155,7 @@ function triggerAvatarPicker(){
             "avatarFileInput"
         );
 
+
     if(input){
 
         input.click();
@@ -116,16 +163,26 @@ function triggerAvatarPicker(){
 }
 
 
+/* =========================================================
+   FICHIER AVATAR
+========================================================= */
+
 function handleAvatarFile(event){
 
     const file =
         event.target.files &&
         event.target.files[0];
 
+
     if(!file) return;
 
 
+    /* =====================================================
+       VERIFICATION TYPE
+    ===================================================== */
+
     if(
+        !file.type ||
         !file.type.startsWith(
             "image/"
         )
@@ -135,11 +192,16 @@ function handleAvatarFile(event){
             "Veuillez sélectionner une image."
         );
 
+
         event.target.value = "";
 
         return;
     }
 
+
+    /* =====================================================
+       VERIFICATION TAILLE
+    ===================================================== */
 
     if(
         file.size >
@@ -150,11 +212,16 @@ function handleAvatarFile(event){
             "L'image ne doit pas dépasser 5 Mo."
         );
 
+
         event.target.value = "";
 
         return;
     }
 
+
+    /* =====================================================
+       LECTURE IMAGE
+    ===================================================== */
 
     const reader =
         new FileReader();
@@ -175,13 +242,14 @@ function handleAvatarFile(event){
 
             if(avatar){
 
-                avatar.innerHTML =
-                    `
+                avatar.innerHTML = `
                     <img
-                        src="${pendingAvatarUrl}"
+                        src="${escapeHtml(
+                            pendingAvatarUrl
+                        )}"
                         alt="Avatar"
                     >
-                    `;
+                `;
             }
         };
 
@@ -192,6 +260,8 @@ function handleAvatarFile(event){
             alert(
                 "Impossible de lire cette image."
             );
+
+            event.target.value = "";
         };
 
 
@@ -202,7 +272,7 @@ function handleAvatarFile(event){
 
 
 /* =========================================================
-   SAUVEGARDE
+   SAUVEGARDER LE PROFIL
 ========================================================= */
 
 function saveProfile(){
@@ -225,8 +295,14 @@ function saveProfile(){
             description
                 ? description.value.trim()
                 : ""
+
     };
 
+
+    /*
+     * On envoie l'avatar uniquement
+     * s'il a été modifié.
+     */
 
     if(
         pendingAvatarUrl !==
@@ -248,7 +324,7 @@ function saveProfile(){
 
 
 /* =========================================================
-   PROFIL AUTRE UTILISATEUR
+   PROFIL D'UN AUTRE UTILISATEUR
 ========================================================= */
 
 function openUserProfile(userId){
@@ -256,9 +332,15 @@ function openUserProfile(userId){
     if(!userId) return;
 
 
+    /*
+     * Si l'utilisateur ouvre son propre profil,
+     * on ouvre le profil personnel.
+     */
+
     if(
         currentUser &&
-        userId === currentUser.id
+        userId ===
+            currentUser.id
     ){
 
         openProfile();
@@ -280,10 +362,15 @@ function openUserProfile(userId){
         userId;
 
 
+    /* =====================================================
+       AVATAR
+    ===================================================== */
+
     const avatar =
         document.getElementById(
             "viewProfileAvatar"
         );
+
 
     if(avatar){
 
@@ -294,10 +381,15 @@ function openUserProfile(userId){
     }
 
 
+    /* =====================================================
+       USERNAME
+    ===================================================== */
+
     const username =
         document.getElementById(
             "viewProfileUsername"
         );
+
 
     if(username){
 
@@ -307,10 +399,15 @@ function openUserProfile(userId){
     }
 
 
+    /* =====================================================
+       DESCRIPTION
+    ===================================================== */
+
     const description =
         document.getElementById(
             "viewProfileDescription"
         );
+
 
     if(description){
 
@@ -320,10 +417,35 @@ function openUserProfile(userId){
     }
 
 
+    /* =====================================================
+       ACTIONS ADMIN
+    ===================================================== */
+
+    const adminActions =
+        document.getElementById(
+            "viewProfileAdminActions"
+        );
+
+
+    if(adminActions){
+
+        adminActions.style.display =
+            currentUser &&
+            currentUser.isAdmin
+                ? "flex"
+                : "none";
+    }
+
+
+    /* =====================================================
+       MODAL
+    ===================================================== */
+
     const modal =
         document.getElementById(
             "userProfileModal"
         );
+
 
     if(modal){
 
@@ -333,12 +455,17 @@ function openUserProfile(userId){
 }
 
 
+/* =========================================================
+   FERMER PROFIL AUTRE UTILISATEUR
+========================================================= */
+
 function closeUserProfile(){
 
     const modal =
         document.getElementById(
             "userProfileModal"
         );
+
 
     if(modal){
 
