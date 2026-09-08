@@ -1,0 +1,114 @@
+/* =========================================================
+   CHAT LOBBY — BOUTON + OUVERTURE AVEC FONDU
+========================================================= */
+
+/* Le chat général n'occupe plus de place dans le lobby. */
+.lobby-screen > #lobbyChat{
+    position:fixed;
+    top:82px;
+    right:20px;
+    bottom:20px;
+    width:330px;
+    height:auto;
+    z-index:80;
+
+    display:flex;
+    flex-direction:column;
+
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transform:translateY(10px) scale(.98);
+
+    transition:
+        opacity .22s ease,
+        transform .22s ease,
+        visibility 0s linear .22s;
+}
+
+.lobby-screen > #lobbyChat.mobile-open{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+    transform:translateY(0) scale(1);
+
+    transition:
+        opacity .22s ease,
+        transform .22s ease,
+        visibility 0s linear 0s;
+}
+
+/* Bouton Général en bas à droite du lobby. */
+.general-chat-toggle{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    z-index:90;
+
+    display:flex !important;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+
+    min-height:44px;
+    padding:0 16px;
+
+    border:1px solid var(--border);
+    border-radius:12px;
+
+    color:var(--text);
+    background:var(--panel2);
+    box-shadow:0 10px 30px rgba(0,0,0,.3);
+
+    font-size:13px;
+    font-weight:700;
+
+    transition:
+        opacity .2s ease,
+        transform .2s ease,
+        background .15s ease;
+}
+
+.general-chat-toggle:hover{
+    background:var(--panel3);
+}
+
+/* Quand le chat est ouvert, le bouton reste discret mais disponible. */
+.general-chat-toggle:active{
+    transform:scale(.97);
+}
+
+/* Fondu du fond mobile si le backdrop est utilisé. */
+.mobile-chat-backdrop{
+    opacity:0;
+    visibility:hidden;
+    transition:
+        opacity .22s ease,
+        visibility 0s linear .22s;
+}
+
+.mobile-chat-backdrop.visible{
+    opacity:1;
+    visibility:visible;
+    transition:
+        opacity .22s ease,
+        visibility 0s linear 0s;
+}
+
+@media (max-width:700px){
+
+    .lobby-screen > #lobbyChat{
+        top:auto;
+        right:12px;
+        bottom:12px;
+        left:12px;
+        width:auto;
+        height:min(70vh,520px);
+        max-height:calc(100vh - 90px);
+    }
+
+    .general-chat-toggle{
+        right:14px;
+        bottom:14px;
+    }
+}
