@@ -3,1332 +3,1890 @@
 
 <head>
 
-<meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
-
-<title>Col'inCall</title>
-
-<style>
-
-/* =========================================================
-   RESET
-========================================================= */
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-:root {
-  --bg: #08090d;
-  --surface: #101219;
-  --surface-2: #151720;
-  --surface-3: #1b1e28;
-
-  --border: rgba(255,255,255,.08);
-
-  --text: #ffffff;
-  --muted: #8d93a3;
-
-  --accent: #765cff;
-  --accent-light: #907aff;
-
-  --green: #35e58a;
-  --red: #ff4f6d;
-
-  --shadow:
-    0 20px 70px rgba(0,0,0,.35);
-}
-
-/* =========================================================
-   BODY
-========================================================= */
-
-html,
-body {
-  width: 100%;
-  height: 100%;
-}
+    <meta charset="UTF-8">
 
-body {
-  overflow: hidden;
-
-  background:
-    radial-gradient(
-      circle at 15% 10%,
-      rgba(118,92,255,.13),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 90% 90%,
-      rgba(0,212,255,.07),
-      transparent 30%
-    ),
-    var(--bg);
-
-  color: var(--text);
-
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-}
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
 
-/* =========================================================
-   APP
-========================================================= */
+    <title>Col'inCall</title>
 
-.app {
-  width: 100%;
-  height: 100dvh;
+    <style>
 
-  display: grid;
+        /* =====================================================
+           RESET
+        ===================================================== */
 
-  grid-template-columns:
-    minmax(0, 1fr)
-    350px;
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-/* =========================================================
-   MAIN
-========================================================= */
+        :root {
 
-.main {
-  min-width: 0;
-  min-height: 0;
+            --background: #07080c;
+            --surface: #11131a;
+            --surface-2: #181b24;
 
-  display: flex;
-  flex-direction: column;
-}
+            --border: rgba(255,255,255,.08);
 
-/* =========================================================
-   HEADER
-========================================================= */
+            --text: #ffffff;
+            --muted: #9297a7;
 
-.header {
-  height: 70px;
-  min-height: 70px;
+            --accent: #6d63ff;
+            --accent-hover: #7b72ff;
 
-  padding: 0 22px;
+            --green: #31d879;
+            --red: #ff4757;
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+        }
 
-  border-bottom:
-    1px solid var(--border);
+        html,
+        body {
 
-  background:
-    rgba(8,9,13,.72);
+            width: 100%;
+            height: 100%;
 
-  backdrop-filter:
-    blur(25px);
+            overflow: hidden;
 
-  position: relative;
-  z-index: 10;
-}
+            background:
+                radial-gradient(
+                    circle at 50% -20%,
+                    rgba(109,99,255,.16),
+                    transparent 40%
+                ),
+                var(--background);
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+            color: var(--text);
 
-  font-size: 19px;
-  font-weight: 800;
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
 
-  letter-spacing: -.6px;
-}
+        }
 
-.logo-mark {
-  width: 12px;
-  height: 12px;
+        button,
+        input {
 
-  border-radius: 50%;
+            font: inherit;
 
-  background:
-    linear-gradient(
-      135deg,
-      #765cff,
-      #00d4ff
-    );
+        }
 
-  box-shadow:
-    0 0 20px rgba(118,92,255,.8);
-}
+        button {
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+            cursor: pointer;
 
-.room-badge {
-  padding: 8px 12px;
+        }
 
-  border-radius: 10px;
 
-  border:
-    1px solid var(--border);
+        /* =====================================================
+           COMMON
+        ===================================================== */
 
-  background:
-    rgba(255,255,255,.04);
+        .hidden {
 
-  color: var(--muted);
+            display: none !important;
 
-  font-size: 12px;
-}
+        }
 
-.people {
-  display: flex;
-  align-items: center;
-  gap: 7px;
 
-  color: var(--muted);
+        /* =====================================================
+           LANDING / PSEUDO
+        ===================================================== */
 
-  font-size: 12px;
-}
+        .screen {
 
-.online-dot {
-  width: 7px;
-  height: 7px;
+            width: 100%;
+            height: 100dvh;
 
-  border-radius: 50%;
+            display: flex;
 
-  background: var(--green);
+            align-items: center;
+            justify-content: center;
 
-  box-shadow:
-    0 0 12px var(--green);
-}
+            padding: 20px;
 
-/* =========================================================
-   VIDEO AREA
-========================================================= */
+        }
 
-.video-area {
-  flex: 1;
+        .welcome {
 
-  min-width: 0;
-  min-height: 0;
+            width: 100%;
+            max-width: 460px;
 
-  position: relative;
+            text-align: center;
 
-  padding: 14px;
-}
+        }
 
-/*
-   IMPORTANT :
-   Les contrôles sont maintenant positionnés
-   indépendamment de la grille vidéo.
-*/
+        .logo {
 
-.video-grid {
-  width: 100%;
-  height: 100%;
+            width: 70px;
+            height: 70px;
 
-  display: grid;
+            margin: 0 auto 22px;
 
-  gap: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-  overflow-y: auto;
+            border-radius: 22px;
 
-  padding-bottom: 78px;
+            background:
+                linear-gradient(
+                    135deg,
+                    #8178ff,
+                    #5047d8
+                );
 
-  grid-template-columns:
-    repeat(
-      auto-fit,
-      minmax(
-        260px,
-        1fr
-      )
-    );
+            box-shadow:
+                0 20px 60px
+                rgba(109,99,255,.3);
 
-  grid-auto-rows:
-    minmax(
-      180px,
-      1fr
-    );
+            font-size: 32px;
 
-  align-content: center;
-}
+        }
 
-/* =========================================================
-   VIDEO CARD
-========================================================= */
+        .welcome h1 {
 
-.video-card {
+            font-size: 38px;
 
-  position: relative;
+            letter-spacing: -1.5px;
 
-  min-width: 0;
-  min-height: 180px;
+            margin-bottom: 10px;
 
-  overflow: hidden;
+        }
 
-  border-radius: 19px;
+        .welcome-description {
 
-  background:
-    radial-gradient(
-      circle at center,
-      rgba(118,92,255,.09),
-      transparent 55%
-    ),
-    #12141b;
+            color: var(--muted);
 
-  border:
-    1px solid var(--border);
+            font-size: 15px;
 
-  box-shadow:
-    0 15px 45px rgba(0,0,0,.25);
+            line-height: 1.5;
 
-  animation:
-    cardIn .35s ease both;
-}
+            margin-bottom: 30px;
 
-@keyframes cardIn {
+        }
 
-  from {
-    opacity: 0;
-    transform: scale(.97);
-  }
+        .pseudo-box {
 
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+            padding: 7px;
 
-}
+            display: flex;
 
-.video-card video {
+            gap: 8px;
 
-  width: 100%;
-  height: 100%;
+            border-radius: 17px;
 
-  object-fit: cover;
+            background:
+                rgba(255,255,255,.045);
 
-  display: block;
-}
+            border:
+                1px solid var(--border);
 
-.video-card.local video {
-  transform: scaleX(-1);
-}
+            backdrop-filter: blur(20px);
 
-/* =========================================================
-   USER LABEL
-========================================================= */
+        }
 
-.user-label {
+        .pseudo-input {
 
-  position: absolute;
+            flex: 1;
 
-  left: 11px;
-  bottom: 11px;
+            min-width: 0;
 
-  display: flex;
-  align-items: center;
+            height: 50px;
 
-  gap: 7px;
+            padding: 0 15px;
 
-  padding: 7px 10px;
+            border: none;
+            outline: none;
 
-  border-radius: 10px;
+            border-radius: 12px;
 
-  background:
-    rgba(0,0,0,.52);
+            background:
+                rgba(255,255,255,.05);
 
-  backdrop-filter:
-    blur(15px);
+            color: white;
 
-  border:
-    1px solid rgba(255,255,255,.08);
+        }
 
-  font-size: 11px;
+        .pseudo-input::placeholder {
 
-  z-index: 3;
-}
+            color: #686d7b;
 
-.user-avatar {
+        }
 
-  width: 22px;
-  height: 22px;
+        .primary-button {
 
-  display: grid;
-  place-items: center;
+            height: 50px;
 
-  border-radius: 50%;
+            padding: 0 20px;
 
-  background:
-    linear-gradient(
-      135deg,
-      #765cff,
-      #00c8ff
-    );
+            border: none;
 
-  font-size: 10px;
-  font-weight: 800;
-}
+            border-radius: 12px;
 
-.mic-indicator {
-  opacity: .8;
-}
+            background: var(--accent);
 
-/* =========================================================
-   EMPTY / AVATAR
-========================================================= */
+            color: white;
 
-.video-avatar {
+            font-weight: 700;
 
-  position: absolute;
+            transition: .2s;
 
-  inset: 0;
+        }
 
-  display: grid;
-  place-items: center;
+        .primary-button:hover {
 
-  pointer-events: none;
-}
+            background: var(--accent-hover);
 
-.avatar-large {
+            transform: translateY(-1px);
 
-  width: 80px;
-  height: 80px;
+        }
 
-  border-radius: 50%;
+        .error {
 
-  display: grid;
-  place-items: center;
+            color: #ff6b78;
 
-  background:
-    linear-gradient(
-      135deg,
-      rgba(118,92,255,.85),
-      rgba(0,212,255,.75)
-    );
+            font-size: 12px;
 
-  font-size: 28px;
-  font-weight: 800;
+            margin-top: 12px;
 
-  box-shadow:
-    0 0 70px
-    rgba(118,92,255,.22);
-}
+        }
 
-/* =========================================================
-   CONTROLS
-========================================================= */
 
-.controls {
+        /* =====================================================
+           ROOMS
+        ===================================================== */
 
-  position: absolute;
+        .rooms-screen {
 
-  left: 50%;
-  bottom: 16px;
+            width: 100%;
+            height: 100dvh;
 
-  transform:
-    translateX(-50%);
+            display: flex;
+            flex-direction: column;
 
-  z-index: 20;
+        }
 
-  display: flex;
-  align-items: center;
+        .rooms-header {
 
-  gap: 9px;
+            height: 70px;
+            min-height: 70px;
 
-  padding: 8px 9px;
+            display: flex;
 
-  border-radius: 18px;
+            align-items: center;
+            justify-content: space-between;
 
-  background:
-    rgba(12,13,18,.82);
+            padding: 0 24px;
 
-  border:
-    1px solid
-    rgba(255,255,255,.10);
+            border-bottom:
+                1px solid var(--border);
 
-  backdrop-filter:
-    blur(25px);
+            background:
+                rgba(7,8,12,.8);
 
-  box-shadow:
-    0 15px 50px
-    rgba(0,0,0,.45);
-}
+            backdrop-filter:
+                blur(20px);
 
-.control {
+        }
 
-  width: 46px;
-  height: 46px;
+        .brand {
 
-  display: grid;
-  place-items: center;
+            display: flex;
 
-  border-radius: 13px;
+            align-items: center;
 
-  border:
-    1px solid
-    rgba(255,255,255,.08);
+            gap: 10px;
 
-  background:
-    rgba(255,255,255,.055);
+        }
 
-  color: white;
+        .brand-logo {
 
-  font-size: 17px;
+            width: 36px;
+            height: 36px;
 
-  transition:
-    transform .18s ease,
-    background .18s ease;
-}
+            border-radius: 11px;
 
-.control:hover {
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-  transform:
-    translateY(-2px);
+            background:
+                linear-gradient(
+                    135deg,
+                    #8178ff,
+                    #5047d8
+                );
 
-  background:
-    rgba(255,255,255,.12);
-}
+            font-size: 17px;
 
-.control.off {
+        }
 
-  background:
-    rgba(255,79,109,.16);
+        .brand-name {
 
-  color:
-    #ff7188;
-}
+            font-size: 18px;
 
-.leave {
+            font-weight: 800;
 
-  height: 46px;
+        }
 
-  padding:
-    0 19px;
+        .profile {
 
-  margin-left: 4px;
+            display: flex;
 
-  border-radius: 13px;
+            align-items: center;
 
-  border: 0;
+            gap: 9px;
 
-  background:
-    var(--red);
+            color: var(--muted);
 
-  color: white;
+            font-size: 13px;
 
-  font-size: 12px;
+        }
 
-  font-weight: 750;
+        .profile-avatar {
 
-  transition:
-    transform .18s ease,
-    box-shadow .18s ease;
-}
+            width: 32px;
+            height: 32px;
 
-.leave:hover {
+            border-radius: 50%;
 
-  transform:
-    translateY(-2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-  box-shadow:
-    0 10px 30px
-    rgba(255,79,109,.25);
-}
+            background:
+                rgba(109,99,255,.18);
 
-/* =========================================================
-   CHAT
-========================================================= */
+            color: #aaa4ff;
 
-.chat {
+            font-size: 12px;
 
-  min-width: 0;
-  min-height: 0;
+            font-weight: 800;
 
-  display: flex;
-  flex-direction: column;
+        }
 
-  background:
-    rgba(13,15,20,.96);
 
-  border-left:
-    1px solid var(--border);
-}
+        .rooms-content {
 
-/* =========================================================
-   CHAT HEADER
-========================================================= */
+            width: 100%;
+            max-width: 900px;
 
-.chat-header {
+            flex: 1;
 
-  height: 70px;
-  min-height: 70px;
+            min-height: 0;
 
-  padding:
-    0 18px;
+            margin: 0 auto;
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+            padding: 35px 24px;
 
-  border-bottom:
-    1px solid var(--border);
-}
+            overflow-y: auto;
 
-.chat-title {
+        }
 
-  font-size: 14px;
-  font-weight: 750;
-}
+        .rooms-title {
 
-.chat-subtitle {
+            margin-bottom: 22px;
 
-  margin-top: 3px;
+        }
 
-  color:
-    var(--muted);
+        .rooms-title h1 {
 
-  font-size: 10px;
-}
+            font-size: 28px;
 
-.chat-status {
+            letter-spacing: -.7px;
 
-  width: 8px;
-  height: 8px;
+        }
 
-  border-radius: 50%;
+        .rooms-title p {
 
-  background:
-    var(--green);
+            color: var(--muted);
 
-  box-shadow:
-    0 0 12px var(--green);
-}
+            margin-top: 5px;
 
-/* =========================================================
-   MESSAGES
-========================================================= */
+            font-size: 13px;
 
-.messages {
+        }
 
-  flex: 1;
+        .rooms-actions {
 
-  min-height: 0;
+            display: flex;
 
-  overflow-y: auto;
+            gap: 10px;
 
-  padding:
-    17px;
+            margin-bottom: 22px;
 
-  display: flex;
-  flex-direction: column;
+        }
 
-  gap: 12px;
-}
+        .search {
 
-.empty-chat {
+            flex: 1;
 
-  flex: 1;
+            height: 46px;
 
-  display: flex;
+            padding: 0 14px;
 
-  align-items: center;
-  justify-content: center;
+            border:
+                1px solid var(--border);
 
-  text-align: center;
+            outline: none;
 
-  color:
-    var(--muted);
+            border-radius: 13px;
 
-  font-size: 12px;
+            background:
+                rgba(255,255,255,.04);
 
-  padding:
-    30px;
-}
+            color: white;
 
-.message {
+        }
 
-  max-width: 82%;
+        .create-room {
 
-  display: flex;
-  flex-direction: column;
+            height: 46px;
 
-  gap: 4px;
+            padding: 0 17px;
 
-  animation:
-    messageIn .25s ease both;
-}
+            border: none;
 
-@keyframes messageIn {
+            border-radius: 13px;
 
-  from {
-    opacity: 0;
-    transform:
-      translateY(5px);
-  }
+            background:
+                rgba(109,99,255,.15);
 
-  to {
-    opacity: 1;
-    transform:
-      translateY(0);
-  }
+            border:
+                1px solid rgba(109,99,255,.3);
 
-}
+            color: #b8b3ff;
 
-.message.mine {
+            font-weight: 700;
 
-  align-self: flex-end;
+        }
 
-  align-items: flex-end;
-}
+        .rooms-list {
 
-.message-name {
+            display: flex;
 
-  color:
-    var(--muted);
+            flex-direction: column;
 
-  font-size: 9px;
+            gap: 8px;
 
-  padding:
-    0 4px;
-}
+        }
 
-.message-bubble {
+        .room {
 
-  padding:
-    10px 12px;
+            width: 100%;
 
-  border-radius:
-    13px;
+            min-height: 76px;
 
-  background:
-    rgba(255,255,255,.055);
+            padding: 13px 15px;
 
-  border:
-    1px solid
-    rgba(255,255,255,.045);
+            display: flex;
 
-  color:
-    #e9eaf0;
+            align-items: center;
 
-  font-size: 12px;
+            justify-content: space-between;
 
-  line-height: 1.45;
+            gap: 15px;
 
-  overflow-wrap: anywhere;
-}
+            border:
+                1px solid var(--border);
 
-.message.mine
-.message-bubble {
+            border-radius: 16px;
 
-  background:
-    linear-gradient(
-      135deg,
-      #765cff,
-      #6248e3
-    );
+            background:
+                rgba(255,255,255,.035);
 
-  color: white;
+            transition: .2s;
 
-  border: 0;
-}
+        }
 
-/* =========================================================
-   CHAT INPUT
-========================================================= */
+        .room:hover {
 
-.chat-input {
+            background:
+                rgba(255,255,255,.06);
 
-  padding:
-    12px;
+            border-color:
+                rgba(255,255,255,.13);
 
-  border-top:
-    1px solid var(--border);
+            transform: translateY(-1px);
 
-  display: flex;
+        }
 
-  gap: 8px;
-}
+        .room-info {
 
-.chat-input input {
+            min-width: 0;
 
-  flex: 1;
+            display: flex;
 
-  min-width: 0;
+            align-items: center;
 
-  height: 43px;
+            gap: 13px;
 
-  border-radius:
-    12px;
+        }
 
-  border:
-    1px solid var(--border);
+        .room-icon {
 
-  outline: none;
+            width: 44px;
+            height: 44px;
 
-  background:
-    rgba(255,255,255,.045);
+            flex-shrink: 0;
 
-  color:
-    white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-  padding:
-    0 12px;
+            border-radius: 13px;
 
-  font-size: 12px;
+            background:
+                rgba(255,255,255,.06);
 
-  transition:
-    border .2s ease;
-}
+            font-size: 18px;
 
-.chat-input input:focus {
+        }
 
-  border-color:
-    rgba(118,92,255,.55);
-}
+        .room-name {
 
-.chat-input button {
+            font-weight: 700;
 
-  width: 43px;
+            margin-bottom: 4px;
 
-  border-radius:
-    12px;
+            overflow: hidden;
 
-  border: 0;
+            white-space: nowrap;
 
-  background:
-    var(--accent);
+            text-overflow: ellipsis;
 
-  color:
-    white;
+        }
 
-  font-size: 18px;
-}
+        .room-description {
 
-/* =========================================================
-   MOBILE CHAT BUTTON
-========================================================= */
+            color: var(--muted);
 
-.mobile-chat-button {
+            font-size: 11px;
 
-  display: none;
+            overflow: hidden;
 
-  position: absolute;
+            white-space: nowrap;
 
-  right: 14px;
-  top: 14px;
+            text-overflow: ellipsis;
 
-  z-index: 30;
+        }
 
-  width: 47px;
-  height: 47px;
+        .room-right {
 
-  border-radius:
-    14px;
+            display: flex;
 
-  background:
-    rgba(12,13,18,.78);
+            align-items: center;
 
-  color:
-    white;
+            gap: 12px;
 
-  border:
-    1px solid var(--border);
+        }
 
-  backdrop-filter:
-    blur(20px);
+        .participants {
 
-  box-shadow:
-    var(--shadow);
-}
+            color: var(--muted);
 
-/* =========================================================
-   NOTIFICATION BADGE
-========================================================= */
+            font-size: 12px;
 
-.unread-badge {
+            white-space: nowrap;
 
-  position: absolute;
+        }
 
-  top: -5px;
-  right: -5px;
+        .join-button {
 
-  min-width: 19px;
-  height: 19px;
+            height: 36px;
 
-  padding:
-    0 5px;
+            padding: 0 13px;
 
-  display: none;
+            border: none;
 
-  align-items: center;
-  justify-content: center;
+            border-radius: 10px;
 
-  border-radius: 999px;
+            background:
+                rgba(109,99,255,.14);
 
-  background:
-    var(--red);
+            color: #b4afff;
 
-  color:
-    white;
+            font-weight: 700;
 
-  border:
-    2px solid var(--bg);
+        }
 
-  font-size: 9px;
-  font-weight: 800;
+        .join-button:hover {
 
-  box-shadow:
-    0 4px 15px
-    rgba(255,79,109,.4);
+            background:
+                rgba(109,99,255,.25);
 
-  animation:
-    notificationPop .25s ease;
-}
+        }
 
-.unread-badge.visible {
-  display: flex;
-}
+        .join-button.full {
 
-@keyframes notificationPop {
+            opacity: .45;
 
-  0% {
-    transform: scale(.5);
-  }
+            cursor: not-allowed;
 
-  70% {
-    transform: scale(1.15);
-  }
+        }
 
-  100% {
-    transform: scale(1);
-  }
+        .empty-rooms {
 
-}
+            padding: 50px 20px;
 
-/* =========================================================
-   MOBILE
-========================================================= */
+            text-align: center;
 
-@media (max-width: 850px) {
+            color: var(--muted);
 
-  .app {
+        }
 
-    display: block;
 
-    position: relative;
+        /* =====================================================
+           CALL SCREEN
+        ===================================================== */
 
-  }
+        .call-screen {
 
-  .main {
+            width: 100%;
+            height: 100dvh;
 
-    width: 100%;
-    height: 100%;
-  }
+            display: flex;
+            flex-direction: column;
 
-  .header {
+        }
 
-    height: 60px;
-    min-height: 60px;
+        .call-header {
 
-    padding:
-      0 14px;
-  }
+            height: 62px;
+            min-height: 62px;
 
-  .room-badge {
-    display: none;
-  }
+            padding: 0 16px;
 
-  .video-area {
+            display: flex;
 
-    padding:
-      8px;
-  }
+            align-items: center;
+            justify-content: space-between;
 
-  .video-grid {
+            background:
+                rgba(7,8,12,.86);
 
-    gap: 8px;
+            border-bottom:
+                1px solid var(--border);
 
-    padding-bottom:
-      70px;
+            backdrop-filter:
+                blur(20px);
 
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+            z-index: 20;
 
-    grid-auto-rows:
-      minmax(
-        150px,
-        1fr
-      );
-  }
+        }
 
-  .video-card {
+        .call-room {
 
-    min-height:
-      150px;
+            display: flex;
 
-    border-radius:
-      15px;
-  }
+            align-items: center;
 
-  .controls {
+            gap: 9px;
 
-    bottom:
-      10px;
+        }
 
-    gap:
-      7px;
+        .call-room-name {
 
-    padding:
-      7px;
+            font-size: 15px;
 
-    width:
-      auto;
+            font-weight: 750;
 
-    max-width:
-      calc(100% - 20px);
-  }
+        }
 
-  .control {
+        .call-room-count {
 
-    width:
-      44px;
+            color: var(--muted);
 
-    height:
-      44px;
-  }
+            font-size: 11px;
 
-  .leave {
+        }
 
-    height:
-      44px;
+        .online {
 
-    padding:
-      0 15px;
-  }
+            width: 7px;
+            height: 7px;
 
-  .mobile-chat-button {
+            border-radius: 50%;
 
-    display:
-      grid;
+            background: var(--green);
 
-    place-items:
-      center;
-  }
+            box-shadow:
+                0 0 10px
+                rgba(49,216,121,.7);
 
-  .chat {
+        }
 
-    position:
-      fixed;
 
-    z-index:
-      100;
+        .call-main {
 
-    right:
-      10px;
+            flex: 1;
 
-    bottom:
-      10px;
+            min-height: 0;
 
-    top:
-      70px;
+            display: flex;
 
-    left:
-      10px;
+            position: relative;
 
-    border:
-      1px solid
-      rgba(255,255,255,.10);
+        }
 
-    border-radius:
-      20px;
+        .video-area {
 
-    transform:
-      translateY(
-        calc(100% + 30px)
-      );
+            flex: 1;
 
-    transition:
-      transform .3s ease;
+            min-width: 0;
+            min-height: 0;
 
-    box-shadow:
-      0 30px 100px
-      rgba(0,0,0,.65);
-  }
+            position: relative;
 
-  .chat.open {
+            overflow: hidden;
 
-    transform:
-      translateY(0);
-  }
+        }
 
-  .chat-header {
+        .video-grid {
 
-    border-radius:
-      20px 20px 0 0;
-  }
+            width: 100%;
+            height: 100%;
 
-}
+            display: grid;
 
-/* =========================================================
-   SMALL MOBILE
-========================================================= */
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(300px,1fr)
+                );
 
-@media (max-width: 480px) {
+            grid-auto-rows:
+                minmax(220px,1fr);
 
-  .video-grid {
+            gap: 10px;
 
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0,1fr)
-      );
+            padding: 10px;
 
-  }
+            overflow: auto;
 
-  .user-label {
+        }
 
-    left:
-      7px;
+        .video-card {
 
-    bottom:
-      7px;
+            position: relative;
 
-    padding:
-      5px 7px;
+            min-width: 0;
+            min-height: 0;
 
-    font-size:
-      9px;
-  }
+            overflow: hidden;
 
-  .user-avatar {
+            border-radius: 18px;
 
-    width:
-      18px;
+            background: #050507;
 
-    height:
-      18px;
+            border:
+                1px solid
+                rgba(255,255,255,.08);
 
-    font-size:
-      8px;
-  }
+        }
 
-  .controls {
+        /*
+            IMPORTANT :
+            aucune déformation de la caméra
+        */
 
-    width:
-      calc(100% - 20px);
+        .video-card video {
 
-    justify-content:
-      center;
-  }
+            position: absolute;
 
-  .control {
+            inset: 0;
 
-    flex:
-      0 0 43px;
-  }
+            width: 100%;
+            height: 100%;
 
-  .leave {
+            display: block;
 
-    flex:
-      1;
+            object-fit: cover;
 
-    max-width:
-      110px;
-  }
+            object-position: center;
 
-}
+            background: #050507;
 
-</style>
+        }
+
+        .video-name {
+
+            position: absolute;
+
+            left: 10px;
+            bottom: 10px;
+
+            padding: 6px 9px;
+
+            border-radius: 9px;
+
+            background:
+                rgba(0,0,0,.5);
+
+            backdrop-filter:
+                blur(10px);
+
+            font-size: 11px;
+
+            font-weight: 650;
+
+            z-index: 2;
+
+        }
+
+
+        /* =====================================================
+           CALL CONTROLS
+        ===================================================== */
+
+        .controls {
+
+            position: absolute;
+
+            left: 50%;
+            bottom: 17px;
+
+            transform:
+                translateX(-50%);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 8px;
+
+            border-radius: 17px;
+
+            background:
+                rgba(17,18,25,.92);
+
+            border:
+                1px solid
+                rgba(255,255,255,.1);
+
+            backdrop-filter:
+                blur(20px);
+
+            box-shadow:
+                0 18px 50px
+                rgba(0,0,0,.4);
+
+            z-index: 30;
+
+        }
+
+        .control {
+
+            width: 44px;
+            height: 44px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+
+            border-radius: 13px;
+
+            background:
+                rgba(255,255,255,.07);
+
+            color: white;
+
+            font-size: 18px;
+
+        }
+
+        .control:hover {
+
+            background:
+                rgba(255,255,255,.13);
+
+        }
+
+        .control.off {
+
+            background:
+                rgba(255,71,87,.17);
+
+            color:
+                #ff6c79;
+
+        }
+
+        .leave {
+
+            width: 50px;
+
+            background:
+                var(--red);
+
+        }
+
+        .leave:hover {
+
+            background:
+                #ff3447;
+
+        }
+
+
+        /* =====================================================
+           CHAT
+        ===================================================== */
+
+        .chat-panel {
+
+            width: 330px;
+            min-width: 330px;
+
+            height: 100%;
+
+            display: flex;
+            flex-direction: column;
+
+            background:
+                rgba(15,16,22,.97);
+
+            border-left:
+                1px solid var(--border);
+
+            z-index: 50;
+
+        }
+
+        .chat-header {
+
+            height: 62px;
+            min-height: 62px;
+
+            padding: 0 15px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            border-bottom:
+                1px solid var(--border);
+
+        }
+
+        .chat-title {
+
+            font-weight: 750;
+
+            font-size: 14px;
+
+        }
+
+        .chat-subtitle {
+
+            color: var(--muted);
+
+            font-size: 10px;
+
+            margin-top: 2px;
+
+        }
+
+        .chat-close {
+
+            display: none;
+
+            width: 34px;
+            height: 34px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background:
+                rgba(255,255,255,.06);
+
+            color: white;
+
+        }
+
+        .messages {
+
+            flex: 1;
+
+            min-height: 0;
+
+            padding: 15px;
+
+            overflow-y: auto;
+
+        }
+
+        .message {
+
+            margin-bottom: 12px;
+
+        }
+
+        .message.me {
+
+            text-align: right;
+
+        }
+
+        .message-author {
+
+            color: var(--muted);
+
+            font-size: 10px;
+
+            margin-bottom: 4px;
+
+        }
+
+        .message-bubble {
+
+            display: inline-block;
+
+            max-width: 85%;
+
+            padding: 9px 11px;
+
+            border-radius: 13px;
+
+            background:
+                rgba(255,255,255,.07);
+
+            font-size: 12px;
+
+            line-height: 1.4;
+
+            word-break: break-word;
+
+        }
+
+        .message.me
+        .message-bubble {
+
+            background:
+                var(--accent);
+
+        }
+
+        .chat-form {
+
+            display: flex;
+
+            gap: 7px;
+
+            padding: 10px;
+
+            border-top:
+                1px solid var(--border);
+
+        }
+
+        .chat-input {
+
+            flex: 1;
+
+            min-width: 0;
+
+            height: 42px;
+
+            border:
+                1px solid var(--border);
+
+            outline: none;
+
+            border-radius: 12px;
+
+            padding: 0 11px;
+
+            background:
+                rgba(255,255,255,.04);
+
+            color: white;
+
+            font-size: 12px;
+
+        }
+
+        .send {
+
+            width: 42px;
+            height: 42px;
+
+            border: none;
+
+            border-radius: 12px;
+
+            background:
+                var(--accent);
+
+            color: white;
+
+        }
+
+
+        /* =====================================================
+           MOBILE CHAT BUTTON
+        ===================================================== */
+
+        .chat-toggle {
+
+            position: absolute;
+
+            right: 13px;
+            bottom: 17px;
+
+            width: 49px;
+            height: 49px;
+
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+
+            border-radius: 15px;
+
+            background:
+                rgba(20,21,29,.94);
+
+            color: white;
+
+            box-shadow:
+                0 15px 35px
+                rgba(0,0,0,.35);
+
+            z-index: 31;
+
+            font-size: 19px;
+
+        }
+
+        .badge {
+
+            position: absolute;
+
+            top: -5px;
+            right: -5px;
+
+            min-width: 20px;
+            height: 20px;
+
+            padding: 0 5px;
+
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 10px;
+
+            background:
+                var(--red);
+
+            border:
+                2px solid
+                var(--background);
+
+            font-size: 9px;
+
+            font-weight: 800;
+
+        }
+
+        .badge.show {
+
+            display: flex;
+
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 700px) {
+
+            .welcome h1 {
+
+                font-size: 31px;
+
+            }
+
+            .pseudo-box {
+
+                flex-direction: column;
+
+            }
+
+            .pseudo-input {
+
+                width: 100%;
+
+            }
+
+            .rooms-header {
+
+                height: 58px;
+                min-height: 58px;
+
+                padding:
+                    0 13px;
+
+            }
+
+            .profile {
+
+                font-size: 11px;
+
+            }
+
+            .rooms-content {
+
+                padding:
+                    25px 13px;
+
+            }
+
+            .rooms-title h1 {
+
+                font-size: 24px;
+
+            }
+
+            .rooms-actions {
+
+                flex-direction: column;
+
+            }
+
+            .create-room {
+
+                width: 100%;
+
+            }
+
+            .room {
+
+                min-height: 72px;
+
+                padding:
+                    11px;
+
+            }
+
+            .room-icon {
+
+                width: 40px;
+                height: 40px;
+
+            }
+
+            .room-right {
+
+                gap: 7px;
+
+            }
+
+            .participants {
+
+                font-size: 10px;
+
+            }
+
+            .join-button {
+
+                padding:
+                    0 10px;
+
+            }
+
+
+            /* ==============================
+               CALL
+            ============================== */
+
+            .call-header {
+
+                height: 55px;
+                min-height: 55px;
+
+            }
+
+            .video-grid {
+
+                grid-template-columns: 1fr;
+
+                grid-auto-rows: auto;
+
+                gap: 7px;
+
+                padding: 7px;
+
+                overflow: hidden;
+
+            }
+
+            /*
+                UNE PERSONNE
+            */
+
+            .video-grid
+            .video-card {
+
+                height:
+                    calc(100dvh - 138px);
+
+            }
+
+
+            /*
+                DEUX PERSONNES
+
+                Côte à côte,
+                sans étirer les vidéos.
+            */
+
+            .video-grid.two-users {
+
+                grid-template-columns:
+                    repeat(
+                        2,
+                        minmax(0,1fr)
+                    );
+
+                grid-template-rows:
+                    1fr;
+
+                gap: 6px;
+
+            }
+
+            .video-grid.two-users
+            .video-card {
+
+                height:
+                    calc(100dvh - 138px);
+
+                min-height: 0;
+
+            }
+
+
+            /*
+                3+ PERSONNES
+            */
+
+            .video-grid.three-plus {
+
+                grid-template-columns:
+                    repeat(
+                        2,
+                        minmax(0,1fr)
+                    );
+
+                grid-auto-rows:
+                    minmax(180px,1fr);
+
+                overflow-y: auto;
+
+            }
+
+            .video-grid.three-plus
+            .video-card {
+
+                height: auto;
+
+                min-height: 180px;
+
+            }
+
+
+            .controls {
+
+                bottom: 11px;
+
+                gap: 6px;
+
+                padding: 7px;
+
+            }
+
+            .control {
+
+                width: 40px;
+                height: 40px;
+
+                border-radius: 12px;
+
+                font-size: 16px;
+
+            }
+
+            .leave {
+
+                width: 46px;
+
+            }
+
+
+            /* ==============================
+               CHAT
+            ============================== */
+
+            .chat-toggle {
+
+                display: flex;
+
+            }
+
+            .chat-panel {
+
+                position: absolute;
+
+                left: 0;
+                right: 0;
+                bottom: 0;
+
+                width: 100%;
+                min-width: 0;
+
+                height:
+                    min(72dvh,620px);
+
+                border-left: none;
+
+                border-top:
+                    1px solid var(--border);
+
+                border-radius:
+                    22px 22px 0 0;
+
+                transform:
+                    translateY(105%);
+
+                transition:
+                    transform .25s ease;
+
+                box-shadow:
+                    0 -20px 60px
+                    rgba(0,0,0,.5);
+
+            }
+
+            .chat-panel.open {
+
+                transform:
+                    translateY(0);
+
+            }
+
+            .chat-close {
+
+                display: flex;
+
+                align-items: center;
+                justify-content: center;
+
+            }
+
+        }
+
+
+        @media (max-width: 390px) {
+
+            .video-grid.two-users {
+
+                gap: 5px;
+
+                padding: 5px;
+
+            }
+
+            .video-grid.two-users
+            .video-card {
+
+                height:
+                    calc(100dvh - 132px);
+
+                border-radius: 14px;
+
+            }
+
+            .controls {
+
+                bottom: 9px;
+
+            }
+
+        }
+
+    </style>
 
 </head>
 
+
 <body>
 
-<div class="app">
 
-  <!-- =====================================================
-       MAIN
-  ====================================================== -->
+<!-- =========================================================
+     PSEUDO
+========================================================= -->
 
-  <main class="main">
+<section
+    id="pseudoScreen"
+    class="screen"
+>
 
-    <header class="header">
+    <div class="welcome">
 
-      <div class="logo">
-
-        <span class="logo-mark"></span>
-
-        Col'inCall
-
-      </div>
-
-      <div class="header-right">
-
-        <div class="room-badge">
-          Salon général
+        <div class="logo">
+            ✦
         </div>
 
-        <div class="people">
+        <h1>
+            Col'inCall
+        </h1>
 
-          <span class="online-dot"></span>
+        <p class="welcome-description">
 
-          <span id="peopleCount">
-            0 personne
-          </span>
+            Discutez, partagez votre caméra
+            et retrouvez-vous simplement
+            dans des salons.
 
+        </p>
+
+
+        <form
+            id="pseudoForm"
+            class="pseudo-box"
+        >
+
+            <input
+                id="pseudoInput"
+                class="pseudo-input"
+                type="text"
+                maxlength="24"
+                autocomplete="nickname"
+                placeholder="Votre pseudo..."
+            >
+
+            <button
+                class="primary-button"
+                type="submit"
+            >
+                Continuer
+            </button>
+
+        </form>
+
+
+        <div
+            id="pseudoError"
+            class="error hidden"
+        >
+            Entrez un pseudo pour continuer.
         </div>
-
-      </div>
-
-    </header>
-
-    <section class="video-area">
-
-      <div
-        class="video-grid"
-        id="videoGrid"
-      ></div>
-
-      <!-- CHAT MOBILE -->
-
-      <button
-        class="mobile-chat-button"
-        id="mobileChatButton"
-        aria-label="Ouvrir le chat"
-      >
-
-        💬
-
-        <span
-          class="unread-badge"
-          id="unreadBadge"
-        >
-          0
-        </span>
-
-      </button>
-
-      <!-- CONTROLS -->
-
-      <div class="controls">
-
-        <button
-          class="control"
-          id="micButton"
-          title="Microphone"
-        >
-          🎙️
-        </button>
-
-        <button
-          class="control"
-          id="cameraButton"
-          title="Caméra"
-        >
-          📷
-        </button>
-
-        <button
-          class="leave"
-          id="leaveButton"
-        >
-          Quitter
-        </button>
-
-      </div>
-
-    </section>
-
-  </main>
-
-  <!-- =====================================================
-       CHAT
-  ====================================================== -->
-
-  <aside
-    class="chat"
-    id="chat"
-  >
-
-    <header class="chat-header">
-
-      <div>
-
-        <div class="chat-title">
-          Discussion
-        </div>
-
-        <div class="chat-subtitle">
-          Messages du salon
-        </div>
-
-      </div>
-
-      <span class="chat-status"></span>
-
-    </header>
-
-    <div
-      class="messages"
-      id="messages"
-    >
-
-      <div
-        class="empty-chat"
-        id="emptyChat"
-      >
-        Les messages de la conversation
-        apparaîtront ici.
-      </div>
 
     </div>
 
-    <form
-      class="chat-input"
-      id="chatForm"
-    >
+</section>
 
-      <input
-        id="messageInput"
-        type="text"
-        placeholder="Écrire un message..."
-        autocomplete="off"
-        maxlength="500"
-      >
 
-      <button
-        type="submit"
-        aria-label="Envoyer"
-      >
-        ↑
-      </button>
 
-    </form>
+<!-- =========================================================
+     ROOMS
+========================================================= -->
 
-  </aside>
+<section
+    id="roomsScreen"
+    class="rooms-screen hidden"
+>
 
-</div>
+
+    <header class="rooms-header">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                ✦
+            </div>
+
+            <div class="brand-name">
+                Col'inCall
+            </div>
+
+        </div>
+
+
+        <div class="profile">
+
+            <div
+                id="profileAvatar"
+                class="profile-avatar"
+            >
+                V
+            </div>
+
+            <span id="profileName">
+                Vous
+            </span>
+
+        </div>
+
+    </header>
+
+
+    <main class="rooms-content">
+
+        <div class="rooms-title">
+
+            <h1>
+                Rejoindre un salon
+            </h1>
+
+            <p>
+                Choisissez une conversation et
+                rejoignez les autres participants.
+            </p>
+
+        </div>
+
+
+        <div class="rooms-actions">
+
+            <input
+                id="searchInput"
+                class="search"
+                type="search"
+                placeholder="🔎 Rechercher un salon..."
+            >
+
+            <button
+                id="createRoomButton"
+                class="create-room"
+            >
+                ＋ Créer un salon
+            </button>
+
+        </div>
+
+
+        <div
+            id="roomsList"
+            class="rooms-list"
+        ></div>
+
+
+        <div
+            id="emptyRooms"
+            class="empty-rooms hidden"
+        >
+            Aucun salon trouvé.
+        </div>
+
+    </main>
+
+</section>
+
+
+
+<!-- =========================================================
+     CALL
+========================================================= -->
+
+<section
+    id="callScreen"
+    class="call-screen hidden"
+>
+
+
+    <header class="call-header">
+
+        <div class="call-room">
+
+            <span class="online"></span>
+
+            <div>
+
+                <div
+                    id="callRoomName"
+                    class="call-room-name"
+                >
+                    Général
+                </div>
+
+                <div
+                    id="callRoomCount"
+                    class="call-room-count"
+                >
+                    1 participant
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="call-main">
+
+
+        <section class="video-area">
+
+
+            <div
+                id="videoGrid"
+                class="video-grid"
+            ></div>
+
+
+            <!-- CONTROLS -->
+
+            <div class="controls">
+
+                <button
+                    id="micButton"
+                    class="control"
+                    title="Micro"
+                >
+                    🎙️
+                </button>
+
+                <button
+                    id="cameraButton"
+                    class="control"
+                    title="Caméra"
+                >
+                    📹
+                </button>
+
+                <button
+                    id="leaveButton"
+                    class="control leave"
+                    title="Quitter"
+                >
+                    ☎
+                </button>
+
+            </div>
+
+
+            <!-- MOBILE CHAT -->
+
+            <button
+                id="chatToggle"
+                class="chat-toggle"
+            >
+
+                💬
+
+                <span
+                    id="unreadBadge"
+                    class="badge"
+                >
+                    0
+                </span>
+
+            </button>
+
+
+        </section>
+
+
+        <!-- CHAT -->
+
+        <aside
+            id="chatPanel"
+            class="chat-panel"
+        >
+
+            <div class="chat-header">
+
+                <div>
+
+                    <div class="chat-title">
+                        Discussion
+                    </div>
+
+                    <div class="chat-subtitle">
+                        Messages du salon
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="chatClose"
+                    class="chat-close"
+                >
+                    ✕
+                </button>
+
+            </div>
+
+
+            <div
+                id="messages"
+                class="messages"
+            ></div>
+
+
+            <form
+                id="chatForm"
+                class="chat-form"
+            >
+
+                <input
+                    id="chatInput"
+                    class="chat-input"
+                    type="text"
+                    maxlength="500"
+                    autocomplete="off"
+                    placeholder="Écrire un message..."
+                >
+
+                <button
+                    class="send"
+                    type="submit"
+                >
+                    ➤
+                </button>
+
+            </form>
+
+        </aside>
+
+
+    </main>
+
+</section>
+
+
 
 <script>
 
+
 /* =========================================================
-   CONFIGURATION
+   CONFIG
 ========================================================= */
 
 const SERVER_URL =
-  "wss://projet-nz7b.onrender.com";
+    "wss://projet-nz7b.onrender.com";
 
-const ROOM_ID =
-  "general";
 
 /* =========================================================
    STATE
@@ -1338,835 +1896,775 @@ let socket = null;
 
 let localStream = null;
 
-const myId =
-  crypto.randomUUID();
+let currentRoom = null;
 
-const myName =
-  "Vous";
+let username = "";
 
-const peers =
-  new Map();
+let clientId = null;
 
-let unreadMessages = 0;
+let unreadCount = 0;
 
-let chatIsOpen = false;
+let chatOpen = false;
+
+
+/*
+    WebRTC connections
+*/
+
+const peers = new Map();
+
 
 /* =========================================================
-   WEBRTC
+   WEBRTC CONFIG
 ========================================================= */
 
 const rtcConfig = {
 
-  iceServers: [
+    iceServers: [
 
-    {
-      urls:
-        "stun:stun.l.google.com:19302"
-    }
+        {
+            urls:
+                "stun:stun.l.google.com:19302"
+        }
 
-  ]
+    ]
 
 };
+
 
 /* =========================================================
    DOM
 ========================================================= */
 
+const pseudoScreen =
+    document.getElementById(
+        "pseudoScreen"
+    );
+
+const roomsScreen =
+    document.getElementById(
+        "roomsScreen"
+    );
+
+const callScreen =
+    document.getElementById(
+        "callScreen"
+    );
+
+const pseudoForm =
+    document.getElementById(
+        "pseudoForm"
+    );
+
+const pseudoInput =
+    document.getElementById(
+        "pseudoInput"
+    );
+
+const pseudoError =
+    document.getElementById(
+        "pseudoError"
+    );
+
+const roomsList =
+    document.getElementById(
+        "roomsList"
+    );
+
+const emptyRooms =
+    document.getElementById(
+        "emptyRooms"
+    );
+
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
+
+const createRoomButton =
+    document.getElementById(
+        "createRoomButton"
+    );
+
+const profileName =
+    document.getElementById(
+        "profileName"
+    );
+
+const profileAvatar =
+    document.getElementById(
+        "profileAvatar"
+    );
+
+const callRoomName =
+    document.getElementById(
+        "callRoomName"
+    );
+
+const callRoomCount =
+    document.getElementById(
+        "callRoomCount"
+    );
+
 const videoGrid =
-  document.getElementById(
-    "videoGrid"
-  );
-
-const peopleCount =
-  document.getElementById(
-    "peopleCount"
-  );
-
-const messages =
-  document.getElementById(
-    "messages"
-  );
-
-const emptyChat =
-  document.getElementById(
-    "emptyChat"
-  );
-
-const messageInput =
-  document.getElementById(
-    "messageInput"
-  );
-
-const chatForm =
-  document.getElementById(
-    "chatForm"
-  );
-
-const chat =
-  document.getElementById(
-    "chat"
-  );
-
-const mobileChatButton =
-  document.getElementById(
-    "mobileChatButton"
-  );
-
-const unreadBadge =
-  document.getElementById(
-    "unreadBadge"
-  );
+    document.getElementById(
+        "videoGrid"
+    );
 
 const micButton =
-  document.getElementById(
-    "micButton"
-  );
+    document.getElementById(
+        "micButton"
+    );
 
 const cameraButton =
-  document.getElementById(
-    "cameraButton"
-  );
+    document.getElementById(
+        "cameraButton"
+    );
 
 const leaveButton =
-  document.getElementById(
-    "leaveButton"
-  );
-
-/* =========================================================
-   CAMERA
-========================================================= */
-
-async function startCamera() {
-
-  try {
-
-    localStream =
-      await navigator.mediaDevices
-        .getUserMedia({
-
-          video: {
-            width: {
-              ideal: 1280
-            },
-            height: {
-              ideal: 720
-            }
-          },
-
-          audio: true
-
-        });
-
-    createVideoCard(
-      myId,
-      myName,
-      localStream,
-      true
-    );
-
-  } catch(error) {
-
-    console.error(error);
-
-    alert(
-      "Impossible d'accéder à la caméra ou au microphone."
-    );
-
-  }
-
-}
-
-/* =========================================================
-   CREATE VIDEO CARD
-========================================================= */
-
-function createVideoCard(
-  id,
-  name,
-  stream,
-  local = false
-) {
-
-  if (
     document.getElementById(
-      `card-${id}`
-    )
-  ) {
-
-    return;
-
-  }
-
-  const card =
-    document.createElement(
-      "div"
+        "leaveButton"
     );
 
-  card.className =
-    "video-card" +
-    (
-      local
-        ? " local"
-        : ""
-    );
-
-  card.id =
-    `card-${id}`;
-
-  const video =
-    document.createElement(
-      "video"
-    );
-
-  video.autoplay = true;
-  video.playsInline = true;
-  video.muted = local;
-
-  if (stream) {
-
-    video.srcObject =
-      stream;
-
-  }
-
-  const avatar =
-    document.createElement(
-      "div"
-    );
-
-  avatar.className =
-    "video-avatar";
-
-  const avatarLarge =
-    document.createElement(
-      "div"
-    );
-
-  avatarLarge.className =
-    "avatar-large";
-
-  avatarLarge.textContent =
-    name
-      .charAt(0)
-      .toUpperCase();
-
-  avatar.appendChild(
-    avatarLarge
-  );
-
-  const label =
-    document.createElement(
-      "div"
-    );
-
-  label.className =
-    "user-label";
-
-  const avatarSmall =
-    document.createElement(
-      "span"
-    );
-
-  avatarSmall.className =
-    "user-avatar";
-
-  avatarSmall.textContent =
-    name
-      .charAt(0)
-      .toUpperCase();
-
-  const username =
-    document.createElement(
-      "span"
-    );
-
-  username.textContent =
-    name;
-
-  const mic =
-    document.createElement(
-      "span"
-    );
-
-  mic.className =
-    "mic-indicator";
-
-  mic.textContent =
-    "🎙️";
-
-  label.appendChild(
-    avatarSmall
-  );
-
-  label.appendChild(
-    username
-  );
-
-  label.appendChild(
-    mic
-  );
-
-  card.appendChild(
-    video
-  );
-
-  card.appendChild(
-    avatar
-  );
-
-  card.appendChild(
-    label
-  );
-
-  videoGrid.appendChild(
-    card
-  );
-
-  updatePeopleCount();
-
-}
-
-/* =========================================================
-   REMOVE VIDEO
-========================================================= */
-
-function removeVideoCard(id) {
-
-  const card =
+const chatPanel =
     document.getElementById(
-      `card-${id}`
+        "chatPanel"
     );
 
-  if (card) {
+const chatToggle =
+    document.getElementById(
+        "chatToggle"
+    );
 
-    card.style.opacity =
-      "0";
+const chatClose =
+    document.getElementById(
+        "chatClose"
+    );
 
-    card.style.transform =
-      "scale(.96)";
+const unreadBadge =
+    document.getElementById(
+        "unreadBadge"
+    );
 
-    setTimeout(() => {
+const messages =
+    document.getElementById(
+        "messages"
+    );
 
-      card.remove();
+const chatForm =
+    document.getElementById(
+        "chatForm"
+    );
 
-      updatePeopleCount();
+const chatInput =
+    document.getElementById(
+        "chatInput"
+    );
 
-    }, 180);
-
-  }
-
-}
 
 /* =========================================================
-   PEOPLE COUNT
+   ROOMS
 ========================================================= */
 
-function updatePeopleCount() {
+let availableRooms = [];
 
-  const count =
-    1 + peers.size;
-
-  peopleCount.textContent =
-    count === 1
-      ? "1 personne"
-      : `${count} personnes`;
-
-}
 
 /* =========================================================
-   SOCKET
+   PSEUDO
 ========================================================= */
 
-function connect() {
-
-  socket =
-    new WebSocket(
-      SERVER_URL
-    );
-
-  socket.onopen = () => {
-
-    console.log(
-      "Connecté au serveur"
-    );
-
-    send({
-
-      type:
-        "join-room",
-
-      roomId:
-        ROOM_ID,
-
-      name:
-        myName
-
-    });
-
-  };
-
-  socket.onmessage =
+pseudoForm.addEventListener(
+    "submit",
     async event => {
 
-      try {
+        event.preventDefault();
 
-        const message =
-          JSON.parse(
-            event.data
-          );
+        const value =
+            pseudoInput.value.trim();
 
-        await handleMessage(
-          message
+
+        if (!value) {
+
+            pseudoError.classList.remove(
+                "hidden"
+            );
+
+            return;
+
+        }
+
+
+        if (value.length < 2) {
+
+            pseudoError.textContent =
+                "Le pseudo doit contenir au moins 2 caractères.";
+
+            pseudoError.classList.remove(
+                "hidden"
+            );
+
+            return;
+
+        }
+
+
+        username =
+            value.slice(0, 24);
+
+
+        localStorage.setItem(
+            "colincall_username",
+            username
         );
 
-      } catch(error) {
 
-        console.error(
-          error
+        profileName.textContent =
+            username;
+
+        profileAvatar.textContent =
+            username
+                .charAt(0)
+                .toUpperCase();
+
+
+        pseudoScreen.classList.add(
+            "hidden"
         );
 
-      }
+        roomsScreen.classList.remove(
+            "hidden"
+        );
 
-    };
 
-  socket.onclose = () => {
+        connectLobby();
 
-    console.log(
-      "Serveur déconnecté"
+    }
+);
+
+
+/* =========================================================
+   RESTORE PSEUDO
+========================================================= */
+
+const savedUsername =
+    localStorage.getItem(
+        "colincall_username"
     );
 
-  };
 
-  socket.onerror = error => {
+if (savedUsername) {
 
-    console.error(
-      "WebSocket error",
-      error
-    );
-
-  };
+    pseudoInput.value =
+        savedUsername;
 
 }
 
-/* =========================================================
-   HANDLE SERVER MESSAGE
-========================================================= */
-
-async function handleMessage(
-  message
-) {
-
-  switch(message.type) {
-
-    case "user-joined":
-
-      if (
-        message.userId ===
-        myId
-      ) {
-
-        return;
-
-      }
-
-      if (
-        message.existing
-      ) {
-
-        await createPeer(
-          message.userId,
-          message.name,
-          true
-        );
-
-      }
-
-      break;
-
-    case "offer":
-
-      await receiveOffer(
-        message
-      );
-
-      break;
-
-    case "answer":
-
-      await receiveAnswer(
-        message
-      );
-
-      break;
-
-    case "ice-candidate":
-
-      await receiveCandidate(
-        message
-      );
-
-      break;
-
-    case "user-left":
-
-      removePeer(
-        message.userId
-      );
-
-      break;
-
-    case "chat":
-
-      handleIncomingChat(
-        message
-      );
-
-      break;
-
-  }
-
-}
 
 /* =========================================================
-   CREATE PEER
+   LOBBY WEBSOCKET
 ========================================================= */
 
-async function createPeer(
-  userId,
-  name,
-  initiator
-) {
+function connectLobby() {
 
-  if (
-    peers.has(userId)
-  ) {
+    if (socket) {
 
-    return;
-
-  }
-
-  const pc =
-    new RTCPeerConnection(
-      rtcConfig
-    );
-
-  const peer = {
-
-    pc,
-
-    name,
-
-    candidates: []
-
-  };
-
-  peers.set(
-    userId,
-    peer
-  );
-
-  if (localStream) {
-
-    localStream
-      .getTracks()
-      .forEach(track => {
-
-        pc.addTrack(
-          track,
-          localStream
-        );
-
-      });
-
-  }
-
-  pc.ontrack =
-    event => {
-
-      const stream =
-        event.streams[0];
-
-      if (!stream) {
-
-        return;
-
-      }
-
-      createVideoCard(
-        userId,
-        name,
-        stream,
-        false
-      );
-
-    };
-
-  pc.onicecandidate =
-    event => {
-
-      if (
-        event.candidate
-      ) {
-
-        send({
-
-          type:
-            "ice-candidate",
-
-          target:
-            userId,
-
-          data:
-            event.candidate
-
-        });
-
-      }
-
-    };
-
-  pc.onconnectionstatechange =
-    () => {
-
-      if (
-        pc.connectionState ===
-        "failed"
-      ) {
-
-        removePeer(
-          userId
-        );
-
-      }
-
-    };
-
-  if (initiator) {
-
-    const offer =
-      await pc.createOffer();
-
-    await pc.setLocalDescription(
-      offer
-    );
-
-    send({
-
-      type:
-        "offer",
-
-      target:
-        userId,
-
-      data:
-        offer
-
-    });
-
-  }
-
-}
-
-/* =========================================================
-   OFFER
-========================================================= */
-
-async function receiveOffer(
-  message
-) {
-
-  let peer =
-    peers.get(
-      message.from
-    );
-
-  if (!peer) {
-
-    await createPeer(
-      message.from,
-      message.name,
-      false
-    );
-
-    peer =
-      peers.get(
-        message.from
-      );
-
-  }
-
-  const pc =
-    peer.pc;
-
-  await pc.setRemoteDescription(
-    new RTCSessionDescription(
-      message.data
-    )
-  );
-
-  for (
-    const candidate
-    of peer.candidates
-  ) {
-
-    await pc.addIceCandidate(
-      new RTCIceCandidate(
-        candidate
-      )
-    );
-
-  }
-
-  peer.candidates = [];
-
-  const answer =
-    await pc.createAnswer();
-
-  await pc.setLocalDescription(
-    answer
-  );
-
-  send({
-
-    type:
-      "answer",
-
-    target:
-      message.from,
-
-    data:
-      answer
-
-  });
-
-}
-
-/* =========================================================
-   ANSWER
-========================================================= */
-
-async function receiveAnswer(
-  message
-) {
-
-  const peer =
-    peers.get(
-      message.from
-    );
-
-  if (!peer) {
-
-    return;
-
-  }
-
-  await peer.pc
-    .setRemoteDescription(
-      new RTCSessionDescription(
-        message.data
-      )
-    );
-
-  for (
-    const candidate
-    of peer.candidates
-  ) {
-
-    await peer.pc
-      .addIceCandidate(
-        new RTCIceCandidate(
-          candidate
-        )
-      );
-
-  }
-
-  peer.candidates = [];
-
-}
-
-/* =========================================================
-   ICE
-========================================================= */
-
-async function receiveCandidate(
-  message
-) {
-
-  const peer =
-    peers.get(
-      message.from
-    );
-
-  if (!peer) {
-
-    return;
-
-  }
-
-  if (
-    peer.pc.remoteDescription
-  ) {
-
-    try {
-
-      await peer.pc
-        .addIceCandidate(
-          new RTCIceCandidate(
-            message.data
-          )
-        );
-
-    } catch(error) {
-
-      console.error(
-        error
-      );
+        try {
+            socket.close();
+        } catch {}
 
     }
 
-  } else {
 
-    peer.candidates.push(
-      message.data
-    );
+    socket =
+        new WebSocket(
+            SERVER_URL
+        );
 
-  }
+
+    socket.onopen =
+        () => {
+
+            send({
+
+                type:
+                    "get-rooms"
+
+            });
+
+        };
+
+
+    socket.onmessage =
+        event => {
+
+            try {
+
+                const data =
+                    JSON.parse(
+                        event.data
+                    );
+
+
+                handleLobbyMessage(
+                    data
+                );
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+            }
+
+        };
+
+
+    socket.onerror =
+        error => {
+
+            console.error(
+                "WebSocket:",
+                error
+            );
+
+        };
 
 }
+
 
 /* =========================================================
-   REMOVE PEER
+   LOBBY MESSAGES
 ========================================================= */
 
-function removePeer(
-  userId
+function handleLobbyMessage(
+    data
 ) {
 
-  const peer =
-    peers.get(
-      userId
-    );
+    switch (
+        data.type
+    ) {
 
-  if (!peer) {
 
-    return;
+        case "rooms":
 
-  }
+            availableRooms =
+                data.rooms || [];
 
-  peer.pc.close();
+            renderRooms();
 
-  peers.delete(
-    userId
-  );
+            break;
 
-  removeVideoCard(
-    userId
-  );
 
-  updatePeopleCount();
+        case "room-created":
+
+            if (data.room) {
+
+                joinRoom(
+                    data.room.id
+                );
+
+            }
+
+            break;
+
+
+        case "room-updated":
+
+            availableRooms =
+                data.rooms || [];
+
+            renderRooms();
+
+            break;
+
+    }
 
 }
+
+
+/* =========================================================
+   RENDER ROOMS
+========================================================= */
+
+function renderRooms() {
+
+    const search =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+
+    const filtered =
+        availableRooms.filter(
+            room => {
+
+                return room.name
+                    .toLowerCase()
+                    .includes(search);
+
+            }
+        );
+
+
+    roomsList.innerHTML =
+        "";
+
+
+    emptyRooms.classList.toggle(
+        "hidden",
+        filtered.length !== 0
+    );
+
+
+    filtered.forEach(
+        room => {
+
+            const element =
+                document.createElement(
+                    "div"
+                );
+
+            element.className =
+                "room";
+
+
+            const icon =
+                document.createElement(
+                    "div"
+                );
+
+            icon.className =
+                "room-icon";
+
+            icon.textContent =
+                room.icon || "💬";
+
+
+            const info =
+                document.createElement(
+                    "div"
+                );
+
+            info.className =
+                "room-info";
+
+
+            const text =
+                document.createElement(
+                    "div"
+                );
+
+
+            const name =
+                document.createElement(
+                    "div"
+                );
+
+            name.className =
+                "room-name";
+
+            name.textContent =
+                room.name;
+
+
+            const description =
+                document.createElement(
+                    "div"
+                );
+
+            description.className =
+                "room-description";
+
+            description.textContent =
+                room.description ||
+                "Salon Col'inCall";
+
+
+            text.appendChild(
+                name
+            );
+
+            text.appendChild(
+                description
+            );
+
+
+            info.appendChild(
+                icon
+            );
+
+            info.appendChild(
+                text
+            );
+
+
+            const right =
+                document.createElement(
+                    "div"
+                );
+
+            right.className =
+                "room-right";
+
+
+            const participants =
+                document.createElement(
+                    "span"
+                );
+
+            participants.className =
+                "participants";
+
+            participants.textContent =
+                `${room.count} / ${room.max} 👤`;
+
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+            button.className =
+                "join-button";
+
+
+            if (
+                room.count >=
+                room.max
+            ) {
+
+                button.textContent =
+                    "Complet";
+
+                button.classList.add(
+                    "full"
+                );
+
+                button.disabled =
+                    true;
+
+            } else {
+
+                button.textContent =
+                    "Rejoindre";
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        joinRoom(
+                            room.id
+                        );
+
+                    }
+                );
+
+            }
+
+
+            right.appendChild(
+                participants
+            );
+
+            right.appendChild(
+                button
+            );
+
+
+            element.appendChild(
+                info
+            );
+
+            element.appendChild(
+                right
+            );
+
+
+            roomsList.appendChild(
+                element
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+searchInput.addEventListener(
+    "input",
+    renderRooms
+);
+
+
+/* =========================================================
+   CREATE ROOM
+========================================================= */
+
+createRoomButton.addEventListener(
+    "click",
+    () => {
+
+        const name =
+            prompt(
+                "Nom du salon :"
+            );
+
+
+        if (!name) {
+            return;
+        }
+
+
+        const cleanName =
+            name
+                .trim()
+                .slice(0, 30);
+
+
+        if (!cleanName) {
+            return;
+        }
+
+
+        send({
+
+            type:
+                "create-room",
+
+            name:
+                cleanName,
+
+            description:
+                "Salon créé par " +
+                username,
+
+            icon:
+                "💬"
+
+        });
+
+    }
+);
+
+
+/* =========================================================
+   JOIN ROOM
+========================================================= */
+
+function joinRoom(
+    roomId
+) {
+
+    currentRoom =
+        roomId;
+
+
+    /*
+        Si la socket actuelle est
+        celle du lobby, on la réutilise.
+    */
+
+    if (
+        socket &&
+        socket.readyState ===
+            WebSocket.OPEN
+    ) {
+
+        send({
+
+            type:
+                "join-room",
+
+            room:
+                roomId,
+
+            name:
+                username
+
+        });
+
+    } else {
+
+        connectCallSocket();
+
+    }
+
+}
+
+
+/* =========================================================
+   CALL SOCKET
+========================================================= */
+
+function connectCallSocket() {
+
+    socket =
+        new WebSocket(
+            SERVER_URL
+        );
+
+
+    socket.onopen =
+        () => {
+
+            send({
+
+                type:
+                    "join-room",
+
+                room:
+                    currentRoom,
+
+                name:
+                    username
+
+            });
+
+        };
+
+
+    socket.onmessage =
+        async event => {
+
+            try {
+
+                const data =
+                    JSON.parse(
+                        event.data
+                    );
+
+
+                await handleCallMessage(
+                    data
+                );
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+            }
+
+        };
+
+
+    socket.onclose =
+        () => {
+
+            console.log(
+                "Connexion fermée"
+            );
+
+        };
+
+}
+
 
 /* =========================================================
    SEND
@@ -2174,446 +2672,1075 @@ function removePeer(
 
 function send(data) {
 
-  if (
-    socket &&
-    socket.readyState ===
-      WebSocket.OPEN
-  ) {
+    if (
+        socket &&
+        socket.readyState ===
+            WebSocket.OPEN
+    ) {
 
-    socket.send(
-      JSON.stringify(
-        data
-      )
-    );
-
-  }
-
-}
-
-/* =========================================================
-   CHAT — SEND
-========================================================= */
-
-chatForm.addEventListener(
-  "submit",
-  event => {
-
-    event.preventDefault();
-
-    const text =
-      messageInput.value.trim();
-
-    if (!text) {
-
-      return;
+        socket.send(
+            JSON.stringify(data)
+        );
 
     }
 
-    send({
+}
 
-      type:
-        "chat",
-
-      text
-
-    });
-
-    messageInput.value = "";
-
-  }
-);
 
 /* =========================================================
-   CHAT — RECEIVE
+   CALL MESSAGE
 ========================================================= */
 
-function handleIncomingChat(
-  message
+async function handleCallMessage(
+    data
 ) {
 
-  removeEmptyChat();
+    switch (
+        data.type
+    ) {
 
-  const mine =
-    message.userId ===
-    myId;
 
-  addMessage(
-    message.name,
-    message.text,
-    mine
-  );
+        case "joined-room":
 
-  /*
-   * Si le chat n'est pas ouvert,
-   * on incrémente les messages non lus.
-   */
+            clientId =
+                data.id;
 
-  if (
-    !mine &&
-    !chatIsOpen
-  ) {
 
-    unreadMessages++;
+            callRoomName.textContent =
+                data.roomName ||
+                currentRoom;
 
-    updateUnreadBadge();
+
+            roomsScreen.classList.add(
+                "hidden"
+            );
+
+            callScreen.classList.remove(
+                "hidden"
+            );
+
+
+            await startCamera();
+
+            updateCallCount(
+                data.count ||
+                1
+            );
+
+
+            /*
+                Connexion aux utilisateurs
+                déjà présents.
+            */
+
+            if (
+                Array.isArray(
+                    data.users
+                )
+            ) {
+
+                data.users.forEach(
+                    user => {
+
+                        createPeer(
+                            user.id,
+                            true,
+                            user.name
+                        );
+
+                    }
+                );
+
+            }
+
+            break;
+
+
+        case "user-joined":
+
+            createPeer(
+                data.id,
+                false,
+                data.name
+            );
+
+            updateCallCount(
+                data.count
+            );
+
+            break;
+
+
+        case "offer": {
+
+            const peer =
+                createPeer(
+                    data.sender,
+                    false,
+                    data.senderName
+                );
+
+
+            await peer.setRemoteDescription(
+                data.offer
+            );
+
+
+            const answer =
+                await peer.createAnswer();
+
+
+            await peer.setLocalDescription(
+                answer
+            );
+
+
+            send({
+
+                type:
+                    "answer",
+
+                target:
+                    data.sender,
+
+                answer:
+                    peer.localDescription
+
+            });
+
+            break;
+
+        }
+
+
+        case "answer": {
+
+            const peer =
+                peers.get(
+                    data.sender
+                );
+
+
+            if (!peer) {
+                return;
+            }
+
+
+            await peer.setRemoteDescription(
+                data.answer
+            );
+
+            break;
+
+        }
+
+
+        case "ice-candidate": {
+
+            const peer =
+                peers.get(
+                    data.sender
+                );
+
+
+            if (
+                peer &&
+                data.candidate
+            ) {
+
+                try {
+
+                    await peer.addIceCandidate(
+                        data.candidate
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        error
+                    );
+
+                }
+
+            }
+
+            break;
+
+        }
+
+
+        case "user-left":
+
+            removePeer(
+                data.id
+            );
+
+
+            updateCallCount(
+                data.count
+            );
+
+            break;
+
+
+        case "chat":
+
+            receiveChat(
+                data
+            );
+
+            break;
+
+    }
+
+}
+
+
+/* =========================================================
+   CAMERA
+========================================================= */
+
+async function startCamera() {
+
+    try {
+
+        localStream =
+            await navigator
+                .mediaDevices
+                .getUserMedia({
+
+                    video: {
+
+                        facingMode:
+                            "user",
+
+                        width: {
+                            ideal: 1280
+                        },
+
+                        height: {
+                            ideal: 720
+                        }
+
+                    },
+
+                    audio: true
+
+                });
+
+
+        addVideo(
+            "local",
+            localStream,
+            username
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+        alert(
+            "Impossible d'accéder à la caméra ou au microphone."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   VIDEO
+========================================================= */
+
+function addVideo(
+    id,
+    stream,
+    name
+) {
+
+    let card =
+        document.getElementById(
+            "video-" + id
+        );
+
+
+    if (card) {
+
+        const video =
+            card.querySelector(
+                "video"
+            );
+
+        video.srcObject =
+            stream;
+
+        updateVideoLayout();
+
+        return;
+
+    }
+
+
+    card =
+        document.createElement(
+            "div"
+        );
+
+    card.className =
+        "video-card";
+
+    card.id =
+        "video-" + id;
+
+
+    const video =
+        document.createElement(
+            "video"
+        );
+
+    video.autoplay =
+        true;
+
+    video.playsInline =
+        true;
+
+    video.muted =
+        id === "local";
+
+    video.srcObject =
+        stream;
+
+
+    const label =
+        document.createElement(
+            "div"
+        );
+
+    label.className =
+        "video-name";
+
+    label.textContent =
+        name ||
+        "Participant";
+
+
+    card.appendChild(
+        video
+    );
+
+    card.appendChild(
+        label
+    );
+
+
+    videoGrid.appendChild(
+        card
+    );
+
+
+    updateVideoLayout();
+
+}
+
+
+/* =========================================================
+   REMOVE VIDEO
+========================================================= */
+
+function removeVideo(
+    id
+) {
+
+    const card =
+        document.getElementById(
+            "video-" + id
+        );
+
+
+    if (card) {
+        card.remove();
+    }
+
+
+    updateVideoLayout();
+
+}
+
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+function updateVideoLayout() {
+
+    const count =
+        videoGrid.querySelectorAll(
+            ".video-card"
+        ).length;
+
+
+    videoGrid.classList.remove(
+        "two-users",
+        "three-plus"
+    );
+
+
+    if (count === 2) {
+
+        videoGrid.classList.add(
+            "two-users"
+        );
+
+    }
+
+
+    if (count >= 3) {
+
+        videoGrid.classList.add(
+            "three-plus"
+        );
+
+    }
+
+
+    updateCallCount(
+        count
+    );
+
+}
+
+
+/* =========================================================
+   COUNT
+========================================================= */
+
+function updateCallCount(
+    count
+) {
+
+    if (
+        typeof count !==
+        "number"
+    ) {
+
+        count =
+            videoGrid.querySelectorAll(
+                ".video-card"
+            ).length;
+
+    }
+
+
+    callRoomCount.textContent =
+        count <= 1
+            ? "1 participant"
+            : `${count} participants`;
+
+}
+
+
+/* =========================================================
+   WEBRTC
+========================================================= */
+
+function createPeer(
+    peerId,
+    initiator,
+    name
+) {
+
+    if (
+        peers.has(
+            peerId
+        )
+    ) {
+
+        return peers.get(
+            peerId
+        );
+
+    }
+
+
+    const peer =
+        new RTCPeerConnection(
+            rtcConfig
+        );
+
+
+    peers.set(
+        peerId,
+        peer
+    );
+
 
     /*
-     * Petit effet visuel
-     */
+        Local tracks
+    */
 
-    mobileChatButton.animate(
-      [
-        {
-          transform:
-            "scale(1)"
-        },
-        {
-          transform:
-            "scale(1.12)"
-        },
-        {
-          transform:
-            "scale(1)"
-        }
-      ],
-      {
-        duration:
-          350
-      }
-    );
+    if (localStream) {
 
-  }
+        localStream
+            .getTracks()
+            .forEach(
+                track => {
+
+                    peer.addTrack(
+                        track,
+                        localStream
+                    );
+
+                }
+            );
+
+    }
+
+
+    /*
+        Remote stream
+    */
+
+    peer.ontrack =
+        event => {
+
+            const stream =
+                event.streams[0];
+
+
+            if (stream) {
+
+                addVideo(
+                    peerId,
+                    stream,
+                    name ||
+                    "Participant"
+                );
+
+            }
+
+        };
+
+
+    /*
+        ICE
+    */
+
+    peer.onicecandidate =
+        event => {
+
+            if (
+                event.candidate
+            ) {
+
+                send({
+
+                    type:
+                        "ice-candidate",
+
+                    target:
+                        peerId,
+
+                    candidate:
+                        event.candidate
+
+                });
+
+            }
+
+        };
+
+
+    /*
+        Connection
+    */
+
+    peer.onconnectionstatechange =
+        () => {
+
+            if (
+                peer.connectionState ===
+                "failed"
+            ) {
+
+                try {
+                    peer.restartIce();
+                } catch {}
+
+            }
+
+        };
+
+
+    /*
+        Create offer
+    */
+
+    if (initiator) {
+
+        peer.createOffer()
+            .then(
+                offer =>
+                    peer.setLocalDescription(
+                        offer
+                    )
+            )
+            .then(
+                () => {
+
+                    send({
+
+                        type:
+                            "offer",
+
+                        target:
+                            peerId,
+
+                        offer:
+                            peer.localDescription
+
+                    });
+
+                }
+            )
+            .catch(
+                console.error
+            );
+
+    }
+
+
+    return peer;
 
 }
 
+
 /* =========================================================
-   ADD MESSAGE
+   REMOVE PEER
 ========================================================= */
 
-function addMessage(
-  name,
-  text,
-  mine
+function removePeer(
+    id
 ) {
 
-  const message =
-    document.createElement(
-      "div"
+    const peer =
+        peers.get(
+            id
+        );
+
+
+    if (peer) {
+
+        peer.close();
+
+        peers.delete(
+            id
+        );
+
+    }
+
+
+    removeVideo(
+        id
     );
-
-  message.className =
-    "message" +
-    (
-      mine
-        ? " mine"
-        : ""
-    );
-
-  const safeName =
-    escapeHtml(
-      name
-    );
-
-  const safeText =
-    escapeHtml(
-      text
-    );
-
-  message.innerHTML = `
-
-    <div class="message-name">
-      ${safeName}
-    </div>
-
-    <div class="message-bubble">
-      ${safeText}
-    </div>
-
-  `;
-
-  messages.appendChild(
-    message
-  );
-
-  messages.scrollTop =
-    messages.scrollHeight;
 
 }
 
-/* =========================================================
-   EMPTY CHAT
-========================================================= */
-
-function removeEmptyChat() {
-
-  if (
-    emptyChat
-  ) {
-
-    emptyChat.remove();
-
-  }
-
-}
 
 /* =========================================================
-   CHAT OPEN / CLOSE
-========================================================= */
-
-mobileChatButton.addEventListener(
-  "click",
-  () => {
-
-    openChat();
-
-  }
-);
-
-function openChat() {
-
-  chatIsOpen =
-    true;
-
-  chat.classList.add(
-    "open"
-  );
-
-  unreadMessages =
-    0;
-
-  updateUnreadBadge();
-
-  setTimeout(
-    () => {
-
-      messageInput.focus();
-
-    },
-    300
-  );
-
-}
-
-/*
-   Sur desktop le chat est toujours visible.
-   Sur mobile, on ferme en cliquant
-   en dehors n'est pas nécessaire ici.
-*/
-
-/* =========================================================
-   UNREAD BADGE
-========================================================= */
-
-function updateUnreadBadge() {
-
-  if (
-    unreadMessages <= 0
-  ) {
-
-    unreadBadge
-      .classList
-      .remove(
-        "visible"
-      );
-
-    return;
-
-  }
-
-  unreadBadge
-    .classList
-    .add(
-      "visible"
-    );
-
-  unreadBadge.textContent =
-    unreadMessages > 99
-      ? "99+"
-      : unreadMessages;
-
-}
-
-/* =========================================================
-   MICROPHONE
+   MICRO
 ========================================================= */
 
 micButton.addEventListener(
-  "click",
-  () => {
+    "click",
+    () => {
 
-    if (!localStream) {
+        if (!localStream) {
+            return;
+        }
 
-      return;
+
+        const track =
+            localStream
+                .getAudioTracks()[0];
+
+
+        if (!track) {
+            return;
+        }
+
+
+        track.enabled =
+            !track.enabled;
+
+
+        micButton.classList.toggle(
+            "off",
+            !track.enabled
+        );
+
+
+        micButton.textContent =
+            track.enabled
+                ? "🎙️"
+                : "🔇";
 
     }
-
-    const track =
-      localStream
-        .getAudioTracks()[0];
-
-    if (!track) {
-
-      return;
-
-    }
-
-    track.enabled =
-      !track.enabled;
-
-    micButton
-      .classList
-      .toggle(
-        "off",
-        !track.enabled
-      );
-
-    micButton.textContent =
-      track.enabled
-        ? "🎙️"
-        : "🔇";
-
-  }
 );
+
 
 /* =========================================================
    CAMERA
 ========================================================= */
 
 cameraButton.addEventListener(
-  "click",
-  () => {
+    "click",
+    () => {
 
-    if (!localStream) {
+        if (!localStream) {
+            return;
+        }
 
-      return;
+
+        const track =
+            localStream
+                .getVideoTracks()[0];
+
+
+        if (!track) {
+            return;
+        }
+
+
+        track.enabled =
+            !track.enabled;
+
+
+        cameraButton.classList.toggle(
+            "off",
+            !track.enabled
+        );
+
+
+        cameraButton.textContent =
+            track.enabled
+                ? "📹"
+                : "🚫";
 
     }
-
-    const track =
-      localStream
-        .getVideoTracks()[0];
-
-    if (!track) {
-
-      return;
-
-    }
-
-    track.enabled =
-      !track.enabled;
-
-    cameraButton
-      .classList
-      .toggle(
-        "off",
-        !track.enabled
-      );
-
-    cameraButton.textContent =
-      track.enabled
-        ? "📷"
-        : "🚫";
-
-  }
 );
+
+
+/* =========================================================
+   CHAT SEND
+========================================================= */
+
+chatForm.addEventListener(
+    "submit",
+    event => {
+
+        event.preventDefault();
+
+
+        const text =
+            chatInput.value.trim();
+
+
+        if (!text) {
+            return;
+        }
+
+
+        send({
+
+            type:
+                "chat",
+
+            message:
+                text
+
+        });
+
+
+        addMessage(
+            username,
+            text,
+            true
+        );
+
+
+        chatInput.value =
+            "";
+
+    }
+);
+
+
+/* =========================================================
+   RECEIVE CHAT
+========================================================= */
+
+function receiveChat(
+    data
+) {
+
+    addMessage(
+        data.name ||
+            "Participant",
+
+        data.message ||
+            "",
+
+        false
+    );
+
+
+    if (!chatOpen) {
+
+        unreadCount++;
+
+        updateUnread();
+
+    }
+
+}
+
+
+/* =========================================================
+   ADD MESSAGE
+========================================================= */
+
+function addMessage(
+    author,
+    text,
+    mine
+) {
+
+    const message =
+        document.createElement(
+            "div"
+        );
+
+    message.className =
+        "message" +
+        (
+            mine
+                ? " me"
+                : ""
+        );
+
+
+    const authorElement =
+        document.createElement(
+            "div"
+        );
+
+    authorElement.className =
+        "message-author";
+
+    authorElement.textContent =
+        mine
+            ? "Vous"
+            : author;
+
+
+    const bubble =
+        document.createElement(
+            "div"
+        );
+
+    bubble.className =
+        "message-bubble";
+
+    bubble.textContent =
+        text;
+
+
+    message.appendChild(
+        authorElement
+    );
+
+    message.appendChild(
+        bubble
+    );
+
+
+    messages.appendChild(
+        message
+    );
+
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+}
+
+
+/* =========================================================
+   CHAT OPEN
+========================================================= */
+
+chatToggle.addEventListener(
+    "click",
+    () => {
+
+        chatOpen =
+            !chatOpen;
+
+
+        chatPanel.classList.toggle(
+            "open",
+            chatOpen
+        );
+
+
+        if (chatOpen) {
+
+            unreadCount =
+                0;
+
+            updateUnread();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   CHAT CLOSE
+========================================================= */
+
+chatClose.addEventListener(
+    "click",
+    () => {
+
+        chatOpen =
+            false;
+
+        chatPanel.classList.remove(
+            "open"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   UNREAD
+========================================================= */
+
+function updateUnread() {
+
+    if (
+        unreadCount <= 0
+    ) {
+
+        unreadBadge.classList.remove(
+            "show"
+        );
+
+        return;
+
+    }
+
+
+    unreadBadge.classList.add(
+        "show"
+    );
+
+
+    unreadBadge.textContent =
+        unreadCount > 99
+            ? "99+"
+            : unreadCount;
+
+}
+
 
 /* =========================================================
    LEAVE
 ========================================================= */
 
 leaveButton.addEventListener(
-  "click",
-  () => {
+    "click",
+    leaveCall
+);
+
+
+function leaveCall() {
 
     send({
-      type:
-        "leave"
+
+        type:
+            "leave"
+
     });
 
-    for (
-      const [
-        id,
-        peer
-      ]
-      of peers
-    ) {
-
-      peer.pc.close();
-
-    }
-
-    peers.clear();
 
     if (localStream) {
 
-      localStream
-        .getTracks()
-        .forEach(
-          track =>
-            track.stop()
-        );
+        localStream
+            .getTracks()
+            .forEach(
+                track =>
+                    track.stop()
+            );
+
+        localStream =
+            null;
 
     }
 
-    if (socket) {
 
-      socket.close();
-
-    }
-
-    window.location.reload();
-
-  }
-);
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
-function escapeHtml(
-  value
-) {
-
-  return String(value)
-
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-
-    .replaceAll(
-      "'",
-      "&#039;"
+    peers.forEach(
+        peer =>
+            peer.close()
     );
+
+    peers.clear();
+
+
+    videoGrid.innerHTML =
+        "";
+
+
+    currentRoom =
+        null;
+
+
+    callScreen.classList.add(
+        "hidden"
+    );
+
+    roomsScreen.classList.remove(
+        "hidden"
+    );
+
+
+    connectLobby();
 
 }
 
+
 /* =========================================================
-   START
+   PAGE VISIBILITY
 ========================================================= */
 
-(async function() {
+document.addEventListener(
+    "visibilitychange",
+    () => {
 
-  await startCamera();
+        /*
+            Rien ici volontairement.
+            La connexion reste active lorsque
+            l'utilisateur change d'application.
+        */
 
-  connect();
-
-})();
+    }
+);
 
 </script>
 
