@@ -122,7 +122,15 @@
     </button>
 </main>
 
-<button id="generalChatToggle" class="general-chat-toggle" onclick="toggleLobbyChat()">💬 Général</button>
+<!-- Boutons flottants du lobby -->
+<button id="usersSidebarToggle" class="users-sidebar-toggle" onclick="toggleUsersSidebar()" title="Afficher ou masquer les utilisateurs" aria-label="Masquer les utilisateurs">
+    ‹ Utilisateurs
+</button>
+
+<button id="generalChatToggle" class="general-chat-toggle" onclick="toggleLobbyChat()" title="Ouvrir le chat général">
+    💬 Général
+</button>
+
 <div id="mobileChatBackdrop" class="mobile-chat-backdrop" onclick="closeMobileChat()"></div>
 
 <div id="profileModal" class="modal" onclick="closeModalOutside(event,'profileModal')">
