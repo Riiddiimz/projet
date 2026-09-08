@@ -12,150 +12,692 @@ const ADMIN_CODE = "85206";
 const users = new Map();
 const rooms = new Map();
 
-function createId() {
-    return crypto.randomUUID();
-}
+const GENERAL_ROOM_ID = "general";
 
-function cleanText(value, maxLength = 500) {
-    return String(value || "")
-        .trim()
-        .replace(/[<>]/g, "")
-        .slice(0, maxLength);
+rooms.set(GENERAL_ROOM_ID, {
+    id: GENERAL_ROOM_ID,
+    name: "Salon général",
+    ownerId: null,
+    users: new Set(),
+    createdAt: Date.now()
+});
+
+function generateId(prefix = "") {
+    return prefix + crypto.randomBytes(8).toString("hex");
 }
 
 function send(ws, type, data = {}) {
-    if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+    ws.send(
+        JSON.stringify({
             type,
             ...data
-        }));
-    }
+        })
+    );
 }
 
-function getUser(ws) {
-    return users.get(ws);
-}
-
-function getUserById(id) {
+function broadcast(type, data = {}, exceptId = null) {
     for (const user of users.values()) {
-        if (user.id === id) return user;
+        if (user.id === exceptId) continue;
+        send(user.ws, type, data);
     }
-
-    return null;
 }
 
-function publicUser(user) {
+function broadcastRoom(roomId, type, data = {}, exceptId = null) {
+    const room = rooms.get(roomId);
+    if (!room) return;
+
+    for (const userId of room.users) {
+        if (userId === exceptId) continue;
+
+        const user = users.get(userId);
+        if (user) {
+            send(user.ws, type, data);
+        }
+    }
+}
+
+function getPublicUser(user) {
     return {
         id: user.id,
         username: user.username,
-        role: user.role,
-        roomId: user.roomId,
-        profile: user.profile,
-        muted: user.muted,
-        cameraDisabled: user.cameraDisabled
+        avatar: user.avatar || null,
+        muted: !!user.muted,
+        cameraDisabled: !!user.cameraDisabled,
+        isAdmin: !!user.isAdmin
     };
 }
 
-function broadcastRoomList() {
-    const roomList = [...rooms.values()].map(room => ({
+function getRoomList() {
+    return Array.from(rooms.values()).map(room => ({
         id: room.id,
         name: room.name,
-        count: room.members.size
+        ownerId: room.ownerId,
+        userCount: room.users.size,
+        isGeneral: room.id === GENERAL_ROOM_ID
     }));
-
-    for (const user of users.values()) {
-        send(user.ws, "room-list", {
-            rooms: roomList
-        });
-    }
 }
 
-function broadcastAdminUsers() {
-    const userList = [...users.values()].map(publicUser);
-
-    for (const user of users.values()) {
-        if (user.role === "admin") {
-            send(user.ws, "users-list", {
-                users: userList
-            });
-        }
-    }
+function sendRoomList() {
+    broadcast("room-list", {
+        rooms: getRoomList()
+    });
 }
 
-function broadcastToRoom(roomId, type, data = {}, excludedWs = null) {
+function getRoomParticipants(roomId) {
     const room = rooms.get(roomId);
+    if (!room) return [];
 
-    if (!room) return;
-
-    for (const memberWs of room.members) {
-        if (memberWs !== excludedWs) {
-            send(memberWs, type, data);
-        }
-    }
+    return Array.from(room.users)
+        .map(id => users.get(id))
+        .filter(Boolean)
+        .map(getPublicUser);
 }
 
-function createRoom(name) {
-    const room = {
-        id: createId(),
-        name: cleanText(name, 40) || "Nouveau salon",
-        members: new Set()
-    };
+function sendUsersListToAdmin(user) {
+    if (!user.isAdmin) return;
 
-    rooms.set(room.id, room);
-
-    return room;
+    send(user.ws, "users-list", {
+        users: Array.from(users.values()).map(getPublicUser)
+    });
 }
 
-function leaveRoom(user, notify = true) {
+function removeUserFromRoom(user, notify = true) {
     if (!user.roomId) return;
 
     const room = rooms.get(user.roomId);
 
     if (room) {
-        room.members.delete(user.ws);
+        room.users.delete(user.id);
 
         if (notify) {
-            broadcastToRoom(room.id, "user-left", {
-                userId: user.id
-            });
+            broadcastRoom(
+                room.id,
+                "user-left",
+                {
+                    userId: user.id,
+                    username: user.username
+                },
+                user.id
+            );
         }
 
-        if (room.members.size === 0) {
+        // Ne jamais supprimer automatiquement le salon général.
+        if (
+            room.id !== GENERAL_ROOM_ID &&
+            room.users.size === 0
+        ) {
             rooms.delete(room.id);
         }
     }
 
     user.roomId = null;
 
-    broadcastRoomList();
-    broadcastAdminUsers();
+    sendRoomList();
 }
 
-createRoom("Salon général");
+function createRoom(user, roomName) {
+    const cleanName = String(roomName || "").trim();
+
+    if (!cleanName) {
+        send(user.ws, "error-message", {
+            message: "Le nom du salon est obligatoire."
+        });
+        return;
+    }
+
+    if (cleanName.length > 50) {
+        send(user.ws, "error-message", {
+            message: "Le nom du salon est trop long."
+        });
+        return;
+    }
+
+    const roomId = generateId("room_");
+
+    const room = {
+        id: roomId,
+        name: cleanName,
+        ownerId: user.id,
+        users: new Set(),
+        createdAt: Date.now()
+    };
+
+    rooms.set(roomId, room);
+
+    sendRoomList();
+
+    joinRoom(user, roomId);
+}
+
+function joinRoom(user, roomId) {
+    const room = rooms.get(roomId);
+
+    if (!room) {
+        send(user.ws, "error-message", {
+            message: "Ce salon n'existe plus."
+        });
+        return;
+    }
+
+    if (user.roomId === roomId) {
+        send(user.ws, "room-joined", {
+            room: {
+                id: room.id,
+                name: room.name
+            },
+            participants: getRoomParticipants(room.id)
+        });
+        return;
+    }
+
+    if (user.roomId) {
+        removeUserFromRoom(user);
+    }
+
+    const existingParticipants = getRoomParticipants(room.id);
+
+    room.users.add(user.id);
+    user.roomId = room.id;
+
+    send(user.ws, "room-joined", {
+        room: {
+            id: room.id,
+            name: room.name
+        },
+        participants: existingParticipants
+    });
+
+    // Prévenir les autres utilisateurs.
+    broadcastRoom(
+        room.id,
+        "user-joined",
+        {
+            user: getPublicUser(user)
+        },
+        user.id
+    );
+
+    // Mettre à jour la liste de participants chez tout le monde.
+    broadcastRoom(room.id, "users-list-room", {
+        participants: getRoomParticipants(room.id)
+    });
+
+    sendRoomList();
+}
+
+function leaveRoom(user) {
+    if (!user.roomId) {
+        send(user.ws, "room-left", {});
+        return;
+    }
+
+    const roomId = user.roomId;
+
+    removeUserFromRoom(user, true);
+
+    send(user.ws, "room-left", {
+        roomId
+    });
+}
+
+function deleteRoom(user, roomId) {
+    if (!user.isAdmin) {
+        send(user.ws, "error-message", {
+            message: "Action réservée à l'administrateur."
+        });
+        return;
+    }
+
+    if (roomId === GENERAL_ROOM_ID) {
+        send(user.ws, "error-message", {
+            message: "Le salon général ne peut pas être supprimé."
+        });
+        return;
+    }
+
+    const room = rooms.get(roomId);
+
+    if (!room) {
+        send(user.ws, "error-message", {
+            message: "Salon introuvable."
+        });
+        return;
+    }
+
+    for (const userId of room.users) {
+        const roomUser = users.get(userId);
+
+        if (!roomUser) continue;
+
+        roomUser.roomId = null;
+
+        send(roomUser.ws, "room-deleted", {
+            roomId,
+            message: "Le salon a été supprimé par l'administrateur."
+        });
+    }
+
+    rooms.delete(roomId);
+
+    sendRoomList();
+}
+
+function kickUser(admin, targetId) {
+    if (!admin.isAdmin) {
+        send(admin.ws, "error-message", {
+            message: "Action réservée à l'administrateur."
+        });
+        return;
+    }
+
+    const target = users.get(targetId);
+
+    if (!target) {
+        send(admin.ws, "error-message", {
+            message: "Utilisateur introuvable."
+        });
+        return;
+    }
+
+    if (target.id === admin.id) {
+        send(admin.ws, "error-message", {
+            message: "Vous ne pouvez pas vous expulser vous-même."
+        });
+        return;
+    }
+
+    if (target.roomId) {
+        const room = rooms.get(target.roomId);
+
+        if (room) {
+            room.users.delete(target.id);
+
+            broadcastRoom(
+                room.id,
+                "user-left",
+                {
+                    userId: target.id,
+                    username: target.username
+                },
+                target.id
+            );
+
+            broadcastRoom(room.id, "users-list-room", {
+                participants: getRoomParticipants(room.id)
+            });
+        }
+
+        target.roomId = null;
+    }
+
+    send(target.ws, "kicked", {
+        message: "Vous avez été expulsé par l'administrateur."
+    });
+
+    send(admin.ws, "error-message", {
+        message: `${target.username} a été expulsé.`
+    });
+
+    sendRoomList();
+    sendUsersListToAdmin(admin);
+}
+
+function setUserMute(admin, targetId, muted) {
+    if (!admin.isAdmin) {
+        send(admin.ws, "error-message", {
+            message: "Action réservée à l'administrateur."
+        });
+        return;
+    }
+
+    const target = users.get(targetId);
+
+    if (!target) {
+        send(admin.ws, "error-message", {
+            message: "Utilisateur introuvable."
+        });
+        return;
+    }
+
+    target.muted = !!muted;
+
+    send(target.ws, "force-micro", {
+        enabled: !target.muted
+    });
+
+    broadcastRoom(target.roomId, "user-updated", {
+        user: getPublicUser(target)
+    });
+
+    sendUsersListToAdmin(admin);
+}
+
+function setUserCamera(admin, targetId, disabled) {
+    if (!admin.isAdmin) {
+        send(admin.ws, "error-message", {
+            message: "Action réservée à l'administrateur."
+        });
+        return;
+    }
+
+    const target = users.get(targetId);
+
+    if (!target) {
+        send(admin.ws, "error-message", {
+            message: "Utilisateur introuvable."
+        });
+        return;
+    }
+
+    target.cameraDisabled = !!disabled;
+
+    send(target.ws, "force-camera", {
+        enabled: !target.cameraDisabled
+    });
+
+    broadcastRoom(target.roomId, "user-updated", {
+        user: getPublicUser(target)
+    });
+
+    sendUsersListToAdmin(admin);
+}
+
+function handleMessage(user, message) {
+    if (!message || typeof message.type !== "string") return;
+
+    switch (message.type) {
+
+        case "login": {
+            const username = String(message.username || "").trim();
+            const code = String(message.code || "").trim();
+            const isAdmin = !!message.isAdmin;
+
+            if (!username) {
+                send(user.ws, "login-error", {
+                    message: "Veuillez entrer un pseudo."
+                });
+                return;
+            }
+
+            if (username.length > 30) {
+                send(user.ws, "login-error", {
+                    message: "Le pseudo est trop long."
+                });
+                return;
+            }
+
+            if (isAdmin) {
+                if (
+                    username !== ADMIN_USERNAME ||
+                    code !== ADMIN_CODE
+                ) {
+                    send(user.ws, "login-error", {
+                        message: "Identifiants administrateur incorrects."
+                    });
+                    return;
+                }
+            }
+
+            user.username = username;
+            user.isAdmin = isAdmin;
+            user.loggedIn = true;
+
+            send(user.ws, "login-success", {
+                user: getPublicUser(user),
+                rooms: getRoomList()
+            });
+
+            sendUsersListToAdmin(user);
+
+            return;
+        }
+
+        case "update-profile": {
+            if (!user.loggedIn) return;
+
+            if (typeof message.avatar === "string") {
+                if (message.avatar.length > 500000) {
+                    send(user.ws, "error-message", {
+                        message: "Avatar trop volumineux."
+                    });
+                    return;
+                }
+
+                user.avatar = message.avatar;
+            }
+
+            broadcastRoom(user.roomId, "user-updated", {
+                user: getPublicUser(user)
+            });
+
+            send(user.ws, "profile-updated", {
+                user: getPublicUser(user)
+            });
+
+            sendUsersListToAdmin(user);
+
+            return;
+        }
+
+        case "create-room": {
+            if (!user.loggedIn) return;
+
+            createRoom(user, message.name);
+            return;
+        }
+
+        case "join-room": {
+            if (!user.loggedIn) return;
+
+            joinRoom(user, String(message.roomId || ""));
+            return;
+        }
+
+        case "leave-room": {
+            if (!user.loggedIn) return;
+
+            leaveRoom(user);
+            return;
+        }
+
+        case "chat": {
+            if (!user.loggedIn) return;
+
+            const text = String(message.text || "").trim();
+
+            if (!text) return;
+
+            if (text.length > 500) {
+                send(user.ws, "error-message", {
+                    message: "Message trop long."
+                });
+                return;
+            }
+
+            const chatMessage = {
+                id: generateId("msg_"),
+                userId: user.id,
+                username: user.username,
+                avatar: user.avatar || null,
+                text,
+                timestamp: Date.now()
+            };
+
+            // Lobby : message global.
+            if (!user.roomId) {
+                broadcast("chat-message", {
+                    message: chatMessage
+                });
+            } else {
+                // Salon : message uniquement dans le salon.
+                broadcastRoom(user.roomId, "chat-message", {
+                    message: chatMessage
+                });
+            }
+
+            return;
+        }
+
+        case "offer": {
+            if (!user.loggedIn) return;
+
+            const target = users.get(message.targetId);
+
+            if (!target) return;
+
+            send(target.ws, "offer", {
+                fromId: user.id,
+                fromUser: getPublicUser(user),
+                offer: message.offer
+            });
+
+            return;
+        }
+
+        case "answer": {
+            if (!user.loggedIn) return;
+
+            const target = users.get(message.targetId);
+
+            if (!target) return;
+
+            send(target.ws, "answer", {
+                fromId: user.id,
+                answer: message.answer
+            });
+
+            return;
+        }
+
+        case "ice-candidate": {
+            if (!user.loggedIn) return;
+
+            const target = users.get(message.targetId);
+
+            if (!target) return;
+
+            send(target.ws, "ice-candidate", {
+                fromId: user.id,
+                candidate: message.candidate
+            });
+
+            return;
+        }
+
+        case "media-state": {
+            if (!user.loggedIn) return;
+
+            user.muted = !!message.muted;
+            user.cameraDisabled = !!message.cameraDisabled;
+
+            broadcastRoom(user.roomId, "user-updated", {
+                user: getPublicUser(user)
+            });
+
+            if (user.isAdmin) {
+                sendUsersListToAdmin(user);
+            }
+
+            return;
+        }
+
+        case "admin-kick":
+            kickUser(user, message.targetId);
+            return;
+
+        case "admin-mute":
+            setUserMute(
+                user,
+                message.targetId,
+                !!message.muted
+            );
+            return;
+
+        case "admin-camera":
+            setUserCamera(
+                user,
+                message.targetId,
+                !!message.disabled
+            );
+            return;
+
+        case "admin-delete-room":
+            deleteRoom(user, message.roomId);
+            return;
+
+        case "get-room-list":
+            send(user.ws, "room-list", {
+                rooms: getRoomList()
+            });
+            return;
+
+        case "get-users":
+            sendUsersListToAdmin(user);
+            return;
+
+        default:
+            send(user.ws, "error-message", {
+                message: `Commande inconnue : ${message.type}`
+            });
+    }
+}
 
 const server = http.createServer((req, res) => {
-    if (req.url === "/" || req.url === "/index.html") {
-        const indexPath = path.join(__dirname, "index.html");
+    const url = new URL(req.url, `http://${req.headers.host}`);
 
-        if (fs.existsSync(indexPath)) {
+    if (
+        url.pathname === "/" ||
+        url.pathname === "/index.html"
+    ) {
+        const filePath = path.join(__dirname, "index.html");
+
+        fs.readFile(filePath, (err, data) => {
+            if (err) {
+                res.writeHead(500, {
+                    "Content-Type": "text/plain; charset=utf-8"
+                });
+
+                res.end("Erreur lors du chargement de index.html");
+                return;
+            }
+
             res.writeHead(200, {
                 "Content-Type": "text/html; charset=utf-8"
             });
 
-            return fs.createReadStream(indexPath).pipe(res);
-        }
+            res.end(data);
+        });
+
+        return;
+    }
+
+    if (url.pathname === "/health") {
+        res.writeHead(200, {
+            "Content-Type": "application/json"
+        });
+
+        res.end(
+            JSON.stringify({
+                status: "online",
+                service: "Col'inCall WebRTC Server"
+            })
+        );
+
+        return;
     }
 
     res.writeHead(200, {
-        "Content-Type": "application/json; charset=utf-8"
+        "Content-Type": "application/json"
     });
 
-    res.end(JSON.stringify({
-        status: "online",
-        service: "Chatroulette WebRTC Server",
-        rooms: rooms.size,
-        users: users.size
-    }));
+    res.end(
+        JSON.stringify({
+            status: "online",
+            service: "Col'inCall WebRTC Server"
+        })
+    );
 });
 
 const wss = new WebSocket.Server({
@@ -164,295 +706,60 @@ const wss = new WebSocket.Server({
 
 wss.on("connection", ws => {
     const user = {
-        id: createId(),
+        id: generateId("user_"),
         ws,
-        username: "",
-        role: "user",
+        username: "Utilisateur",
+        avatar: null,
         roomId: null,
-        profile: {
-            description: "",
-            avatar: null
-        },
-        muted: false,
-        cameraDisabled: false
+        loggedIn: false,
+        isAdmin: false,
+        muted: true,
+        cameraDisabled: true
     };
 
-    users.set(ws, user);
+    users.set(user.id, user);
 
     send(ws, "connected", {
         userId: user.id
     });
 
-    ws.on("message", rawMessage => {
-        let message;
-
+    ws.on("message", raw => {
         try {
-            message = JSON.parse(rawMessage.toString());
-        } catch {
-            return send(ws, "error-message", {
+            const message = JSON.parse(raw.toString());
+            handleMessage(user, message);
+        } catch (error) {
+            send(ws, "error-message", {
                 message: "Message invalide."
             });
-        }
-
-        switch (message.type) {
-            case "login": {
-                const username = cleanText(message.username, 24);
-                const role = message.role === "admin" ? "admin" : "user";
-
-                if (!username) {
-                    return send(ws, "login-error", {
-                        message: "Le pseudo est obligatoire."
-                    });
-                }
-
-                const duplicate = [...users.values()].find(other =>
-                    other !== user &&
-                    other.username.toLowerCase() === username.toLowerCase()
-                );
-
-                if (duplicate) {
-                    return send(ws, "login-error", {
-                        message: "Ce pseudo est déjà utilisé."
-                    });
-                }
-
-                if (
-                    role === "admin" &&
-                    (
-                        username !== ADMIN_USERNAME ||
-                        String(message.adminCode || "") !== ADMIN_CODE
-                    )
-                ) {
-                    return send(ws, "login-error", {
-                        message: "Identifiants administrateur incorrects."
-                    });
-                }
-
-                user.username = username;
-                user.role = role;
-
-                send(ws, "login-success", {
-                    user: publicUser(user)
-                });
-
-                broadcastRoomList();
-                broadcastAdminUsers();
-
-                break;
-            }
-
-            case "update-profile": {
-                if (!user.username) return;
-
-                user.profile = {
-                    description: cleanText(message.description, 300),
-                    avatar:
-                        typeof message.avatar === "string"
-                            ? message.avatar.slice(0, 500000)
-                            : null
-                };
-
-                send(ws, "profile-updated", {
-                    user: publicUser(user)
-                });
-
-                if (user.roomId) {
-                    broadcastToRoom(user.roomId, "user-updated", {
-                        user: publicUser(user)
-                    });
-                }
-
-                broadcastAdminUsers();
-
-                break;
-            }
-
-            case "create-room": {
-                if (!user.username) return;
-
-                const room = createRoom(message.name);
-
-                broadcastRoomList();
-
-                send(ws, "room-created", {
-                    room: {
-                        id: room.id,
-                        name: room.name,
-                        count: 0
-                    }
-                });
-
-                break;
-            }
-
-            case "join-room": {
-                if (!user.username) return;
-
-                const room = rooms.get(message.roomId);
-
-                if (!room) {
-                    return send(ws, "error-message", {
-                        message: "Ce salon n'existe plus."
-                    });
-                }
-
-                leaveRoom(user, true);
-
-                const participants = [...room.members].map(memberWs =>
-                    publicUser(getUser(memberWs))
-                );
-
-                room.members.add(ws);
-                user.roomId = room.id;
-
-                send(ws, "room-joined", {
-                    room: {
-                        id: room.id,
-                        name: room.name
-                    },
-                    participants
-                });
-
-                broadcastToRoom(room.id, "user-joined", {
-                    user: publicUser(user)
-                }, ws);
-
-                broadcastRoomList();
-                broadcastAdminUsers();
-
-                break;
-            }
-
-            case "leave-room": {
-                leaveRoom(user, true);
-                send(ws, "room-left");
-                break;
-            }
-
-            case "chat": {
-                if (!user.roomId) return;
-
-                const text = cleanText(message.text, 1000);
-
-                if (!text) return;
-
-                broadcastToRoom(user.roomId, "chat-message", {
-                    user: publicUser(user),
-                    text,
-                    timestamp: Date.now()
-                });
-
-                break;
-            }
-
-            case "offer":
-            case "answer":
-            case "ice-candidate": {
-                const target = getUserById(message.targetId);
-
-                if (!target) return;
-
-                send(target.ws, message.type, {
-                    fromId: user.id,
-                    offer: message.offer,
-                    answer: message.answer,
-                    candidate: message.candidate
-                });
-
-                break;
-            }
-
-            case "admin-kick": {
-                if (user.role !== "admin") return;
-
-                const target = getUserById(message.userId);
-
-                if (!target || target === user) return;
-
-                send(target.ws, "kicked", {
-                    message: "Vous avez été expulsé par l'administrateur."
-                });
-
-                leaveRoom(target, true);
-                broadcastAdminUsers();
-
-                break;
-            }
-
-            case "admin-mute": {
-                if (user.role !== "admin") return;
-
-                const target = getUserById(message.userId);
-
-                if (!target || target === user) return;
-
-                target.muted = Boolean(message.muted);
-
-                send(target.ws, "force-micro", {
-                    enabled: !target.muted
-                });
-
-                broadcastAdminUsers();
-
-                break;
-            }
-
-            case "admin-camera": {
-                if (user.role !== "admin") return;
-
-                const target = getUserById(message.userId);
-
-                if (!target || target === user) return;
-
-                target.cameraDisabled = Boolean(message.disabled);
-
-                send(target.ws, "force-camera", {
-                    enabled: !target.cameraDisabled
-                });
-
-                broadcastAdminUsers();
-
-                break;
-            }
-
-            case "admin-delete-room": {
-                if (user.role !== "admin") return;
-
-                const room = rooms.get(message.roomId);
-
-                if (!room) return;
-
-                for (const memberWs of room.members) {
-                    const member = getUser(memberWs);
-
-                    if (member) {
-                        send(member.ws, "room-deleted", {
-                            message: "Ce salon a été supprimé par l'administrateur."
-                        });
-
-                        member.roomId = null;
-                    }
-                }
-
-                rooms.delete(room.id);
-
-                broadcastRoomList();
-                broadcastAdminUsers();
-
-                break;
-            }
         }
     });
 
     ws.on("close", () => {
-        leaveRoom(user, true);
-        users.delete(ws);
+        if (user.roomId) {
+            removeUserFromRoom(user, true);
+        }
 
-        broadcastRoomList();
-        broadcastAdminUsers();
+        users.delete(user.id);
+
+        broadcast("user-updated", {
+            userId: user.id,
+            disconnected: true
+        });
+
+        sendRoomList();
+
+        for (const admin of users.values()) {
+            sendUsersListToAdmin(admin);
+        }
+    });
+
+    ws.on("error", () => {
+        try {
+            ws.close();
+        } catch (_) {}
     });
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-    console.log(`Col'inCall server listening on port ${PORT}`);
+    console.log(`Col'inCall server running on port ${PORT}`);
 });
