@@ -103,13 +103,25 @@
     </div>
 
     <aside id="roomChat" class="chat-sidebar room-chat">
-        <div class="chat-header">
+        <div class="chat-header room-chat-header">
             <div>
                 <div class="chat-title">Chat du salon</div>
                 <div class="chat-subtitle">Discussion du salon</div>
             </div>
-            <button class="chat-close" onclick="closeRoomChat()">×</button>
+            <div class="room-chat-actions">
+                <button id="roomUsersToggle" class="room-users-toggle" onclick="toggleRoomUsers()" title="Voir les utilisateurs du salon" aria-label="Voir les utilisateurs du salon">👥</button>
+                <button class="chat-close" onclick="closeRoomChat()">×</button>
+            </div>
         </div>
+
+        <div id="roomUsersMenu" class="room-users-menu" aria-hidden="true">
+            <div class="room-users-menu-header">
+                <span>Utilisateurs du salon</span>
+                <span id="roomUsersCount" class="room-users-count">0</span>
+            </div>
+            <div id="roomUsersList" class="room-users-list"></div>
+        </div>
+
         <div id="roomChatMessages" class="chat-messages"></div>
         <div class="chat-input-area">
             <input id="roomChatInput" type="text" placeholder="Écrire un message..." autocomplete="off">
