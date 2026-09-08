@@ -1,405 +1,422 @@
-```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#08090d">
 
-<title>Giant Lens</title>
+<title>Vibe — Random Video Chat</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 :root {
-    --bg: #08090d;
-    --card: rgba(255,255,255,.055);
-    --border: rgba(255,255,255,.09);
-    --text: #f7f7f8;
-    --muted: #858995;
+  --bg: #07080c;
+  --panel: rgba(255,255,255,.065);
+  --border: rgba(255,255,255,.10);
+  --text: #fff;
+  --muted: #9297a5;
+  --accent: #7c5cff;
+  --accent2: #00d4ff;
+  --danger: #ff4664;
 }
 
+html,
 body {
-    min-height: 100vh;
-    background:
-        radial-gradient(
-            circle at 50% -10%,
-            rgba(120,90,255,.20),
-            transparent 35%
-        ),
-        #08090d;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(124,92,255,.16), transparent 30%),
+    radial-gradient(circle at 80% 90%, rgba(0,212,255,.10), transparent 30%),
+    var(--bg);
+  color: var(--text);
+}
 
-    color: var(--text);
-    font-family: Inter, sans-serif;
+button {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
 .app {
-    width: 100%;
-    max-width: 1000px;
-    margin: auto;
-    padding: 25px 16px 50px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* HEADER */
 
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
+.header {
+  height: 76px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 10;
 }
 
 .logo {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    font-weight: 800;
-    font-size: 19px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -.6px;
 }
 
-.logo-icon {
-    width: 40px;
-    height: 40px;
-    display: grid;
-    place-items: center;
-    border-radius: 13px;
-
-    background: white;
-    color: black;
-
-    font-size: 20px;
-}
-
-.badge {
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--muted);
-
-    padding: 8px 12px;
-    border-radius: 999px;
-
-    font-size: 11px;
-}
-
-/* HERO */
-
-.hero {
-    margin-bottom: 25px;
-}
-
-.hero h1 {
-    font-size: clamp(40px, 7vw, 68px);
-    line-height: .95;
-    letter-spacing: -4px;
-    margin-bottom: 14px;
-}
-
-.hero h1 span {
-    color: #8c7cff;
-}
-
-.hero p {
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-/* GRID */
-
-.workspace {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-}
-
-/* CARD */
-
-.card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    overflow: hidden;
-
-    backdrop-filter: blur(20px);
-}
-
-/* CARD HEADER */
-
-.card-header {
-    height: 58px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 18px;
-
-    border-bottom: 1px solid var(--border);
-}
-
-.card-title {
-    font-size: 12px;
-    font-weight: 700;
+.logo-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  box-shadow: 0 0 22px rgba(124,92,255,.8);
 }
 
 .status {
-    font-size: 11px;
-    color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 15px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.055);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  color: #c7cad4;
+  font-size: 13px;
 }
 
-/* CAMERA */
-
-.camera {
-    position: relative;
-    aspect-ratio: 4/3;
-    background: #000;
-    overflow: hidden;
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffc857;
+  box-shadow: 0 0 12px #ffc857;
 }
 
-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.status.connected .status-dot {
+  background: #31e981;
+  box-shadow: 0 0 12px #31e981;
 }
 
-/* CAMERA FRAME */
+/* VIDEOS */
 
-.camera::before,
-.camera::after {
-    content: "";
-    position: absolute;
-    width: 28px;
-    height: 28px;
-    border-color: rgba(255,255,255,.7);
-    pointer-events: none;
+.stage {
+  flex: 1;
+  min-height: 0;
+  padding: 0 22px 18px;
+  position: relative;
 }
 
-.camera::before {
-    top: 18px;
-    left: 18px;
-
-    border-top: 2px solid;
-    border-left: 2px solid;
+.video-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #101218;
+  border: 1px solid var(--border);
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.45),
+    inset 0 1px rgba(255,255,255,.05);
 }
 
-.camera::after {
-    bottom: 18px;
-    right: 18px;
-
-    border-bottom: 2px solid;
-    border-right: 2px solid;
+#remoteVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background:
+    radial-gradient(circle, rgba(124,92,255,.08), transparent 50%),
+    #101218;
 }
 
-/* BUTTONS */
+.empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.empty-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.empty-state h1 {
+  font-size: clamp(25px, 4vw, 42px);
+  letter-spacing: -1.5px;
+}
+
+.empty-state p {
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* LOCAL VIDEO */
+
+.local-wrapper {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: min(270px, 25vw);
+  aspect-ratio: 16 / 10;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 20px 50px rgba(0,0,0,.5);
+  background: #15171e;
+}
+
+#localVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.local-label {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 5px 9px;
+  border-radius: 8px;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(10px);
+  font-size: 11px;
+  color: #ddd;
+}
+
+/* CONTROLS */
 
 .controls {
-    padding: 16px;
-
-    display: flex;
-    gap: 9px;
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 24px;
+  background: rgba(10,11,16,.72);
+  border: 1px solid rgba(255,255,255,.10);
+  backdrop-filter: blur(25px);
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
 }
 
-button {
-    border: 0;
-    font-family: inherit;
-    cursor: pointer;
-    transition: .18s;
+.control {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  color: white;
+  background: rgba(255,255,255,.075);
+  border: 1px solid rgba(255,255,255,.08);
+  transition: .2s ease;
 }
 
-button:active {
-    transform: scale(.96);
+.control:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,.13);
 }
 
-.primary {
-    flex: 1;
-
-    height: 52px;
-
-    border-radius: 15px;
-
-    background: white;
-    color: #09090b;
-
-    font-weight: 800;
+.control.active {
+  background: rgba(255,255,255,.13);
 }
 
-.primary:hover {
-    background: #e9e9e9;
+.control.danger {
+  background: rgba(255,70,100,.14);
+  color: #ff7188;
 }
 
-.icon-btn {
-    width: 52px;
-    height: 52px;
-
-    border-radius: 15px;
-
-    background: rgba(255,255,255,.06);
-    border: 1px solid var(--border);
-
-    color: white;
-    font-size: 18px;
+.next {
+  height: 50px;
+  padding: 0 24px;
+  border-radius: 16px;
+  color: white;
+  font-weight: 750;
+  background: linear-gradient(135deg, #7658ff, #6044db);
+  box-shadow: 0 10px 30px rgba(102,75,230,.32);
+  transition: .2s ease;
 }
 
-/* SETTINGS */
-
-.settings {
-    padding: 0 16px 17px;
+.next:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 35px rgba(102,75,230,.45);
 }
 
-.setting-row {
-    display: flex;
-    justify-content: space-between;
+/* CHAT */
 
-    color: var(--muted);
-
-    font-size: 11px;
-
-    margin-bottom: 10px;
+.chat-button {
+  position: absolute;
+  right: 24px;
+  top: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  color: white;
+  background: rgba(10,11,16,.72);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  z-index: 5;
 }
 
-#intensityValue {
-    color: white;
-    font-weight: 700;
+.chat {
+  position: fixed;
+  right: 22px;
+  top: 88px;
+  bottom: 22px;
+  width: 330px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  background: rgba(13,14,20,.92);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(30px);
+  box-shadow: 0 30px 100px rgba(0,0,0,.5);
+  transform: translateX(380px);
+  transition: .3s ease;
 }
 
-input[type=range] {
-    width: 100%;
-    accent-color: white;
+.chat.open {
+  transform: translateX(0);
 }
 
-/* RESULT */
-
-.result {
-    position: relative;
+.chat-header {
+  padding: 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
 }
 
-.result-area {
-    position: relative;
-
-    aspect-ratio: 4/3;
-
-    background: #020204;
-
-    overflow: hidden;
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-#resultCanvas {
-    width: 100%;
-    height: 100%;
-
-    display: block;
+.message {
+  max-width: 80%;
+  padding: 10px 13px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.07);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
-.placeholder {
-    position: absolute;
-    inset: 0;
-
-    display: flex;
-    flex-direction: column;
-
-    justify-content: center;
-    align-items: center;
-
-    gap: 10px;
-
-    color: #555;
-
-    text-align: center;
+.message.mine {
+  align-self: flex-end;
+  background: #6650df;
 }
 
-.placeholder-icon {
-    font-size: 36px;
+.chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--border);
 }
 
-.placeholder p {
-    font-size: 12px;
+.chat-input input {
+  min-width: 0;
+  flex: 1;
+  background: rgba(255,255,255,.06);
+  color: white;
+  border: 1px solid var(--border);
+  outline: none;
+  border-radius: 13px;
+  padding: 11px 12px;
 }
 
-/* MAGNIFIER */
-
-.magnifier {
-    position: absolute;
-
-    width: 45px;
-    height: 45px;
-
-    border-radius: 50%;
-
-    border: 2px solid rgba(255,255,255,.9);
-
-    box-shadow:
-        0 0 0 5px rgba(0,0,0,.3),
-        0 10px 40px rgba(0,0,0,.4);
-
-    transform:
-        translate(-50%, -50%);
-
-    pointer-events: none;
-
-    display: none;
-}
-
-.instructions {
-    padding: 15px 17px;
-
-    color: var(--muted);
-
-    font-size: 11px;
-
-    line-height: 1.5;
-}
-
-/* FOOTER */
-
-.footer {
-    margin-top: 17px;
-
-    display: flex;
-    justify-content: space-between;
-
-    color: #5f626b;
-
-    font-size: 10px;
-}
-
-.footer button {
-    color: #aaa;
-
-    background: rgba(255,255,255,.04);
-
-    border: 1px solid var(--border);
-
-    border-radius: 9px;
-
-    padding: 8px 11px;
+.chat-input button {
+  width: 43px;
+  border-radius: 13px;
+  background: #6650df;
+  color: white;
 }
 
 /* MOBILE */
 
-@media(max-width: 750px) {
+@media (max-width: 700px) {
+  .header {
+    height: 64px;
+    padding: 0 16px;
+  }
 
-    .workspace {
-        grid-template-columns: 1fr;
-    }
+  .stage {
+    padding: 0 10px 10px;
+  }
 
-    .hero h1 {
-        letter-spacing: -2.5px;
-    }
+  .video-container {
+    border-radius: 22px;
+  }
 
-    .result-area {
-        aspect-ratio: 4/3;
-    }
+  .local-wrapper {
+    width: 125px;
+    right: 14px;
+    bottom: 105px;
+    border-radius: 15px;
+  }
 
-    .footer {
-        flex-direction: column;
-        gap: 12px;
-    }
+  .controls {
+    bottom: 14px;
+    width: calc(100% - 28px);
+    justify-content: center;
+  }
+
+  .control {
+    width: 46px;
+    height: 46px;
+  }
+
+  .next {
+    flex: 1;
+    padding: 0 12px;
+  }
+
+  .chat {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    top: 74px;
+    bottom: 10px;
+  }
+
+  .chat-button {
+    right: 14px;
+    top: 14px;
+  }
+
+  .status {
+    font-size: 11px;
+    padding: 8px 11px;
+  }
 }
 </style>
 </head>
@@ -408,866 +425,956 @@ input[type=range] {
 
 <div class="app">
 
-<header>
+  <header class="header">
 
     <div class="logo">
-
-        <div class="logo-icon">
-            ◉
-        </div>
-
-        Giant Lens
-
+      <span class="logo-dot"></span>
+      Vibe
     </div>
 
-    <div class="badge">
-        LOCAL PROCESSING
+    <div class="status" id="status">
+      <span class="status-dot"></span>
+      <span id="statusText">Connexion...</span>
     </div>
 
-</header>
+  </header>
 
+  <main class="stage">
 
-<section class="hero">
+    <div class="video-container">
 
-    <h1>
-        Make it<br>
-        <span>giant.</span>
-    </h1>
+      <video
+        id="remoteVideo"
+        autoplay
+        playsinline
+      ></video>
 
-    <p>
-        Photograph something, select a point and
-        transform it with a powerful local
-        magnification effect.
-    </p>
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">✦</div>
+        <h1>À la recherche de quelqu'un</h1>
+        <p>Une nouvelle rencontre peut commencer maintenant.</p>
+      </div>
 
-</section>
-
-
-<main class="workspace">
-
-
-<!-- CAMERA -->
-
-<section class="card">
-
-    <div class="card-header">
-
-        <div class="card-title">
-            CAMERA
-        </div>
-
-        <div
-            id="cameraStatus"
-            class="status">
-
-            Offline
-
-        </div>
-
-    </div>
-
-
-    <div class="camera">
-
+      <div class="local-wrapper">
         <video
-            id="video"
-            autoplay
-            playsinline>
-        </video>
+          id="localVideo"
+          autoplay
+          muted
+          playsinline
+        ></video>
 
-    </div>
+        <div class="local-label">
+          Vous
+        </div>
+      </div>
 
+      <button
+        class="chat-button"
+        id="chatButton"
+        title="Chat"
+      >
+        💬
+      </button>
 
-    <div class="controls">
+      <div class="controls">
 
         <button
-            id="capture"
-            class="primary">
-
-            ✦ Take photo
-
+          class="control active"
+          id="micButton"
+          title="Micro"
+        >
+          🎙
         </button>
 
         <button
-            id="switch"
-            class="icon-btn">
-
-            ↻
-
+          class="control active"
+          id="cameraButton"
+          title="Caméra"
+        >
+          ◉
         </button>
 
-    </div>
-
-
-    <div class="settings">
-
-        <div class="setting-row">
-
-            <span>
-                MAGNIFICATION
-            </span>
-
-            <span id="intensityValue">
-                3.0×
-            </span>
-
-        </div>
-
-        <input
-            id="intensity"
-            type="range"
-            min="1"
-            max="6"
-            step=".1"
-            value="3">
-
-    </div>
-
-</section>
-
-
-<!-- RESULT -->
-
-<section class="card result">
-
-    <div class="card-header">
-
-        <div class="card-title">
-            GIANT RESULT
-        </div>
-
-        <div
-            id="resultStatus"
-            class="status">
-
-            Waiting
-
-        </div>
-
-    </div>
-
-
-    <div
-        id="resultArea"
-        class="result-area">
-
-        <canvas
-            id="resultCanvas">
-        </canvas>
-
-        <div
-            id="placeholder"
-            class="placeholder">
-
-            <div class="placeholder-icon">
-                ◉
-            </div>
-
-            <p>
-                Prends une photo pour commencer
-            </p>
-
-        </div>
-
-        <div
-            id="magnifier"
-            class="magnifier">
-        </div>
-
-    </div>
-
-
-    <div class="instructions">
-
-        Après la photo, touche directement
-        l'objet que tu veux agrandir.
-        L'effet sera appliqué autour du point sélectionné.
-
-    </div>
-
-</section>
-
-</main>
-
-
-<div class="footer">
-
-    <span>
-        Nothing is uploaded. Everything runs locally.
-    </span>
-
-    <div>
-
-        <button id="download">
-            ↓ Save image
+        <button
+          class="control danger"
+          id="reportButton"
+          title="Signaler"
+        >
+          ⚑
         </button>
 
-        <button id="reset">
-            Reset
+        <button
+          class="next"
+          id="nextButton"
+        >
+          Suivant&nbsp; →
         </button>
 
+      </div>
+
     </div>
+
+  </main>
 
 </div>
 
-</div>
+<!-- CHAT -->
 
+<aside class="chat" id="chat">
+
+  <div class="chat-header">
+    <strong>Discussion</strong>
+
+    <button id="closeChat">
+      ✕
+    </button>
+  </div>
+
+  <div
+    class="chat-messages"
+    id="chatMessages"
+  ></div>
+
+  <form
+    class="chat-input"
+    id="chatForm"
+  >
+    <input
+      id="chatInput"
+      autocomplete="off"
+      placeholder="Écrire un message..."
+    />
+
+    <button type="submit">
+      ↑
+    </button>
+  </form>
+
+</aside>
 
 <script>
 
-/* =========================================
-   ELEMENTS
-========================================= */
+/*
+|--------------------------------------------------------------------------
+| CONFIGURATION
+|--------------------------------------------------------------------------
+*/
 
-const video =
-    document.getElementById("video");
+const SERVER_URL = "wss://YOUR-RENDER-URL.onrender.com";
 
-const capture =
-    document.getElementById("capture");
+/*
+|--------------------------------------------------------------------------
+| DOM
+|--------------------------------------------------------------------------
+*/
 
-const switchButton =
-    document.getElementById("switch");
+const localVideo = document.getElementById("localVideo");
+const remoteVideo = document.getElementById("remoteVideo");
 
-const intensity =
-    document.getElementById("intensity");
+const status = document.getElementById("status");
+const statusText = document.getElementById("statusText");
 
-const intensityValue =
-    document.getElementById("intensityValue");
+const emptyState = document.getElementById("emptyState");
 
-const canvas =
-    document.getElementById("resultCanvas");
+const micButton = document.getElementById("micButton");
+const cameraButton = document.getElementById("cameraButton");
+const nextButton = document.getElementById("nextButton");
+const reportButton = document.getElementById("reportButton");
 
-const resultArea =
-    document.getElementById("resultArea");
+const chatButton = document.getElementById("chatButton");
+const closeChat = document.getElementById("closeChat");
+const chat = document.getElementById("chat");
 
-const placeholder =
-    document.getElementById("placeholder");
+const chatForm = document.getElementById("chatForm");
+const chatInput = document.getElementById("chatInput");
+const chatMessages = document.getElementById("chatMessages");
 
-const magnifier =
-    document.getElementById("magnifier");
+/*
+|--------------------------------------------------------------------------
+| STATE
+|--------------------------------------------------------------------------
+*/
 
-const cameraStatus =
-    document.getElementById("cameraStatus");
+let socket = null;
+let peerConnection = null;
+let localStream = null;
 
-const resultStatus =
-    document.getElementById("resultStatus");
+let isInitiator = false;
+let connected = false;
 
-const download =
-    document.getElementById("download");
+let pendingCandidates = [];
 
-const reset =
-    document.getElementById("reset");
+/*
+|--------------------------------------------------------------------------
+| WEBRTC
+|--------------------------------------------------------------------------
+*/
 
-
-let stream = null;
-
-let facingMode = "environment";
-
-let originalImage = null;
-
-let hasPhoto = false;
-
-
-/* =========================================
-   CAMERA
-========================================= */
+const rtcConfig = {
+  iceServers: [
+    {
+      urls: "stun:stun.l.google.com:19302"
+    }
+  ]
+};
 
 async function startCamera() {
 
+  try {
+
+    localStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        width: {
+          ideal: 1280
+        },
+        height: {
+          ideal: 720
+        },
+        facingMode: "user"
+      },
+      audio: true
+    });
+
+    localVideo.srcObject = localStream;
+
+  } catch (error) {
+
+    console.error(error);
+
+    setStatus(
+      "Autorisation caméra / micro nécessaire",
+      false
+    );
+
+  }
+}
+
+/*
+|--------------------------------------------------------------------------
+| SOCKET
+|--------------------------------------------------------------------------
+*/
+
+function connectSocket() {
+
+  socket = new WebSocket(SERVER_URL);
+
+  socket.addEventListener("open", () => {
+
+    console.log("WebSocket connected");
+
+    setStatus("Recherche...", false);
+
+    send({
+      type: "join"
+    });
+
+  });
+
+  socket.addEventListener("message", async event => {
+
+    let message;
+
     try {
-
-        if (stream) {
-
-            stream
-                .getTracks()
-                .forEach(track =>
-                    track.stop()
-                );
-
-        }
-
-
-        stream =
-            await navigator
-                .mediaDevices
-                .getUserMedia({
-
-                    video: {
-
-                        facingMode,
-
-                        width: {
-                            ideal: 1280
-                        },
-
-                        height: {
-                            ideal: 720
-                        }
-
-                    },
-
-                    audio: false
-
-                });
-
-
-        video.srcObject =
-            stream;
-
-
-        cameraStatus.textContent =
-            "● Live";
-
-
-    } catch(error) {
-
-        console.error(error);
-
-        cameraStatus.textContent =
-            "Camera unavailable";
-
+      message = JSON.parse(event.data);
+    } catch {
+      return;
     }
+
+    await handleServerMessage(message);
+
+  });
+
+  socket.addEventListener("close", () => {
+
+    connected = false;
+
+    setStatus(
+      "Serveur déconnecté",
+      false
+    );
+
+    cleanupPeer();
+
+  });
+
+  socket.addEventListener("error", error => {
+
+    console.error("WebSocket error", error);
+
+    setStatus(
+      "Erreur de connexion",
+      false
+    );
+
+  });
+}
+
+function send(data) {
+
+  if (
+    socket &&
+    socket.readyState === WebSocket.OPEN
+  ) {
+    socket.send(JSON.stringify(data));
+  }
 
 }
 
+/*
+|--------------------------------------------------------------------------
+| SERVER EVENTS
+|--------------------------------------------------------------------------
+*/
 
-/* =========================================
-   SWITCH CAMERA
-========================================= */
+async function handleServerMessage(message) {
 
-switchButton.addEventListener(
-    "click",
-    async () => {
+  switch (message.type) {
 
-        facingMode =
-            facingMode === "environment"
-            ? "user"
-            : "environment";
+    case "connected":
 
-        await startCamera();
+      setStatus(
+        "Recherche...",
+        false
+      );
 
-    }
-);
+      break;
 
+    case "searching":
 
-/* =========================================
-   TAKE PHOTO
-========================================= */
+      connected = false;
 
-capture.addEventListener(
-    "click",
-    () => {
+      setStatus(
+        "Recherche de quelqu'un...",
+        false
+      );
 
-        if (!video.videoWidth) {
+      emptyState.style.display = "flex";
 
-            return;
+      break;
 
-        }
+    case "matched":
 
+      isInitiator = message.initiator;
 
-        canvas.width =
-            video.videoWidth;
+      connected = true;
 
-        canvas.height =
-            video.videoHeight;
+      setStatus(
+        "Connecté",
+        true
+      );
 
+      emptyState.style.display = "none";
 
-        const ctx =
-            canvas.getContext("2d");
+      await createPeerConnection();
 
+      if (isInitiator) {
+        await createOffer();
+      }
 
-        ctx.drawImage(
-            video,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
+      break;
 
+    case "offer":
 
-        originalImage =
-            ctx.getImageData(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
+      await handleOffer(message.data);
 
+      break;
 
-        hasPhoto = true;
+    case "answer":
 
+      await handleAnswer(message.data);
 
-        placeholder.style.display =
-            "none";
+      break;
 
+    case "ice-candidate":
 
-        resultStatus.textContent =
-            "Touch the object";
+      await handleIceCandidate(message.data);
 
+      break;
 
-        capture.textContent =
-            "✓ Photo captured";
+    case "peer-left":
 
+      cleanupPeer();
 
-        setTimeout(() => {
+      connected = false;
 
-            capture.textContent =
-                "✦ Take photo";
+      setStatus(
+        "La personne est partie",
+        false
+      );
 
-        }, 1200);
+      emptyState.style.display = "flex";
 
-    }
-);
+      setTimeout(() => {
 
+        send({
+          type: "join"
+        });
 
-/* =========================================
-   INTENSITY
-========================================= */
+      }, 800);
 
-intensity.addEventListener(
-    "input",
-    () => {
+      break;
 
-        intensityValue.textContent =
-            Number(intensity.value)
-            .toFixed(1) + "×";
-
-
-        if (hasPhoto) {
-
-            /*
-              Si un point a déjà été choisi,
-              on recalcule.
-            */
-
-            if (selectedPoint) {
-
-                applyBulge(
-                    selectedPoint.x,
-                    selectedPoint.y
-                );
-
-            }
-
-        }
-
-    }
-);
-
-
-/* =========================================
-   SELECTED POINT
-========================================= */
-
-let selectedPoint = null;
-
-
-/* =========================================
-   TOUCH / CLICK
-========================================= */
-
-function selectPoint(event) {
-
-    if (!hasPhoto) {
-
-        return;
-
-    }
-
-
-    const rect =
-        resultArea.getBoundingClientRect();
-
-
-    let x;
-    let y;
-
-
-    if (event.touches) {
-
-        x =
-            event.touches[0].clientX
-            - rect.left;
-
-        y =
-            event.touches[0].clientY
-            - rect.top;
-
-    } else {
-
-        x =
-            event.clientX
-            - rect.left;
-
-        y =
-            event.clientY
-            - rect.top;
-
-    }
-
-
-    const normalizedX =
-        x / rect.width;
-
-    const normalizedY =
-        y / rect.height;
-
-
-    selectedPoint = {
-
-        x: normalizedX,
-        y: normalizedY
-
-    };
-
-
-    magnifier.style.display =
-        "block";
-
-
-    magnifier.style.left =
-        x + "px";
-
-    magnifier.style.top =
-        y + "px";
-
-
-    applyBulge(
-        normalizedX,
-        normalizedY
-    );
+  }
 
 }
 
+/*
+|--------------------------------------------------------------------------
+| PEER CONNECTION
+|--------------------------------------------------------------------------
+*/
 
-resultArea.addEventListener(
-    "click",
-    selectPoint
-);
+async function createPeerConnection() {
 
+  cleanupPeer();
 
-/* =========================================
-   BULGE EFFECT
-========================================= */
+  peerConnection = new RTCPeerConnection(
+    rtcConfig
+  );
 
-function applyBulge(
-    centerX,
-    centerY
-) {
+  if (localStream) {
 
-    if (!originalImage) {
-        return;
-    }
+    localStream
+      .getTracks()
+      .forEach(track => {
 
-
-    const width =
-        originalImage.width;
-
-    const height =
-        originalImage.height;
-
-
-    const sourceCanvas =
-        document.createElement("canvas");
-
-    sourceCanvas.width =
-        width;
-
-    sourceCanvas.height =
-        height;
-
-
-    const sourceCtx =
-        sourceCanvas.getContext("2d");
-
-
-    sourceCtx.putImageData(
-        originalImage,
-        0,
-        0
-    );
-
-
-    const source =
-        sourceCtx.getImageData(
-            0,
-            0,
-            width,
-            height
+        peerConnection.addTrack(
+          track,
+          localStream
         );
 
+      });
 
-    const output =
-        canvas
-            .getContext("2d")
-            .createImageData(
-                width,
-                height
-            );
+  }
 
+  peerConnection.ontrack = event => {
 
-    const input =
-        source.data;
+    if (event.streams[0]) {
 
-    const result =
-        output.data;
+      remoteVideo.srcObject =
+        event.streams[0];
 
+      emptyState.style.display =
+        "none";
 
-    const cx =
-        centerX * width;
+    }
 
-    const cy =
-        centerY * height;
+  };
 
+  peerConnection.onicecandidate = event => {
 
-    /*
-       Rayon de l'effet.
+    if (event.candidate) {
 
-       On prend environ 38 %
-       de la largeur de l'image.
-    */
+      send({
+        type: "ice-candidate",
+        data: event.candidate
+      });
 
-    const radius =
-        Math.min(width, height)
-        * 0.42;
+    }
 
+  };
 
-    /*
-       Intensité du grossissement.
-    */
+  peerConnection.onconnectionstatechange = () => {
 
-    const strength =
-        Number(intensity.value);
+    if (!peerConnection) {
+      return;
+    }
 
+    const state =
+      peerConnection.connectionState;
 
-    for (
-        let y = 0;
-        y < height;
-        y++
+    console.log(
+      "WebRTC:",
+      state
+    );
+
+    if (state === "connected") {
+
+      setStatus(
+        "Connecté",
+        true
+      );
+
+    }
+
+    if (
+      state === "failed" ||
+      state === "disconnected"
     ) {
 
-        for (
-            let x = 0;
-            x < width;
-            x++
-        ) {
-
-            const dx =
-                x - cx;
-
-            const dy =
-                y - cy;
-
-
-            const distance =
-                Math.sqrt(
-                    dx * dx +
-                    dy * dy
-                );
-
-
-            let sourceX = x;
-            let sourceY = y;
-
-
-            if (distance < radius) {
-
-                /*
-                   Normalisation du rayon
-                */
-
-                const r =
-                    distance / radius;
-
-
-                /*
-                   Fonction de déformation.
-
-                   Plus r est petit,
-                   plus on va chercher
-                   près du centre.
-
-                   Cela crée l'effet
-                   "loupe / grosse main".
-                */
-
-                const power =
-                    1 +
-                    strength * 0.9;
-
-
-                const distorted =
-                    Math.pow(r, power);
-
-
-                const factor =
-                    distorted / r || 0;
-
-
-                sourceX =
-                    cx + dx * factor;
-
-                sourceY =
-                    cy + dy * factor;
-
-            }
-
-
-            sourceX =
-                Math.max(
-                    0,
-                    Math.min(
-                        width - 1,
-                        sourceX
-                    )
-                );
-
-
-            sourceY =
-                Math.max(
-                    0,
-                    Math.min(
-                        height - 1,
-                        sourceY
-                    )
-                );
-
-
-            /*
-               Bilinéaire simplifié
-            */
-
-            const sx =
-                Math.floor(sourceX);
-
-            const sy =
-                Math.floor(sourceY);
-
-
-            const sourceIndex =
-                (sy * width + sx) * 4;
-
-
-            const outputIndex =
-                (y * width + x) * 4;
-
-
-            result[outputIndex] =
-                input[sourceIndex];
-
-            result[outputIndex + 1] =
-                input[sourceIndex + 1];
-
-            result[outputIndex + 2] =
-                input[sourceIndex + 2];
-
-            result[outputIndex + 3] =
-                255;
-
-        }
+      setStatus(
+        "Connexion instable",
+        false
+      );
 
     }
 
-
-    canvas
-        .getContext("2d")
-        .putImageData(
-            output,
-            0,
-            0
-        );
-
-
-    resultStatus.textContent =
-        "Giant × " +
-        strength.toFixed(1);
+  };
 
 }
 
+/*
+|--------------------------------------------------------------------------
+| OFFER
+|--------------------------------------------------------------------------
+*/
 
-/* =========================================
-   DOWNLOAD
-========================================= */
+async function createOffer() {
 
-download.addEventListener(
-    "click",
-    () => {
+  if (!peerConnection) {
+    return;
+  }
 
-        if (!hasPhoto) {
-            return;
-        }
+  const offer =
+    await peerConnection.createOffer();
 
+  await peerConnection.setLocalDescription(
+    offer
+  );
 
-        const link =
-            document.createElement("a");
+  send({
+    type: "offer",
+    data: offer
+  });
 
+}
 
-        link.download =
-            "giant-effect.png";
+/*
+|--------------------------------------------------------------------------
+| HANDLE OFFER
+|--------------------------------------------------------------------------
+*/
 
+async function handleOffer(offer) {
 
-        link.href =
-            canvas.toDataURL(
-                "image/png"
-            );
+  if (!peerConnection) {
 
+    await createPeerConnection();
 
-        link.click();
+  }
+
+  await peerConnection.setRemoteDescription(
+    new RTCSessionDescription(offer)
+  );
+
+  await flushCandidates();
+
+  const answer =
+    await peerConnection.createAnswer();
+
+  await peerConnection.setLocalDescription(
+    answer
+  );
+
+  send({
+    type: "answer",
+    data: answer
+  });
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| HANDLE ANSWER
+|--------------------------------------------------------------------------
+*/
+
+async function handleAnswer(answer) {
+
+  if (!peerConnection) {
+    return;
+  }
+
+  await peerConnection.setRemoteDescription(
+    new RTCSessionDescription(answer)
+  );
+
+  await flushCandidates();
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| ICE
+|--------------------------------------------------------------------------
+*/
+
+async function handleIceCandidate(candidate) {
+
+  if (!peerConnection) {
+    return;
+  }
+
+  if (
+    peerConnection.remoteDescription
+  ) {
+
+    try {
+
+      await peerConnection.addIceCandidate(
+        new RTCIceCandidate(candidate)
+      );
+
+    } catch (error) {
+
+      console.error(error);
 
     }
-);
 
+  } else {
 
-/* =========================================
-   RESET
-========================================= */
+    pendingCandidates.push(candidate);
 
-reset.addEventListener(
-    "click",
-    () => {
+  }
 
-        hasPhoto = false;
+}
 
-        originalImage = null;
+async function flushCandidates() {
 
-        selectedPoint = null;
+  for (
+    const candidate
+    of pendingCandidates
+  ) {
 
+    try {
 
-        const ctx =
-            canvas.getContext("2d");
+      await peerConnection.addIceCandidate(
+        new RTCIceCandidate(candidate)
+      );
 
+    } catch (error) {
 
-        ctx.clearRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-
-        placeholder.style.display =
-            "flex";
-
-
-        magnifier.style.display =
-            "none";
-
-
-        resultStatus.textContent =
-            "Waiting";
+      console.error(error);
 
     }
+
+  }
+
+  pendingCandidates = [];
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| NEXT
+|--------------------------------------------------------------------------
+*/
+
+nextButton.addEventListener(
+  "click",
+  () => {
+
+    cleanupPeer();
+
+    connected = false;
+
+    emptyState.style.display =
+      "flex";
+
+    setStatus(
+      "Recherche...",
+      false
+    );
+
+    clearChat();
+
+    send({
+      type: "next"
+    });
+
+  }
 );
 
+/*
+|--------------------------------------------------------------------------
+| CLEANUP
+|--------------------------------------------------------------------------
+*/
 
-/* =========================================
-   START
-========================================= */
+function cleanupPeer() {
 
-startCamera();
+  if (peerConnection) {
+
+    peerConnection.ontrack = null;
+    peerConnection.onicecandidate = null;
+
+    peerConnection.close();
+
+    peerConnection = null;
+
+  }
+
+  remoteVideo.srcObject = null;
+
+  pendingCandidates = [];
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| MICROPHONE
+|--------------------------------------------------------------------------
+*/
+
+micButton.addEventListener(
+  "click",
+  () => {
+
+    if (!localStream) {
+      return;
+    }
+
+    const track =
+      localStream.getAudioTracks()[0];
+
+    if (!track) {
+      return;
+    }
+
+    track.enabled =
+      !track.enabled;
+
+    micButton.classList.toggle(
+      "active",
+      track.enabled
+    );
+
+    micButton.textContent =
+      track.enabled
+        ? "🎙"
+        : "🔇";
+
+  }
+);
+
+/*
+|--------------------------------------------------------------------------
+| CAMERA
+|--------------------------------------------------------------------------
+*/
+
+cameraButton.addEventListener(
+  "click",
+  () => {
+
+    if (!localStream) {
+      return;
+    }
+
+    const track =
+      localStream.getVideoTracks()[0];
+
+    if (!track) {
+      return;
+    }
+
+    track.enabled =
+      !track.enabled;
+
+    cameraButton.classList.toggle(
+      "active",
+      track.enabled
+    );
+
+    cameraButton.textContent =
+      track.enabled
+        ? "◉"
+        : "⊘";
+
+  }
+);
+
+/*
+|--------------------------------------------------------------------------
+| REPORT
+|--------------------------------------------------------------------------
+*/
+
+reportButton.addEventListener(
+  "click",
+  () => {
+
+    if (!connected) {
+      return;
+    }
+
+    send({
+      type: "report"
+    });
+
+    alert(
+      "Merci. Le signalement a été envoyé."
+    );
+
+  }
+);
+
+/*
+|--------------------------------------------------------------------------
+| CHAT
+|--------------------------------------------------------------------------
+*/
+
+chatButton.addEventListener(
+  "click",
+  () => {
+
+    chat.classList.add("open");
+
+    setTimeout(() => {
+      chatInput.focus();
+    }, 200);
+
+  }
+);
+
+closeChat.addEventListener(
+  "click",
+  () => {
+
+    chat.classList.remove("open");
+
+  }
+);
+
+chatForm.addEventListener(
+  "submit",
+  event => {
+
+    event.preventDefault();
+
+    const text =
+      chatInput.value.trim();
+
+    if (!text || !connected) {
+      return;
+    }
+
+    addMessage(
+      text,
+      true
+    );
+
+    send({
+      type: "chat",
+      data: {
+        text
+      }
+    });
+
+    chatInput.value = "";
+
+  }
+);
+
+function addMessage(
+  text,
+  mine = false
+) {
+
+  const element =
+    document.createElement("div");
+
+  element.className =
+    "message" +
+    (mine ? " mine" : "");
+
+  element.textContent =
+    text;
+
+  chatMessages.appendChild(
+    element
+  );
+
+  chatMessages.scrollTop =
+    chatMessages.scrollHeight;
+
+}
+
+function clearChat() {
+
+  chatMessages.innerHTML = "";
+
+}
+
+async function handleChat(data) {
+
+  if (
+    data &&
+    typeof data.text === "string"
+  ) {
+
+    addMessage(
+      data.text,
+      false
+    );
+
+  }
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| STATUS
+|--------------------------------------------------------------------------
+*/
+
+function setStatus(
+  text,
+  isConnected
+) {
+
+  statusText.textContent =
+    text;
+
+  status.classList.toggle(
+    "connected",
+    isConnected
+  );
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| OVERRIDE CHAT MESSAGE
+|--------------------------------------------------------------------------
+*/
+
+const originalHandler =
+  handleServerMessage;
+
+handleServerMessage =
+  async function(message) {
+
+    if (message.type === "chat") {
+
+      await handleChat(
+        message.data
+      );
+
+      return;
+
+    }
+
+    return originalHandler(message);
+
+  };
+
+/*
+|--------------------------------------------------------------------------
+| START
+|--------------------------------------------------------------------------
+*/
+
+(async function() {
+
+  await startCamera();
+
+  connectSocket();
+
+})();
 
 </script>
 
 </body>
 </html>
-```
