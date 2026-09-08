@@ -10,9 +10,13 @@
   content="width=device-width, initial-scale=1.0"
 >
 
-<title>Vibe — Room</title>
+<title>Col'inCall</title>
 
 <style>
+
+/* =========================================================
+   RESET
+========================================================= */
 
 * {
   box-sizing: border-box;
@@ -22,21 +26,53 @@
 
 :root {
   --bg: #08090d;
-  --panel: #11131a;
-  --panel2: #171922;
-  --border: rgba(255,255,255,.09);
-  --text: #fff;
-  --muted: #8e94a3;
+  --surface: #101219;
+  --surface-2: #151720;
+  --surface-3: #1b1e28;
+
+  --border: rgba(255,255,255,.08);
+
+  --text: #ffffff;
+  --muted: #8d93a3;
+
   --accent: #765cff;
-  --green: #36e58a;
-  --danger: #ff4967;
+  --accent-light: #907aff;
+
+  --green: #35e58a;
+  --red: #ff4f6d;
+
+  --shadow:
+    0 20px 70px rgba(0,0,0,.35);
 }
+
+/* =========================================================
+   BODY
+========================================================= */
 
 html,
 body {
   width: 100%;
   height: 100%;
+}
+
+body {
   overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 15% 10%,
+      rgba(118,92,255,.13),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 90%,
+      rgba(0,212,255,.07),
+      transparent 30%
+    ),
+    var(--bg);
+
+  color: var(--text);
+
   font-family:
     Inter,
     system-ui,
@@ -44,77 +80,109 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  background: var(--bg);
-  color: var(--text);
 }
 
-/* =========================
+/* =========================================================
    APP
-========================= */
+========================================================= */
 
 .app {
   width: 100%;
-  height: 100%;
+  height: 100dvh;
+
   display: grid;
-  grid-template-columns: 1fr 340px;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    350px;
 }
 
-/* =========================
+/* =========================================================
    MAIN
-========================= */
+========================================================= */
 
 .main {
   min-width: 0;
+  min-height: 0;
+
   display: flex;
   flex-direction: column;
 }
 
-/* =========================
+/* =========================================================
    HEADER
-========================= */
+========================================================= */
 
 .header {
-  height: 72px;
-  padding: 0 24px;
+  height: 70px;
+  min-height: 70px;
+
+  padding: 0 22px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--border);
+
+  border-bottom:
+    1px solid var(--border);
+
+  background:
+    rgba(8,9,13,.72);
+
+  backdrop-filter:
+    blur(25px);
+
+  position: relative;
+  z-index: 10;
 }
 
 .logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 20px;
+
+  font-size: 19px;
   font-weight: 800;
+
+  letter-spacing: -.6px;
 }
 
-.logoDot {
-  width: 11px;
-  height: 11px;
+.logo-mark {
+  width: 12px;
+  height: 12px;
+
   border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    #7b5cff,
-    #00d4ff
-  );
+
+  background:
+    linear-gradient(
+      135deg,
+      #765cff,
+      #00d4ff
+    );
+
   box-shadow:
-    0 0 20px rgba(118,92,255,.7);
+    0 0 20px rgba(118,92,255,.8);
 }
 
-.roomInfo {
+.header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
-.roomBadge {
-  padding: 8px 13px;
+.room-badge {
+  padding: 8px 12px;
+
   border-radius: 10px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid var(--border);
+
+  border:
+    1px solid var(--border);
+
+  background:
+    rgba(255,255,255,.04);
+
   color: var(--muted);
+
   font-size: 12px;
 }
 
@@ -122,302 +190,959 @@ body {
   display: flex;
   align-items: center;
   gap: 7px;
+
   color: var(--muted);
-  font-size: 13px;
-}
 
-.onlineDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 12px var(--green);
-}
-
-/* =========================
-   VIDEOS
-========================= */
-
-.videos {
-  flex: 1;
-  min-height: 0;
-  padding: 18px;
-  display: grid;
-  grid-template-columns:
-    repeat(
-      auto-fit,
-      minmax(280px, 1fr)
-    );
-  grid-auto-rows: minmax(180px, 1fr);
-  gap: 14px;
-  overflow: auto;
-}
-
-.videoCard {
-  position: relative;
-  min-height: 180px;
-  overflow: hidden;
-  border-radius: 20px;
-  background:
-    radial-gradient(
-      circle at 50% 30%,
-      rgba(118,92,255,.10),
-      transparent 45%
-    ),
-    #12141b;
-  border: 1px solid var(--border);
-  box-shadow:
-    0 15px 40px rgba(0,0,0,.22);
-}
-
-.videoCard video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.videoCard.local video {
-  transform: scaleX(-1);
-}
-
-.userInfo {
-  position: absolute;
-  left: 13px;
-  bottom: 13px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 11px;
-  border-radius: 11px;
-  background: rgba(0,0,0,.52);
-  backdrop-filter: blur(15px);
   font-size: 12px;
 }
 
-.micState {
-  opacity: .8;
-}
+.online-dot {
+  width: 7px;
+  height: 7px;
 
-/* Avatar quand vidéo indisponible */
-
-.avatar {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-}
-
-.avatarCircle {
-  width: 80px;
-  height: 80px;
   border-radius: 50%;
+
+  background: var(--green);
+
+  box-shadow:
+    0 0 12px var(--green);
+}
+
+/* =========================================================
+   VIDEO AREA
+========================================================= */
+
+.video-area {
+  flex: 1;
+
+  min-width: 0;
+  min-height: 0;
+
+  position: relative;
+
+  padding: 14px;
+}
+
+/*
+   IMPORTANT :
+   Les contrôles sont maintenant positionnés
+   indépendamment de la grille vidéo.
+*/
+
+.video-grid {
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+
+  gap: 12px;
+
+  overflow-y: auto;
+
+  padding-bottom: 78px;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(
+        260px,
+        1fr
+      )
+    );
+
+  grid-auto-rows:
+    minmax(
+      180px,
+      1fr
+    );
+
+  align-content: center;
+}
+
+/* =========================================================
+   VIDEO CARD
+========================================================= */
+
+.video-card {
+
+  position: relative;
+
+  min-width: 0;
+  min-height: 180px;
+
+  overflow: hidden;
+
+  border-radius: 19px;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(118,92,255,.09),
+      transparent 55%
+    ),
+    #12141b;
+
+  border:
+    1px solid var(--border);
+
+  box-shadow:
+    0 15px 45px rgba(0,0,0,.25);
+
+  animation:
+    cardIn .35s ease both;
+}
+
+@keyframes cardIn {
+
+  from {
+    opacity: 0;
+    transform: scale(.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+}
+
+.video-card video {
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+.video-card.local video {
+  transform: scaleX(-1);
+}
+
+/* =========================================================
+   USER LABEL
+========================================================= */
+
+.user-label {
+
+  position: absolute;
+
+  left: 11px;
+  bottom: 11px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 7px 10px;
+
+  border-radius: 10px;
+
+  background:
+    rgba(0,0,0,.52);
+
+  backdrop-filter:
+    blur(15px);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  font-size: 11px;
+
+  z-index: 3;
+}
+
+.user-avatar {
+
+  width: 22px;
+  height: 22px;
+
   display: grid;
   place-items: center;
-  font-size: 28px;
-  font-weight: 700;
+
+  border-radius: 50%;
+
   background:
     linear-gradient(
       135deg,
-      rgba(118,92,255,.8),
-      rgba(0,212,255,.7)
+      #765cff,
+      #00c8ff
     );
-  box-shadow:
-    0 0 60px rgba(118,92,255,.2);
+
+  font-size: 10px;
+  font-weight: 800;
 }
 
-/* =========================
+.mic-indicator {
+  opacity: .8;
+}
+
+/* =========================================================
+   EMPTY / AVATAR
+========================================================= */
+
+.video-avatar {
+
+  position: absolute;
+
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+
+  pointer-events: none;
+}
+
+.avatar-large {
+
+  width: 80px;
+  height: 80px;
+
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(118,92,255,.85),
+      rgba(0,212,255,.75)
+    );
+
+  font-size: 28px;
+  font-weight: 800;
+
+  box-shadow:
+    0 0 70px
+    rgba(118,92,255,.22);
+}
+
+/* =========================================================
    CONTROLS
-========================= */
+========================================================= */
 
 .controls {
-  height: 82px;
+
+  position: absolute;
+
+  left: 50%;
+  bottom: 16px;
+
+  transform:
+    translateX(-50%);
+
+  z-index: 20;
+
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-top: 1px solid var(--border);
+
+  gap: 9px;
+
+  padding: 8px 9px;
+
+  border-radius: 18px;
+
+  background:
+    rgba(12,13,18,.82);
+
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
+  backdrop-filter:
+    blur(25px);
+
+  box-shadow:
+    0 15px 50px
+    rgba(0,0,0,.45);
 }
 
 .control {
-  width: 48px;
-  height: 48px;
-  border-radius: 15px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,.055);
+
+  width: 46px;
+  height: 46px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 13px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.08);
+
+  background:
+    rgba(255,255,255,.055);
+
   color: white;
-  font-size: 18px;
-  transition: .2s;
+
+  font-size: 17px;
+
+  transition:
+    transform .18s ease,
+    background .18s ease;
 }
 
 .control:hover {
-  background: rgba(255,255,255,.11);
-  transform: translateY(-2px);
+
+  transform:
+    translateY(-2px);
+
+  background:
+    rgba(255,255,255,.12);
 }
 
 .control.off {
-  background: rgba(255,73,103,.15);
-  color: #ff7188;
+
+  background:
+    rgba(255,79,109,.16);
+
+  color:
+    #ff7188;
 }
 
 .leave {
-  width: 110px;
-  height: 48px;
-  margin-left: 8px;
-  border-radius: 15px;
+
+  height: 46px;
+
+  padding:
+    0 19px;
+
+  margin-left: 4px;
+
+  border-radius: 13px;
+
   border: 0;
-  background: var(--danger);
+
+  background:
+    var(--red);
+
   color: white;
+
+  font-size: 12px;
+
   font-weight: 750;
-  transition: .2s;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease;
 }
 
 .leave:hover {
-  transform: translateY(-2px);
+
+  transform:
+    translateY(-2px);
+
   box-shadow:
-    0 10px 30px rgba(255,73,103,.25);
+    0 10px 30px
+    rgba(255,79,109,.25);
 }
 
-/* =========================
+/* =========================================================
    CHAT
-========================= */
+========================================================= */
 
 .chat {
+
   min-width: 0;
+  min-height: 0;
+
   display: flex;
   flex-direction: column;
-  background: #0d0f14;
-  border-left: 1px solid var(--border);
+
+  background:
+    rgba(13,15,20,.96);
+
+  border-left:
+    1px solid var(--border);
 }
 
-.chatHeader {
-  height: 72px;
-  padding: 0 20px;
+/* =========================================================
+   CHAT HEADER
+========================================================= */
+
+.chat-header {
+
+  height: 70px;
+  min-height: 70px;
+
+  padding:
+    0 18px;
+
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--border);
+  justify-content: space-between;
+
+  border-bottom:
+    1px solid var(--border);
 }
 
-.chatTitle {
+.chat-title {
+
+  font-size: 14px;
   font-weight: 750;
 }
 
-.chatSubtitle {
+.chat-subtitle {
+
   margin-top: 3px;
-  color: var(--muted);
-  font-size: 11px;
-}
 
-.messages {
-  flex: 1;
-  min-height: 0;
-  padding: 18px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+  color:
+    var(--muted);
 
-.message {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-width: 85%;
-}
-
-.message.mine {
-  align-self: flex-end;
-  align-items: flex-end;
-}
-
-.messageName {
-  color: var(--muted);
   font-size: 10px;
 }
 
-.messageBubble {
-  padding: 10px 12px;
-  border-radius: 13px;
-  background: rgba(255,255,255,.06);
-  color: #e8e9ed;
-  font-size: 13px;
-  line-height: 1.45;
+.chat-status {
+
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background:
+    var(--green);
+
+  box-shadow:
+    0 0 12px var(--green);
 }
 
-.message.mine .messageBubble {
-  background: var(--accent);
-  color: white;
-}
+/* =========================================================
+   MESSAGES
+========================================================= */
 
-.chatInput {
-  padding: 13px;
-  border-top: 1px solid var(--border);
+.messages {
+
+  flex: 1;
+
+  min-height: 0;
+
+  overflow-y: auto;
+
+  padding:
+    17px;
+
   display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.empty-chat {
+
+  flex: 1;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  color:
+    var(--muted);
+
+  font-size: 12px;
+
+  padding:
+    30px;
+}
+
+.message {
+
+  max-width: 82%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  animation:
+    messageIn .25s ease both;
+}
+
+@keyframes messageIn {
+
+  from {
+    opacity: 0;
+    transform:
+      translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0);
+  }
+
+}
+
+.message.mine {
+
+  align-self: flex-end;
+
+  align-items: flex-end;
+}
+
+.message-name {
+
+  color:
+    var(--muted);
+
+  font-size: 9px;
+
+  padding:
+    0 4px;
+}
+
+.message-bubble {
+
+  padding:
+    10px 12px;
+
+  border-radius:
+    13px;
+
+  background:
+    rgba(255,255,255,.055);
+
+  border:
+    1px solid
+    rgba(255,255,255,.045);
+
+  color:
+    #e9eaf0;
+
+  font-size: 12px;
+
+  line-height: 1.45;
+
+  overflow-wrap: anywhere;
+}
+
+.message.mine
+.message-bubble {
+
+  background:
+    linear-gradient(
+      135deg,
+      #765cff,
+      #6248e3
+    );
+
+  color: white;
+
+  border: 0;
+}
+
+/* =========================================================
+   CHAT INPUT
+========================================================= */
+
+.chat-input {
+
+  padding:
+    12px;
+
+  border-top:
+    1px solid var(--border);
+
+  display: flex;
+
   gap: 8px;
 }
 
-.chatInput input {
-  min-width: 0;
+.chat-input input {
+
   flex: 1;
+
+  min-width: 0;
+
   height: 43px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
+
+  border-radius:
+    12px;
+
+  border:
+    1px solid var(--border);
+
   outline: none;
-  background: rgba(255,255,255,.055);
-  color: white;
-  padding: 0 12px;
+
+  background:
+    rgba(255,255,255,.045);
+
+  color:
+    white;
+
+  padding:
+    0 12px;
+
+  font-size: 12px;
+
+  transition:
+    border .2s ease;
 }
 
-.chatInput button {
+.chat-input input:focus {
+
+  border-color:
+    rgba(118,92,255,.55);
+}
+
+.chat-input button {
+
   width: 43px;
-  border-radius: 12px;
+
+  border-radius:
+    12px;
+
   border: 0;
-  background: var(--accent);
-  color: white;
+
+  background:
+    var(--accent);
+
+  color:
+    white;
+
   font-size: 18px;
 }
 
-/* =========================
-   MOBILE
-========================= */
+/* =========================================================
+   MOBILE CHAT BUTTON
+========================================================= */
 
-@media(max-width: 850px) {
+.mobile-chat-button {
+
+  display: none;
+
+  position: absolute;
+
+  right: 14px;
+  top: 14px;
+
+  z-index: 30;
+
+  width: 47px;
+  height: 47px;
+
+  border-radius:
+    14px;
+
+  background:
+    rgba(12,13,18,.78);
+
+  color:
+    white;
+
+  border:
+    1px solid var(--border);
+
+  backdrop-filter:
+    blur(20px);
+
+  box-shadow:
+    var(--shadow);
+}
+
+/* =========================================================
+   NOTIFICATION BADGE
+========================================================= */
+
+.unread-badge {
+
+  position: absolute;
+
+  top: -5px;
+  right: -5px;
+
+  min-width: 19px;
+  height: 19px;
+
+  padding:
+    0 5px;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background:
+    var(--red);
+
+  color:
+    white;
+
+  border:
+    2px solid var(--bg);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  box-shadow:
+    0 4px 15px
+    rgba(255,79,109,.4);
+
+  animation:
+    notificationPop .25s ease;
+}
+
+.unread-badge.visible {
+  display: flex;
+}
+
+@keyframes notificationPop {
+
+  0% {
+    transform: scale(.5);
+  }
+
+  70% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 850px) {
 
   .app {
-    grid-template-columns: 1fr;
+
+    display: block;
+
+    position: relative;
+
   }
 
-  .chat {
-    display: none;
-  }
+  .main {
 
-  .videos {
-    grid-template-columns:
-      repeat(
-        auto-fit,
-        minmax(160px, 1fr)
-      );
-    grid-auto-rows: minmax(150px, 1fr);
-    padding: 10px;
-    gap: 9px;
-  }
-
-  .videoCard {
-    min-height: 150px;
-    border-radius: 16px;
+    width: 100%;
+    height: 100%;
   }
 
   .header {
-    padding: 0 15px;
-    height: 62px;
+
+    height: 60px;
+    min-height: 60px;
+
+    padding:
+      0 14px;
   }
 
-  .roomBadge {
+  .room-badge {
     display: none;
   }
 
+  .video-area {
+
+    padding:
+      8px;
+  }
+
+  .video-grid {
+
+    gap: 8px;
+
+    padding-bottom:
+      70px;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    grid-auto-rows:
+      minmax(
+        150px,
+        1fr
+      );
+  }
+
+  .video-card {
+
+    min-height:
+      150px;
+
+    border-radius:
+      15px;
+  }
+
   .controls {
-    height: 72px;
+
+    bottom:
+      10px;
+
+    gap:
+      7px;
+
+    padding:
+      7px;
+
+    width:
+      auto;
+
+    max-width:
+      calc(100% - 20px);
+  }
+
+  .control {
+
+    width:
+      44px;
+
+    height:
+      44px;
+  }
+
+  .leave {
+
+    height:
+      44px;
+
+    padding:
+      0 15px;
+  }
+
+  .mobile-chat-button {
+
+    display:
+      grid;
+
+    place-items:
+      center;
+  }
+
+  .chat {
+
+    position:
+      fixed;
+
+    z-index:
+      100;
+
+    right:
+      10px;
+
+    bottom:
+      10px;
+
+    top:
+      70px;
+
+    left:
+      10px;
+
+    border:
+      1px solid
+      rgba(255,255,255,.10);
+
+    border-radius:
+      20px;
+
+    transform:
+      translateY(
+        calc(100% + 30px)
+      );
+
+    transition:
+      transform .3s ease;
+
+    box-shadow:
+      0 30px 100px
+      rgba(0,0,0,.65);
+  }
+
+  .chat.open {
+
+    transform:
+      translateY(0);
+  }
+
+  .chat-header {
+
+    border-radius:
+      20px 20px 0 0;
+  }
+
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+  .video-grid {
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0,1fr)
+      );
+
+  }
+
+  .user-label {
+
+    left:
+      7px;
+
+    bottom:
+      7px;
+
+    padding:
+      5px 7px;
+
+    font-size:
+      9px;
+  }
+
+  .user-avatar {
+
+    width:
+      18px;
+
+    height:
+      18px;
+
+    font-size:
+      8px;
+  }
+
+  .controls {
+
+    width:
+      calc(100% - 20px);
+
+    justify-content:
+      center;
+  }
+
+  .control {
+
+    flex:
+      0 0 43px;
+  }
+
+  .leave {
+
+    flex:
+      1;
+
+    max-width:
+      110px;
   }
 
 }
@@ -430,27 +1155,31 @@ body {
 
 <div class="app">
 
+  <!-- =====================================================
+       MAIN
+  ====================================================== -->
+
   <main class="main">
 
     <header class="header">
 
       <div class="logo">
 
-        <span class="logoDot"></span>
+        <span class="logo-mark"></span>
 
-        Vibe
+        Col'inCall
 
       </div>
 
-      <div class="roomInfo">
+      <div class="header-right">
 
-        <div class="roomBadge">
+        <div class="room-badge">
           Salon général
         </div>
 
         <div class="people">
 
-          <span class="onlineDot"></span>
+          <span class="online-dot"></span>
 
           <span id="peopleCount">
             0 personne
@@ -462,76 +1191,124 @@ body {
 
     </header>
 
-    <section
-      class="videos"
-      id="videos"
-    ></section>
+    <section class="video-area">
 
-    <footer class="controls">
+      <div
+        class="video-grid"
+        id="videoGrid"
+      ></div>
 
-      <button
-        class="control"
-        id="micButton"
-        title="Micro"
-      >
-        🎙
-      </button>
+      <!-- CHAT MOBILE -->
 
       <button
-        class="control"
-        id="cameraButton"
-        title="Caméra"
+        class="mobile-chat-button"
+        id="mobileChatButton"
+        aria-label="Ouvrir le chat"
       >
-        📷
+
+        💬
+
+        <span
+          class="unread-badge"
+          id="unreadBadge"
+        >
+          0
+        </span>
+
       </button>
 
-      <button
-        class="leave"
-        id="leaveButton"
-      >
-        Quitter
-      </button>
+      <!-- CONTROLS -->
 
-    </footer>
+      <div class="controls">
+
+        <button
+          class="control"
+          id="micButton"
+          title="Microphone"
+        >
+          🎙️
+        </button>
+
+        <button
+          class="control"
+          id="cameraButton"
+          title="Caméra"
+        >
+          📷
+        </button>
+
+        <button
+          class="leave"
+          id="leaveButton"
+        >
+          Quitter
+        </button>
+
+      </div>
+
+    </section>
 
   </main>
 
-  <aside class="chat">
+  <!-- =====================================================
+       CHAT
+  ====================================================== -->
 
-    <header class="chatHeader">
+  <aside
+    class="chat"
+    id="chat"
+  >
+
+    <header class="chat-header">
 
       <div>
 
-        <div class="chatTitle">
+        <div class="chat-title">
           Discussion
         </div>
 
-        <div class="chatSubtitle">
-          Les messages sont visibles par tous
+        <div class="chat-subtitle">
+          Messages du salon
         </div>
 
       </div>
+
+      <span class="chat-status"></span>
 
     </header>
 
     <div
       class="messages"
       id="messages"
-    ></div>
+    >
+
+      <div
+        class="empty-chat"
+        id="emptyChat"
+      >
+        Les messages de la conversation
+        apparaîtront ici.
+      </div>
+
+    </div>
 
     <form
-      class="chatInput"
+      class="chat-input"
       id="chatForm"
     >
 
       <input
         id="messageInput"
+        type="text"
         placeholder="Écrire un message..."
         autocomplete="off"
         maxlength="500"
       >
 
-      <button type="submit">
+      <button
+        type="submit"
+        aria-label="Envoyer"
+      >
         ↑
       </button>
 
@@ -543,24 +1320,22 @@ body {
 
 <script>
 
-/*
-==================================================
-CONFIG
-==================================================
-*/
+/* =========================================================
+   CONFIGURATION
+========================================================= */
 
 const SERVER_URL =
   "wss://projet-nz7b.onrender.com";
 
-const ROOM_ID = "general";
+const ROOM_ID =
+  "general";
 
-/*
-==================================================
-STATE
-==================================================
-*/
+/* =========================================================
+   STATE
+========================================================= */
 
 let socket = null;
+
 let localStream = null;
 
 const myId =
@@ -569,13 +1344,16 @@ const myId =
 const myName =
   "Vous";
 
-const peers = new Map();
+const peers =
+  new Map();
 
-/*
-==================================================
-WEBRTC
-==================================================
-*/
+let unreadMessages = 0;
+
+let chatIsOpen = false;
+
+/* =========================================================
+   WEBRTC
+========================================================= */
 
 const rtcConfig = {
 
@@ -590,41 +1368,73 @@ const rtcConfig = {
 
 };
 
-/*
-==================================================
-DOM
-==================================================
-*/
+/* =========================================================
+   DOM
+========================================================= */
 
-const videos =
-  document.getElementById("videos");
+const videoGrid =
+  document.getElementById(
+    "videoGrid"
+  );
 
 const peopleCount =
-  document.getElementById("peopleCount");
+  document.getElementById(
+    "peopleCount"
+  );
 
 const messages =
-  document.getElementById("messages");
+  document.getElementById(
+    "messages"
+  );
 
-const micButton =
-  document.getElementById("micButton");
-
-const cameraButton =
-  document.getElementById("cameraButton");
-
-const leaveButton =
-  document.getElementById("leaveButton");
-
-const chatForm =
-  document.getElementById("chatForm");
+const emptyChat =
+  document.getElementById(
+    "emptyChat"
+  );
 
 const messageInput =
-  document.getElementById("messageInput");
+  document.getElementById(
+    "messageInput"
+  );
 
-/*
-==================================================
-CAMERA
-==================================================
-*/
+const chatForm =
+  document.getElementById(
+    "chatForm"
+  );
+
+const chat =
+  document.getElementById(
+    "chat"
+  );
+
+const mobileChatButton =
+  document.getElementById(
+    "mobileChatButton"
+  );
+
+const unreadBadge =
+  document.getElementById(
+    "unreadBadge"
+  );
+
+const micButton =
+  document.getElementById(
+    "micButton"
+  );
+
+const cameraButton =
+  document.getElementById(
+    "cameraButton"
+  );
+
+const leaveButton =
+  document.getElementById(
+    "leaveButton"
+  );
+
+/* =========================================================
+   CAMERA
+========================================================= */
 
 async function startCamera() {
 
@@ -666,11 +1476,9 @@ async function startCamera() {
 
 }
 
-/*
-==================================================
-VIDEO CARD
-==================================================
-*/
+/* =========================================================
+   CREATE VIDEO CARD
+========================================================= */
 
 function createVideoCard(
   id,
@@ -684,76 +1492,143 @@ function createVideoCard(
       `card-${id}`
     )
   ) {
+
     return;
+
   }
 
   const card =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   card.className =
-    "videoCard" +
-    (local ? " local" : "");
+    "video-card" +
+    (
+      local
+        ? " local"
+        : ""
+    );
 
   card.id =
     `card-${id}`;
 
   const video =
-    document.createElement("video");
+    document.createElement(
+      "video"
+    );
 
   video.autoplay = true;
   video.playsInline = true;
   video.muted = local;
 
   if (stream) {
-    video.srcObject = stream;
+
+    video.srcObject =
+      stream;
+
   }
 
   const avatar =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   avatar.className =
-    "avatar";
+    "video-avatar";
 
-  const avatarCircle =
-    document.createElement("div");
+  const avatarLarge =
+    document.createElement(
+      "div"
+    );
 
-  avatarCircle.className =
-    "avatarCircle";
+  avatarLarge.className =
+    "avatar-large";
 
-  avatarCircle.textContent =
-    name.charAt(0).toUpperCase();
+  avatarLarge.textContent =
+    name
+      .charAt(0)
+      .toUpperCase();
 
   avatar.appendChild(
-    avatarCircle
+    avatarLarge
   );
 
-  const info =
-    document.createElement("div");
+  const label =
+    document.createElement(
+      "div"
+    );
 
-  info.className =
-    "userInfo";
+  label.className =
+    "user-label";
 
-  info.innerHTML = `
-    <span>${escapeHtml(name)}</span>
-    <span class="micState">🎙</span>
-  `;
+  const avatarSmall =
+    document.createElement(
+      "span"
+    );
 
-  card.appendChild(video);
-  card.appendChild(avatar);
-  card.appendChild(info);
+  avatarSmall.className =
+    "user-avatar";
 
-  videos.appendChild(card);
+  avatarSmall.textContent =
+    name
+      .charAt(0)
+      .toUpperCase();
+
+  const username =
+    document.createElement(
+      "span"
+    );
+
+  username.textContent =
+    name;
+
+  const mic =
+    document.createElement(
+      "span"
+    );
+
+  mic.className =
+    "mic-indicator";
+
+  mic.textContent =
+    "🎙️";
+
+  label.appendChild(
+    avatarSmall
+  );
+
+  label.appendChild(
+    username
+  );
+
+  label.appendChild(
+    mic
+  );
+
+  card.appendChild(
+    video
+  );
+
+  card.appendChild(
+    avatar
+  );
+
+  card.appendChild(
+    label
+  );
+
+  videoGrid.appendChild(
+    card
+  );
 
   updatePeopleCount();
 
-  return video;
 }
 
-/*
-==================================================
-REMOVE VIDEO
-==================================================
-*/
+/* =========================================================
+   REMOVE VIDEO
+========================================================= */
 
 function removeVideoCard(id) {
 
@@ -763,49 +1638,94 @@ function removeVideoCard(id) {
     );
 
   if (card) {
-    card.remove();
-  }
 
-  updatePeopleCount();
+    card.style.opacity =
+      "0";
+
+    card.style.transform =
+      "scale(.96)";
+
+    setTimeout(() => {
+
+      card.remove();
+
+      updatePeopleCount();
+
+    }, 180);
+
+  }
 
 }
 
-/*
-==================================================
-SOCKET
-==================================================
-*/
+/* =========================================================
+   PEOPLE COUNT
+========================================================= */
+
+function updatePeopleCount() {
+
+  const count =
+    1 + peers.size;
+
+  peopleCount.textContent =
+    count === 1
+      ? "1 personne"
+      : `${count} personnes`;
+
+}
+
+/* =========================================================
+   SOCKET
+========================================================= */
 
 function connect() {
 
   socket =
-    new WebSocket(SERVER_URL);
+    new WebSocket(
+      SERVER_URL
+    );
 
   socket.onopen = () => {
 
-    socket.send(
-      JSON.stringify({
-
-        type: "join-room",
-
-        roomId: ROOM_ID,
-
-        name: myName
-
-      })
+    console.log(
+      "Connecté au serveur"
     );
+
+    send({
+
+      type:
+        "join-room",
+
+      roomId:
+        ROOM_ID,
+
+      name:
+        myName
+
+    });
 
   };
 
   socket.onmessage =
     async event => {
 
-      const message =
-        JSON.parse(event.data);
+      try {
 
-      await handleMessage(
-        message
-      );
+        const message =
+          JSON.parse(
+            event.data
+          );
+
+        await handleMessage(
+          message
+        );
+
+      } catch(error) {
+
+        console.error(
+          error
+        );
+
+      }
 
     };
 
@@ -817,32 +1737,41 @@ function connect() {
 
   };
 
+  socket.onerror = error => {
+
+    console.error(
+      "WebSocket error",
+      error
+    );
+
+  };
+
 }
 
-/*
-==================================================
-MESSAGES
-==================================================
-*/
+/* =========================================================
+   HANDLE SERVER MESSAGE
+========================================================= */
 
-async function handleMessage(message) {
+async function handleMessage(
+  message
+) {
 
   switch(message.type) {
 
     case "user-joined":
 
       if (
-        message.userId === myId
+        message.userId ===
+        myId
       ) {
+
         return;
+
       }
 
-      /*
-      L'utilisateur déjà présent
-      crée l'offre.
-      */
-
-      if (message.existing) {
+      if (
+        message.existing
+      ) {
 
         await createPeer(
           message.userId,
@@ -888,10 +1817,8 @@ async function handleMessage(message) {
 
     case "chat":
 
-      addMessage(
-        message.name,
-        message.text,
-        message.userId === myId
+      handleIncomingChat(
+        message
       );
 
       break;
@@ -900,11 +1827,9 @@ async function handleMessage(message) {
 
 }
 
-/*
-==================================================
-CREATE PEER
-==================================================
-*/
+/* =========================================================
+   CREATE PEER
+========================================================= */
 
 async function createPeer(
   userId,
@@ -912,8 +1837,12 @@ async function createPeer(
   initiator
 ) {
 
-  if (peers.has(userId)) {
+  if (
+    peers.has(userId)
+  ) {
+
     return;
+
   }
 
   const pc =
@@ -922,19 +1851,19 @@ async function createPeer(
     );
 
   const peer = {
+
     pc,
+
     name,
+
     candidates: []
+
   };
 
   peers.set(
     userId,
     peer
   );
-
-  /*
-  Local tracks
-  */
 
   if (localStream) {
 
@@ -951,29 +1880,26 @@ async function createPeer(
 
   }
 
-  /*
-  Remote stream
-  */
+  pc.ontrack =
+    event => {
 
-  pc.ontrack = event => {
+      const stream =
+        event.streams[0];
 
-    const stream =
-      event.streams[0];
+      if (!stream) {
 
-    if (!stream) return;
+        return;
 
-    createVideoCard(
-      userId,
-      name,
-      stream,
-      false
-    );
+      }
 
-  };
+      createVideoCard(
+        userId,
+        name,
+        stream,
+        false
+      );
 
-  /*
-  ICE
-  */
+    };
 
   pc.onicecandidate =
     event => {
@@ -999,10 +1925,6 @@ async function createPeer(
 
     };
 
-  /*
-  Connection
-  */
-
   pc.onconnectionstatechange =
     () => {
 
@@ -1019,10 +1941,6 @@ async function createPeer(
 
     };
 
-  /*
-  Initiator
-  */
-
   if (initiator) {
 
     const offer =
@@ -1034,11 +1952,14 @@ async function createPeer(
 
     send({
 
-      type: "offer",
+      type:
+        "offer",
 
-      target: userId,
+      target:
+        userId,
 
-      data: offer
+      data:
+        offer
 
     });
 
@@ -1046,11 +1967,9 @@ async function createPeer(
 
 }
 
-/*
-==================================================
-OFFER
-==================================================
-*/
+/* =========================================================
+   OFFER
+========================================================= */
 
 async function receiveOffer(
   message
@@ -1109,22 +2028,22 @@ async function receiveOffer(
 
   send({
 
-    type: "answer",
+    type:
+      "answer",
 
     target:
       message.from,
 
-    data: answer
+    data:
+      answer
 
   });
 
 }
 
-/*
-==================================================
-ANSWER
-==================================================
-*/
+/* =========================================================
+   ANSWER
+========================================================= */
 
 async function receiveAnswer(
   message
@@ -1136,7 +2055,9 @@ async function receiveAnswer(
     );
 
   if (!peer) {
+
     return;
+
   }
 
   await peer.pc
@@ -1164,11 +2085,9 @@ async function receiveAnswer(
 
 }
 
-/*
-==================================================
-ICE
-==================================================
-*/
+/* =========================================================
+   ICE
+========================================================= */
 
 async function receiveCandidate(
   message
@@ -1180,7 +2099,9 @@ async function receiveCandidate(
     );
 
   if (!peer) {
+
     return;
+
   }
 
   if (
@@ -1198,7 +2119,9 @@ async function receiveCandidate(
 
     } catch(error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
 
     }
 
@@ -1212,21 +2135,23 @@ async function receiveCandidate(
 
 }
 
-/*
-==================================================
-REMOVE PEER
-==================================================
-*/
+/* =========================================================
+   REMOVE PEER
+========================================================= */
 
 function removePeer(
   userId
 ) {
 
   const peer =
-    peers.get(userId);
+    peers.get(
+      userId
+    );
 
   if (!peer) {
+
     return;
+
   }
 
   peer.pc.close();
@@ -1239,13 +2164,13 @@ function removePeer(
     userId
   );
 
+  updatePeopleCount();
+
 }
 
-/*
-==================================================
-SEND
-==================================================
-*/
+/* =========================================================
+   SEND
+========================================================= */
 
 function send(data) {
 
@@ -1256,18 +2181,18 @@ function send(data) {
   ) {
 
     socket.send(
-      JSON.stringify(data)
+      JSON.stringify(
+        data
+      )
     );
 
   }
 
 }
 
-/*
-==================================================
-CHAT
-==================================================
-*/
+/* =========================================================
+   CHAT — SEND
+========================================================= */
 
 chatForm.addEventListener(
   "submit",
@@ -1279,12 +2204,15 @@ chatForm.addEventListener(
       messageInput.value.trim();
 
     if (!text) {
+
       return;
+
     }
 
     send({
 
-      type: "chat",
+      type:
+        "chat",
 
       text
 
@@ -1295,6 +2223,73 @@ chatForm.addEventListener(
   }
 );
 
+/* =========================================================
+   CHAT — RECEIVE
+========================================================= */
+
+function handleIncomingChat(
+  message
+) {
+
+  removeEmptyChat();
+
+  const mine =
+    message.userId ===
+    myId;
+
+  addMessage(
+    message.name,
+    message.text,
+    mine
+  );
+
+  /*
+   * Si le chat n'est pas ouvert,
+   * on incrémente les messages non lus.
+   */
+
+  if (
+    !mine &&
+    !chatIsOpen
+  ) {
+
+    unreadMessages++;
+
+    updateUnreadBadge();
+
+    /*
+     * Petit effet visuel
+     */
+
+    mobileChatButton.animate(
+      [
+        {
+          transform:
+            "scale(1)"
+        },
+        {
+          transform:
+            "scale(1.12)"
+        },
+        {
+          transform:
+            "scale(1)"
+        }
+      ],
+      {
+        duration:
+          350
+      }
+    );
+
+  }
+
+}
+
+/* =========================================================
+   ADD MESSAGE
+========================================================= */
+
 function addMessage(
   name,
   text,
@@ -1302,20 +2297,36 @@ function addMessage(
 ) {
 
   const message =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   message.className =
     "message" +
-    (mine ? " mine" : "");
+    (
+      mine
+        ? " mine"
+        : ""
+    );
+
+  const safeName =
+    escapeHtml(
+      name
+    );
+
+  const safeText =
+    escapeHtml(
+      text
+    );
 
   message.innerHTML = `
 
-    <div class="messageName">
-      ${escapeHtml(name)}
+    <div class="message-name">
+      ${safeName}
     </div>
 
-    <div class="messageBubble">
-      ${escapeHtml(text)}
+    <div class="message-bubble">
+      ${safeText}
     </div>
 
   `;
@@ -1329,17 +2340,111 @@ function addMessage(
 
 }
 
+/* =========================================================
+   EMPTY CHAT
+========================================================= */
+
+function removeEmptyChat() {
+
+  if (
+    emptyChat
+  ) {
+
+    emptyChat.remove();
+
+  }
+
+}
+
+/* =========================================================
+   CHAT OPEN / CLOSE
+========================================================= */
+
+mobileChatButton.addEventListener(
+  "click",
+  () => {
+
+    openChat();
+
+  }
+);
+
+function openChat() {
+
+  chatIsOpen =
+    true;
+
+  chat.classList.add(
+    "open"
+  );
+
+  unreadMessages =
+    0;
+
+  updateUnreadBadge();
+
+  setTimeout(
+    () => {
+
+      messageInput.focus();
+
+    },
+    300
+  );
+
+}
+
 /*
-==================================================
-MIC
-==================================================
+   Sur desktop le chat est toujours visible.
+   Sur mobile, on ferme en cliquant
+   en dehors n'est pas nécessaire ici.
 */
 
-micButton.onclick =
+/* =========================================================
+   UNREAD BADGE
+========================================================= */
+
+function updateUnreadBadge() {
+
+  if (
+    unreadMessages <= 0
+  ) {
+
+    unreadBadge
+      .classList
+      .remove(
+        "visible"
+      );
+
+    return;
+
+  }
+
+  unreadBadge
+    .classList
+    .add(
+      "visible"
+    );
+
+  unreadBadge.textContent =
+    unreadMessages > 99
+      ? "99+"
+      : unreadMessages;
+
+}
+
+/* =========================================================
+   MICROPHONE
+========================================================= */
+
+micButton.addEventListener(
+  "click",
   () => {
 
     if (!localStream) {
+
       return;
+
     }
 
     const track =
@@ -1347,35 +2452,41 @@ micButton.onclick =
         .getAudioTracks()[0];
 
     if (!track) {
+
       return;
+
     }
 
     track.enabled =
       !track.enabled;
 
-    micButton.classList.toggle(
-      "off",
-      !track.enabled
-    );
+    micButton
+      .classList
+      .toggle(
+        "off",
+        !track.enabled
+      );
 
     micButton.textContent =
       track.enabled
-        ? "🎙"
+        ? "🎙️"
         : "🔇";
 
-  };
+  }
+);
 
-/*
-==================================================
-CAMERA
-==================================================
-*/
+/* =========================================================
+   CAMERA
+========================================================= */
 
-cameraButton.onclick =
+cameraButton.addEventListener(
+  "click",
   () => {
 
     if (!localStream) {
+
       return;
+
     }
 
     const track =
@@ -1383,39 +2494,47 @@ cameraButton.onclick =
         .getVideoTracks()[0];
 
     if (!track) {
+
       return;
+
     }
 
     track.enabled =
       !track.enabled;
 
-    cameraButton.classList.toggle(
-      "off",
-      !track.enabled
-    );
+    cameraButton
+      .classList
+      .toggle(
+        "off",
+        !track.enabled
+      );
 
     cameraButton.textContent =
       track.enabled
         ? "📷"
         : "🚫";
 
-  };
+  }
+);
 
-/*
-==================================================
-LEAVE
-==================================================
-*/
+/* =========================================================
+   LEAVE
+========================================================= */
 
-leaveButton.onclick =
+leaveButton.addEventListener(
+  "click",
   () => {
 
     send({
-      type: "leave"
+      type:
+        "leave"
     });
 
     for (
-      const [id, peer]
+      const [
+        id,
+        peer
+      ]
       of peers
     ) {
 
@@ -1437,55 +2556,56 @@ leaveButton.onclick =
     }
 
     if (socket) {
+
       socket.close();
+
     }
 
     window.location.reload();
 
-  };
+  }
+);
 
-/*
-==================================================
-COUNT
-==================================================
-*/
-
-function updatePeopleCount() {
-
-  const count =
-    1 + peers.size;
-
-  peopleCount.textContent =
-    count === 1
-      ? "1 personne"
-      : `${count} personnes`;
-
-}
-
-/*
-==================================================
-ESCAPE HTML
-==================================================
-*/
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
 
 function escapeHtml(
   value
 ) {
 
   return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 
 }
 
-/*
-==================================================
-START
-==================================================
-*/
+/* =========================================================
+   START
+========================================================= */
 
 (async function() {
 
