@@ -2,20 +2,24 @@ name: Generate Mobile Screenshot
 
 on:
   deployment_status:
+  workflow_dispatch:
 
 jobs:
   screenshot:
-    if: github.event.deployment_status.state == 'success'
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.deployment_status.state == 'success'
+
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install Playwright
         run: |
@@ -40,14 +44,24 @@ jobs:
             const page = await context.newPage();
 
             page.on('console', message => {
-              console.log(`[CONSOLE ${message.type()}] ${message.text()}`);
+              console.log(
+                `[CONSOLE ${message.type()}] ${message.text()}`
+              );
             });
 
             page.on('pageerror', error => {
               console.error('[PAGE ERROR]', error.message);
             });
 
-            await page.goto(process.env.SITE_URL, {
+            const siteUrl = process.env.SITE_URL;
+
+            if (!siteUrl) {
+              throw new Error(
+                'SITE_URL est vide. Lance le workflow depuis un déploiement Vercel.'
+              );
+            }
+
+            await page.goto(siteUrl, {
               waitUntil: 'networkidle',
               timeout: 60000
             });
@@ -62,7 +76,7 @@ jobs:
           EOF
 
       - name: Upload mobile preview
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: mobile-preview
           path: mobile-preview.png
