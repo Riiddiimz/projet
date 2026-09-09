@@ -20,8 +20,6 @@
 
         lobby.classList.toggle("users-hidden", hidden);
 
-        /* On applique aussi l'état directement sur l'élément.
-           Cela évite qu'une autre règle CSS empêche l'ouverture. */
         if(window.innerWidth <= 700){
             sidebar.style.transform = hidden ? "translateX(-105%)" : "translateX(0)";
             sidebar.style.opacity = hidden ? "0" : "1";
@@ -52,7 +50,6 @@
         const lobby = document.getElementById("lobbyScreen");
         if(!button || !lobby) return;
 
-        /* Suppression du onclick inline puis gestion unique du clic. */
         button.onclick = null;
         button.onpointerup = function(event){
             event.preventDefault();
@@ -70,8 +67,6 @@
     function setup(){
         setupMobileUsersButton();
 
-        /* Sécurité supplémentaire : si le navigateur ne déclenche pas
-           correctement pointerup sur le bouton, on intercepte le clic. */
         document.addEventListener("click", function(event){
             const button = event.target.closest?.("#usersSidebarToggle");
             if(!button) return;
@@ -89,8 +84,68 @@
 
     window.addEventListener("resize", setupMobileUsersButton);
 
+    /*
+     * LOGIN ROBUSTE
+     *
+     * L'ancienne version d'app.js envoyait les identifiants après un
+     * délai fixe de 300 ms. Sur mobile, le WebSocket peut être encore
+     * en CONNECTING à ce moment-là : le login n'était donc jamais envoyé.
+     * On attend maintenant réellement l'état OPEN avant l'envoi.
+     */
+    window.login = function(){
+        const usernameInput =
+            document.getElementById("usernameInput") ||
+            document.getElementById("userUsernameInput");
+        const passwordInput =
+            document.getElementById("passwordInput");
+        const errorElement =
+            document.getElementById("loginError");
+
+        const username = usernameInput?.value?.trim() || "";
+        const password = passwordInput?.value?.trim() || "";
+
+        if(errorElement) errorElement.textContent = "";
+
+        if(!username){
+            if(errorElement) errorElement.textContent = "Entrez un nom d'utilisateur.";
+            return;
+        }
+
+        const sendWhenReady = () => {
+            if(window.socket?.readyState === WebSocket.OPEN){
+                if(typeof window.sendLogin === "function"){
+                    window.sendLogin(username, password);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        if(sendWhenReady()) return;
+
+        if(typeof window.connectSocket !== "function"){
+            if(errorElement) errorElement.textContent = "Connexion impossible.";
+            return;
+        }
+
+        window.connectSocket();
+
+        const startedAt = Date.now();
+        const timer = setInterval(() => {
+            if(sendWhenReady()){
+                clearInterval(timer);
+                return;
+            }
+
+            if(Date.now() - startedAt >= 10000){
+                clearInterval(timer);
+                if(errorElement) errorElement.textContent = "Connexion impossible.";
+            }
+        }, 50);
+    };
+
     const style = document.createElement("style");
-    style.id = "colincall-mobile-fixes-v4";
+    style.id = "colincall-mobile-fixes-v5";
     style.textContent = `
         .video-card .video-overlay{
             position:absolute;
