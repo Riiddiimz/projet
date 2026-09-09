@@ -1,8 +1,8 @@
 name: Generate Mobile Screenshot
 
 on:
-  deployment_status:
   workflow_dispatch:
+  deployment_status:
 
 jobs:
   screenshot:
@@ -28,7 +28,7 @@ jobs:
 
       - name: Capture mobile screenshot
         env:
-          SITE_URL: ${{ github.event.deployment_status.target_url }}
+          SITE_URL: https://gcol.vercel.app/
         run: |
           node <<'EOF'
           const { chromium, devices } = require('playwright');
@@ -53,18 +53,14 @@ jobs:
               console.error('[PAGE ERROR]', error.message);
             });
 
-            const siteUrl = process.env.SITE_URL;
+            console.log(`Ouverture de : ${process.env.SITE_URL}`);
 
-            if (!siteUrl) {
-              throw new Error(
-                'SITE_URL est vide. Lance le workflow depuis un déploiement Vercel.'
-              );
-            }
-
-            await page.goto(siteUrl, {
+            await page.goto(process.env.SITE_URL, {
               waitUntil: 'networkidle',
               timeout: 60000
             });
+
+            console.log(`Page chargée : ${await page.title()}`);
 
             await page.screenshot({
               path: 'mobile-preview.png',
@@ -72,6 +68,8 @@ jobs:
             });
 
             await browser.close();
+
+            console.log('Capture terminée.');
           })();
           EOF
 
