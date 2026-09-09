@@ -15,13 +15,6 @@ function record(name, status, details = {}) {
     console.log(`[${status}] ${name}${Object.keys(details).length ? ` ${JSON.stringify(details)}` : ''}`);
 }
 
-function visible(el) {
-    if (!el) return false;
-    const s = getComputedStyle(el);
-    const r = el.getBoundingClientRect();
-    return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
-}
-
 async function waitVisible(page, selector, timeout = 15000) {
     await page.waitForFunction(sel => {
         const el = document.querySelector(sel);
@@ -111,6 +104,46 @@ async function assertNoPageErrors(pageErrors, label) {
     pageA.on('pageerror', e => errorsA.push(e.message));
     pageB.on('pageerror', e => errorsB.push(e.message));
 
+    // Instrumente chaque RTCPeerConnection avant le chargement de l'application.
+    // Cela permet de vérifier l'état réel des connexions, et pas seulement la présence
+    // d'un MediaStream dans une balise <video>.
+    const installPeerInstrumentation = async context => {
+        await context.addInitScript(() => {
+            const OriginalRTCPeerConnection = window.RTCPeerConnection;
+            if (!OriginalRTCPeerConnection) return;
+
+            const peers = [];
+            window.__qaPeerConnections = peers;
+
+            window.RTCPeerConnection = function(...args) {
+                const pc = new OriginalRTCPeerConnection(...args);
+                const info = {
+                    pc,
+                    createdAt: Date.now(),
+                    connectionState: pc.connectionState,
+                    iceConnectionState: pc.iceConnectionState,
+                    signalingState: pc.signalingState
+                };
+                const update = () => {
+                    info.connectionState = pc.connectionState;
+                    info.iceConnectionState = pc.iceConnectionState;
+                    info.signalingState = pc.signalingState;
+                    info.updatedAt = Date.now();
+                };
+                pc.addEventListener('connectionstatechange', update);
+                pc.addEventListener('iceconnectionstatechange', update);
+                pc.addEventListener('signalingstatechange', update);
+                peers.push(info);
+                return pc;
+            };
+            window.RTCPeerConnection.prototype = OriginalRTCPeerConnection.prototype;
+            Object.setPrototypeOf(window.RTCPeerConnection, OriginalRTCPeerConnection);
+        });
+    };
+
+    await installPeerInstrumentation(contextA);
+    await installPeerInstrumentation(contextB);
+
     try {
         console.log(`\n===== ROOMS + WEBRTC QA / ${USER_A} + ${USER_B} =====`);
 
@@ -120,8 +153,6 @@ async function assertNoPageErrors(pageErrors, label) {
         await login(pageB, USER_B);
         record('Rooms / B connecté', 'PASS', { username: USER_B });
 
-        // L'application utilise un prompt() natif pour demander le nom du salon.
-        // On installe le handler avant le clic afin que Playwright accepte le nom réel.
         let roomPromptSeen = false;
         pageA.once('dialog', async dialog => {
             roomPromptSeen = true;
@@ -202,15 +233,36 @@ async function assertNoPageErrors(pageErrors, label) {
         await pageB.waitForFunction(() => (document.querySelector('#roomChatMessages')?.innerText || '').includes('QA_ROOM_A_TO_B'), { timeout: 15000 });
         record('Rooms / chat A → B', 'PASS');
 
-        const peerState = await pageA.evaluate(() => {
-            const videos = [...document.querySelectorAll('#videoGrid .video-card video')];
-            const remote = videos.slice(1).find(video => video.srcObject);
-            return {
-                remoteStream: !!remote?.srcObject,
-                remoteTracks: remote?.srcObject?.getTracks().length || 0
-            };
+        // Vérification renforcée de la connexion WebRTC : on attend une connexion
+        // réellement établie côté RTCPeerConnection sur au moins un des pairs.
+        const peerConnectionState = await Promise.race([
+            pageA.waitForFunction(() => {
+                return (window.__qaPeerConnections || []).some(info =>
+                    info.connectionState === 'connected' || info.iceConnectionState === 'connected' || info.iceConnectionState === 'completed'
+                );
+            }, { timeout: 20000 }).then(() => 'A'),
+            pageB.waitForFunction(() => {
+                return (window.__qaPeerConnections || []).some(info =>
+                    info.connectionState === 'connected' || info.iceConnectionState === 'connected' || info.iceConnectionState === 'completed'
+                );
+            }, { timeout: 20000 }).then(() => 'B')
+        ]).catch(() => null);
+
+        const peerDetails = await pageA.evaluate(() => (window.__qaPeerConnections || []).map(info => ({
+            connectionState: info.connectionState,
+            iceConnectionState: info.iceConnectionState,
+            signalingState: info.signalingState
+        })));
+        const peerDetailsB = await pageB.evaluate(() => (window.__qaPeerConnections || []).map(info => ({
+            connectionState: info.connectionState,
+            iceConnectionState: info.iceConnectionState,
+            signalingState: info.signalingState
+        })));
+        const allPeerDetails = [...peerDetails.map(p => ({ side: 'A', ...p })), ...peerDetailsB.map(p => ({ side: 'B', ...p }))];
+        record('WebRTC / RTCPeerConnection établie', peerConnectionState ? 'PASS' : 'FAIL', {
+            connectedSide: peerConnectionState,
+            peers: allPeerDetails
         });
-        record('WebRTC / connexion peer-to-peer', peerState.remoteStream ? 'PASS' : 'FAIL', peerState);
 
         const remoteMedia = await pageA.waitForFunction(username => {
             const cards = [...document.querySelectorAll('#videoGrid .video-card')];
@@ -221,11 +273,16 @@ async function assertNoPageErrors(pageErrors, label) {
         const remoteDetails = await pageA.evaluate(username => {
             const card = [...document.querySelectorAll('#videoGrid .video-card')].find(c => (c.innerText || '').includes(username));
             const video = card?.querySelector('video');
+            const stream = video?.srcObject;
             return {
                 found: !!card,
-                hasSrcObject: !!video?.srcObject,
-                tracks: video?.srcObject?.getTracks().length || 0,
-                readyState: video?.readyState ?? null
+                hasSrcObject: !!stream,
+                tracks: stream?.getTracks().length || 0,
+                audioTracks: stream?.getAudioTracks().length || 0,
+                videoTracks: stream?.getVideoTracks().length || 0,
+                readyState: video?.readyState ?? null,
+                videoWidth: video?.videoWidth ?? 0,
+                videoHeight: video?.videoHeight ?? 0
             };
         }, USER_B);
         record('WebRTC / flux distant reçu', remoteMedia ? 'PASS' : 'FAIL', remoteDetails);
@@ -253,6 +310,8 @@ async function assertNoPageErrors(pageErrors, label) {
                 ? 'PASS' : 'FAIL',
             { before: beforeMedia, after: afterMedia });
 
+        // Vérifie que la sortie de A ferme réellement ses PeerConnections et arrête
+        // ses pistes média, pas seulement que l'écran du salon disparaît.
         await pageA.locator('.leave-btn').click();
         await waitVisible(pageA, '#lobbyScreen', 10000);
         const cleanupState = await pageA.evaluate(() => {
@@ -264,18 +323,42 @@ async function assertNoPageErrors(pageErrors, label) {
                 return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
             })();
             const videos = [...document.querySelectorAll('#videoGrid .video-card video')];
+            const activeTracks = videos.flatMap(video => video.srcObject?.getTracks() || []).filter(track => track.readyState !== 'ended').length;
+            const peers = (window.__qaPeerConnections || []).map(info => ({
+                connectionState: info.connectionState,
+                iceConnectionState: info.iceConnectionState,
+                signalingState: info.signalingState
+            }));
             return {
                 roomVisible,
                 cards: document.querySelectorAll('#videoGrid .video-card').length,
-                localVideoStream: !!videos[0]?.srcObject
+                localVideoStream: !!videos[0]?.srcObject,
+                activeTracks,
+                peers
             };
         });
-        record('Rooms / A quitte le salon + nettoyage', !cleanupState.roomVisible && cleanupState.cards === 0 && !cleanupState.localVideoStream ? 'PASS' : 'FAIL', cleanupState);
+        const peersClosed = cleanupState.peers.length === 0 || cleanupState.peers.every(p =>
+            p.connectionState === 'closed' || p.iceConnectionState === 'closed'
+        );
+        record('Rooms / A quitte le salon + nettoyage WebRTC',
+            !cleanupState.roomVisible && cleanupState.cards === 0 && !cleanupState.localVideoStream && cleanupState.activeTracks === 0 && peersClosed
+                ? 'PASS' : 'FAIL',
+            cleanupState);
 
         await pageB.waitForFunction(username => {
             return ![...document.querySelectorAll('#videoGrid .video-card')].some(card => (card.innerText || '').includes(username));
         }, USER_A, { timeout: 15000 });
         record('Rooms / B voit le départ de A', 'PASS');
+
+        const remoteAfterLeave = await pageB.evaluate(username => {
+            const card = [...document.querySelectorAll('#videoGrid .video-card')].find(c => (c.innerText || '').includes(username));
+            return {
+                participantStillVisible: !!card,
+                videoTracks: card?.querySelector('video')?.srcObject?.getVideoTracks().length || 0,
+                audioTracks: card?.querySelector('video')?.srcObject?.getAudioTracks().length || 0
+            };
+        }, USER_A);
+        record('WebRTC / flux distant supprimé après départ', !remoteAfterLeave.participantStillVisible && remoteAfterLeave.videoTracks === 0 && remoteAfterLeave.audioTracks === 0 ? 'PASS' : 'FAIL', remoteAfterLeave);
 
     } catch (error) {
         record('Rooms + WebRTC / runner', 'FAIL', { error: error.stack || error.message });
