@@ -1,26 +1,15 @@
 /* Corrections mobile Col'inCall */
 (function(){
-    const originalPrepareLocalMedia = window.prepareLocalMedia;
-
-    if(typeof originalPrepareLocalMedia === "function"){
-        window.prepareLocalMedia = async function(){
-            const ready = await originalPrepareLocalMedia();
-            if(!ready) return false;
-            if(typeof window.toggleMicro === "function") window.toggleMicro();
-            if(typeof window.toggleCamera === "function") window.toggleCamera();
-            return true;
-        };
-    }
-
     function setUsersSidebarState(hidden){
         const lobby = document.getElementById("lobbyScreen");
         const sidebar = lobby?.querySelector(".users-sidebar");
         const button = document.getElementById("usersSidebarToggle");
         if(!lobby || !sidebar) return;
 
-        lobby.classList.toggle("users-hidden", hidden);
+        const mobile = window.innerWidth <= 700;
+        lobby.classList.toggle("users-hidden", mobile && hidden);
 
-        if(window.innerWidth <= 700){
+        if(mobile){
             sidebar.style.transform = hidden ? "translateX(-105%)" : "translateX(0)";
             sidebar.style.opacity = hidden ? "0" : "1";
             sidebar.style.pointerEvents = hidden ? "none" : "auto";
@@ -31,10 +20,10 @@
         }
 
         if(button){
-            button.textContent = hidden ? "👥 Utilisateurs" : "× Fermer";
+            button.textContent = hidden && mobile ? "👥 Utilisateurs" : "× Fermer";
             button.setAttribute(
                 "aria-label",
-                hidden ? "Afficher les utilisateurs" : "Fermer les utilisateurs"
+                hidden && mobile ? "Afficher les utilisateurs" : "Fermer les utilisateurs"
             );
         }
     }
@@ -50,15 +39,9 @@
         const lobby = document.getElementById("lobbyScreen");
         if(!button || !lobby) return;
 
-        button.onclick = null;
-        button.onpointerup = function(event){
-            event.preventDefault();
-            event.stopPropagation();
-            window.toggleUsersSidebar();
-        };
-
         if(window.innerWidth <= 700){
-            setUsersSidebarState(true);
+            button.style.display = "flex";
+            setUsersSidebarState(lobby.classList.contains("users-hidden"));
         }else{
             setUsersSidebarState(false);
         }
@@ -66,14 +49,6 @@
 
     function setup(){
         setupMobileUsersButton();
-
-        document.addEventListener("click", function(event){
-            const button = event.target.closest?.("#usersSidebarToggle");
-            if(!button) return;
-            event.preventDefault();
-            event.stopPropagation();
-            window.toggleUsersSidebar();
-        }, true);
     }
 
     if(document.readyState === "loading"){
@@ -85,24 +60,26 @@
     window.addEventListener("resize", setupMobileUsersButton);
 
     /*
-     * LOGIN ROBUSTE
+     * LOGIN MOBILE ROBUSTE
      *
-     * L'ancienne version d'app.js envoyait les identifiants après un
-     * délai fixe de 300 ms. Sur mobile, le WebSocket peut être encore
-     * en CONNECTING à ce moment-là : le login n'était donc jamais envoyé.
-     * On attend maintenant réellement l'état OPEN avant l'envoi.
+     * admin.js possède déjà le formulaire utilisateur. Sur certaines
+     * connexions mobiles, le WebSocket peut rester en CONNECTING plus
+     * longtemps que prévu. On intercepte uniquement le bouton utilisateur
+     * et on réessaie l'envoi jusqu'à ce que send() confirme OPEN.
+     * Aucun accès à window.socket n'est utilisé : socket est un binding
+     * lexical dans app.js.
      */
-    window.login = function(){
-        const usernameInput =
-            document.getElementById("usernameInput") ||
-            document.getElementById("userUsernameInput");
-        const passwordInput =
-            document.getElementById("passwordInput");
-        const errorElement =
-            document.getElementById("loginError");
+    function robustUserLogin(event){
+        const button = event.target.closest?.("#userLoginButton");
+        if(!button) return;
 
-        const username = usernameInput?.value?.trim() || "";
-        const password = passwordInput?.value?.trim() || "";
+        const input = document.getElementById("userUsernameInput");
+        const errorElement = document.getElementById("userLoginError");
+        const username = input?.value?.trim() || "";
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
 
         if(errorElement) errorElement.textContent = "";
 
@@ -111,41 +88,52 @@
             return;
         }
 
-        const sendWhenReady = () => {
-            if(window.socket?.readyState === WebSocket.OPEN){
-                if(typeof window.sendLogin === "function"){
-                    window.sendLogin(username, password);
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        if(sendWhenReady()) return;
-
-        if(typeof window.connectSocket !== "function"){
+        if(typeof window.connectSocket !== "function" || typeof window.send !== "function"){
             if(errorElement) errorElement.textContent = "Connexion impossible.";
             return;
         }
 
         window.connectSocket();
 
+        let finished = false;
         const startedAt = Date.now();
+        const timeout = 15000;
+
         const timer = setInterval(() => {
-            if(sendWhenReady()){
+            if(finished){
                 clearInterval(timer);
                 return;
             }
 
-            if(Date.now() - startedAt >= 10000){
+            if(Date.now() - startedAt >= timeout){
+                finished = true;
                 clearInterval(timer);
                 if(errorElement) errorElement.textContent = "Connexion impossible.";
+                return;
             }
-        }, 50);
-    };
+
+            try{
+                const sent = window.send({
+                    type: "login",
+                    username,
+                    password: "",
+                    isAdmin: false
+                });
+
+                if(sent){
+                    finished = true;
+                    clearInterval(timer);
+                }
+            }catch(error){
+                /* Le WebSocket peut encore être en transition. On réessaie. */
+            }
+        }, 100);
+    }
+
+    document.addEventListener("click", robustUserLogin, true);
 
     const style = document.createElement("style");
-    style.id = "colincall-mobile-fixes-v5";
+    style.id = "colincall-mobile-fixes-v6";
     style.textContent = `
         .video-card .video-overlay{
             position:absolute;
