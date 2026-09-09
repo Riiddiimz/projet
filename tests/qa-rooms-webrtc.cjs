@@ -255,11 +255,21 @@ async function assertNoPageErrors(pageErrors, label) {
 
         await pageA.locator('.leave-btn').click();
         await waitVisible(pageA, '#lobbyScreen', 10000);
-        const cleanupState = await pageA.evaluate(() => ({
-            roomVisible: visible(document.querySelector('#roomScreen')),
-            cards: document.querySelectorAll('#videoGrid .video-card').length,
-            localVideoStream: !!document.querySelector('#videoGrid .video-card video')?.srcObject
-        }));
+        const cleanupState = await pageA.evaluate(() => {
+            const roomScreen = document.querySelector('#roomScreen');
+            const roomVisible = (() => {
+                if (!roomScreen) return false;
+                const s = getComputedStyle(roomScreen);
+                const r = roomScreen.getBoundingClientRect();
+                return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+            })();
+            const videos = [...document.querySelectorAll('#videoGrid .video-card video')];
+            return {
+                roomVisible,
+                cards: document.querySelectorAll('#videoGrid .video-card').length,
+                localVideoStream: !!videos[0]?.srcObject
+            };
+        });
         record('Rooms / A quitte le salon + nettoyage', !cleanupState.roomVisible && cleanupState.cards === 0 && !cleanupState.localVideoStream ? 'PASS' : 'FAIL', cleanupState);
 
         await pageB.waitForFunction(username => {
