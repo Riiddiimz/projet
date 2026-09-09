@@ -35,7 +35,7 @@ async function visibleButtonContaining(page, text) {
 async function snapshot(page, label) {
   const data = {
     url: page.url(), title: await page.title().catch(() => ''), viewport: page.viewportSize(), readyState: await page.evaluate(() => document.readyState).catch(() => ''), bodyText: await page.locator('body').innerText().catch(() => ''),
-    authScreen: await inspectElement(page, '#authScreen'), app: await inspectElement(page, '#app'), lobby: await inspectElement(page, '#lobbyScreen'), usernameInput: await inspectElement(page, '#usernameInput'), passwordInput: await inspectElement(page, '#passwordInput'), usersButton: await inspectElement(page, '#usersSidebarToggle'), usersSidebar: await inspectElement(page, '#lobbyScreen .users-sidebar'), generalChatButton: await inspectElement(page, '#generalChatToggle'), roomList: await inspectElement(page, '#roomList'), roomScreen: await inspectElement(page, '#roomScreen')
+    authScreen: await inspectElement(page, '#authScreen'), app: await inspectElement(page, '#app'), lobby: await inspectElement(page, '#lobbyScreen'), usernameInput: await inspectElement(page, '#userUsernameInput'), passwordInput: await inspectElement(page, '#passwordInput'), usersButton: await inspectElement(page, '#usersSidebarToggle'), usersSidebar: await inspectElement(page, '#lobbyScreen .users-sidebar'), generalChatButton: await inspectElement(page, '#generalChatToggle'), roomList: await inspectElement(page, '#roomList'), roomScreen: await inspectElement(page, '#roomScreen')
   };
   fs.writeFileSync(`${OUT}/${label}.json`, JSON.stringify(data, null, 2));
   return data;
@@ -53,7 +53,6 @@ async function login(page) {
   await page.waitForTimeout(1500);
   await snapshot(page, '00-login-page');
 
-  // Parcours réel : arrivée -> bouton 👤 Utilisateur.
   const userButton = await visibleButtonContaining(page, 'Utilisateur');
   if (!userButton) {
     record('Auth / bouton Utilisateur', 'FAIL', { reason: 'visible button containing "Utilisateur" missing', visibleButtons: await page.locator('button:visible').allTextContents().catch(() => []) });
@@ -65,12 +64,12 @@ async function login(page) {
   record('Auth / bouton Utilisateur', 'PASS', { clickedText: ((await userButton.innerText().catch(() => '')) || '').trim() });
   await snapshot(page, '01-after-utilisateur');
 
-  const username = page.locator('#usernameInput').first();
+  const username = page.locator('#userUsernameInput').first();
   if (!(await username.count()) || !(await username.isVisible().catch(() => false))) {
     const html = await page.locator('body').innerHTML().catch(() => '');
     fs.writeFileSync(`${OUT}/01-login-form-missing.html`, html);
     await page.screenshot({ path: `${OUT}/01-login-form-missing.png`, fullPage: true }).catch(() => {});
-    record('Auth / formulaire utilisateur', 'FAIL', { reason: 'usernameInput not visible after clicking Utilisateur', bodyPreview: (await page.locator('body').innerText().catch(() => '')).slice(0, 1200), visibleButtons: await page.locator('button:visible').allTextContents().catch(() => []), visibleInputs: await page.locator('input:visible').evaluateAll(els => els.map(el => ({ id: el.id, type: el.type, placeholder: el.placeholder }))).catch(() => []), htmlHasUsernameInput: html.includes('usernameInput') });
+    record('Auth / formulaire utilisateur', 'FAIL', { reason: 'userUsernameInput not visible after clicking Utilisateur', bodyPreview: (await page.locator('body').innerText().catch(() => '')).slice(0, 1200), visibleButtons: await page.locator('button:visible').allTextContents().catch(() => []), visibleInputs: await page.locator('input:visible').evaluateAll(els => els.map(el => ({ id: el.id, type: el.type, placeholder: el.placeholder }))).catch(() => []), htmlHasUsernameInput: html.includes('userUsernameInput') });
     return false;
   }
 
