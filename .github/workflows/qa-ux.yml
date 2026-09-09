@@ -1,0 +1,41 @@
+name: Col'inCall UX Audit QA
+
+on:
+  workflow_dispatch:
+  deployment_status:
+
+jobs:
+  qa-ux:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Install Playwright
+        run: |
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Run UX audit QA
+        env:
+          SITE_URL: https://gcol.vercel.app/
+          QA_USER_A: QA_UX_${{ github.run_id }}
+          QA_PASSWORD: qa-test-password
+        run: node tests/qa-ux.cjs
+
+      - name: Upload UX audit report and screenshots
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: colincall-ux-audit-report
+          path: qa-results/
+          retention-days: 14
