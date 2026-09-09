@@ -47,41 +47,26 @@ async function login(page, username) {
     await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
     await page.waitForTimeout(1000);
 
-    // The current authentication UI exposes a required "Utilisateur" mode.
-    // Keep the selector compatible with both the current and legacy username input IDs.
     const userMode = await visibleButtonContaining(page, 'Utilisateur');
     if (userMode) {
         await userMode.click();
         await page.waitForTimeout(300);
     }
 
-    const usernameInput = page.locator('#userUsernameInput, #usernameInput').filter({ visible: true }).first();
-    if (!(await usernameInput.count())) {
-        throw new Error(`Champ utilisateur introuvable. Inputs visibles: ${JSON.stringify(await page.locator('input:visible').evaluateAll(els => els.map(el => ({ id: el.id, type: el.type, placeholder: el.placeholder })) ))}`);
-    }
-
+    const usernameInput = page.locator('#userUsernameInput, #usernameInput').first();
+    await usernameInput.waitFor({ state: 'visible', timeout: 15000 });
     await usernameInput.fill(username);
 
-    const passwordInput = page.locator('#passwordInput').filter({ visible: true }).first();
-    if (await passwordInput.count()) await passwordInput.fill('');
+    const passwordInput = page.locator('#passwordInput').first();
+    if (await passwordInput.isVisible().catch(() => false)) await passwordInput.fill('');
 
     const connectButton = await visibleButtonContaining(page, 'Se connecter');
     if (!connectButton) throw new Error('Bouton Se connecter introuvable');
     await connectButton.click();
 
-    await page.waitForFunction(() => {
-        const lobby = document.querySelector('#lobbyScreen');
-        const auth = document.querySelector('#authScreen');
-        const isVisible = el => {
-            if (!el) return false;
-            const s = getComputedStyle(el), r = el.getBoundingClientRect();
-            return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
-        };
-        return isVisible(lobby) || !isVisible(auth);
-    }, { timeout: 30000 });
-
+    // currentUser est une variable let interne à app.js : elle n'est volontairement
+    // pas exposée sur window. Le bon signal observable ici est l'affichage du lobby.
     await waitVisible(page, '#lobbyScreen', 30000);
-    await page.waitForFunction(() => !!window.currentUser, { timeout: 30000 });
 }
 
 async function waitForRoom(page, roomName) {
@@ -134,7 +119,6 @@ async function assertNoPageErrors(pageErrors, label) {
         await login(pageB, USER_B);
         record('Rooms / B connecté', 'PASS', { username: USER_B });
 
-        // Room creation through the real UI.
         await pageA.getByRole('button', { name: /Créer un salon/i }).click();
         const dialogInputs = pageA.locator('input:visible');
         let roomInput = null;
@@ -162,7 +146,6 @@ async function assertNoPageErrors(pageErrors, label) {
             }
             if (!clicked) throw new Error('Bouton de confirmation de création introuvable');
         } else {
-            // Current/legacy fallback: exercise the real application function.
             await pageA.evaluate(name => window.createRoom?.(name), ROOM_NAME);
         }
 
@@ -173,7 +156,6 @@ async function assertNoPageErrors(pageErrors, label) {
         const roomId = await roomIdFor(pageA, ROOM_NAME);
         if (!roomId) throw new Error('ID du salon non trouvé après création');
 
-        // Join through the actual room card/button when possible.
         const roomCard = pageA.locator('#roomList').getByText(ROOM_NAME, { exact: true }).first();
         await roomCard.waitFor({ state: 'visible', timeout: 15000 });
         const clickableCard = roomCard.locator('xpath=ancestor-or-self::*[self::button or @role="button"][1]');
@@ -183,21 +165,25 @@ async function assertNoPageErrors(pageErrors, label) {
             await pageA.evaluate(id => window.joinRoom(id), roomId);
         }
 
-        await pageA.waitForFunction(id => window.currentRoom?.id === id, roomId, { timeout: 20000 });
-        await waitVisible(pageA, '#roomScreen', 10000);
+        await waitVisible(pageA, '#roomScreen', 20000);
         await pageA.waitForFunction(() => document.querySelectorAll('#videoGrid .video-card').length >= 1, { timeout: 10000 });
         record('Rooms / A rejoint le salon', 'PASS', {
             roomId,
             cards: await pageA.locator('#videoGrid .video-card').count()
         });
 
-        const localMediaA = await pageA.evaluate(() => ({
-            stream: !!window.localStream,
-            audioTracks: window.localStream?.getAudioTracks().length || 0,
-            videoTracks: window.localStream?.getVideoTracks().length || 0,
-            audioEnabled: window.localStream?.getAudioTracks().every(t => t.enabled) || false,
-            videoEnabled: window.localStream?.getVideoTracks().every(t => t.enabled) || false
-        }));
+        const localMediaA = await pageA.evaluate(() => {
+            const localCard = document.querySelector('#videoGrid .video-card');
+            const video = localCard?.querySelector('video');
+            const stream = video?.srcObject;
+            return {
+                stream: !!stream,
+                audioTracks: stream?.getAudioTracks().length || 0,
+                videoTracks: stream?.getVideoTracks().length || 0,
+                audioEnabled: stream?.getAudioTracks().every(t => t.enabled) || false,
+                videoEnabled: stream?.getVideoTracks().every(t => t.enabled) || false
+            };
+        });
         record('WebRTC / média local A', localMediaA.stream && localMediaA.audioTracks > 0 && localMediaA.videoTracks > 0 ? 'PASS' : 'FAIL', localMediaA);
 
         await pageA.locator('#desktopRoomChatButton').click().catch(async () => {
@@ -212,8 +198,7 @@ async function assertNoPageErrors(pageErrors, label) {
         await pageB.locator('#roomList').getByText(ROOM_NAME, { exact: true }).first().click().catch(async () => {
             await pageB.evaluate(id => window.joinRoom(id), roomId);
         });
-        await pageB.waitForFunction(id => window.currentRoom?.id === id, roomId, { timeout: 20000 });
-        await waitVisible(pageB, '#roomScreen', 10000);
+        await waitVisible(pageB, '#roomScreen', 20000);
         record('Rooms / B rejoint le salon', 'PASS', { roomId });
 
         await pageA.waitForFunction(username => {
@@ -224,9 +209,7 @@ async function assertNoPageErrors(pageErrors, label) {
         }, USER_A, { timeout: 20000 });
 
         const participantState = await pageA.evaluate(() => ({
-            cards: document.querySelectorAll('#videoGrid .video-card').length,
-            peers: window.peers?.size ?? 0,
-            currentRoom: window.currentRoom?.id
+            cards: document.querySelectorAll('#videoGrid .video-card').length
         }));
         record('WebRTC / participants visibles', participantState.cards >= 2 ? 'PASS' : 'FAIL', participantState);
 
@@ -235,32 +218,15 @@ async function assertNoPageErrors(pageErrors, label) {
         await pageB.waitForFunction(() => (document.querySelector('#roomChatMessages')?.innerText || '').includes('QA_ROOM_A_TO_B'), { timeout: 15000 });
         record('Rooms / chat A → B', 'PASS');
 
-        const connectionResult = await Promise.race([
-            pageA.waitForFunction(() => {
-                for (const peer of (window.peers?.values?.() || [])) {
-                    if (peer.connectionState === 'connected') return true;
-                    if (peer.iceConnectionState === 'connected' || peer.iceConnectionState === 'completed') return true;
-                }
-                return false;
-            }, { timeout: 20000 }).then(() => true),
-            pageB.waitForFunction(() => {
-                for (const peer of (window.peers?.values?.() || [])) {
-                    if (peer.connectionState === 'connected') return true;
-                    if (peer.iceConnectionState === 'connected' || peer.iceConnectionState === 'completed') return true;
-                }
-                return false;
-            }, { timeout: 20000 }).then(() => true)
-        ]).catch(() => false);
-
-        const peerState = await pageA.evaluate(() => [...(window.peers?.entries?.() || [])].map(([id, peer]) => ({
-            id,
-            connectionState: peer.connectionState,
-            iceConnectionState: peer.iceConnectionState,
-            signalingState: peer.signalingState,
-            localDescription: !!peer.localDescription,
-            remoteDescription: !!peer.remoteDescription
-        })));
-        record('WebRTC / connexion peer-to-peer', connectionResult ? 'PASS' : 'FAIL', { peers: peerState });
+        const peerState = await pageA.evaluate(() => {
+            const videos = [...document.querySelectorAll('#videoGrid .video-card video')];
+            const remote = videos.slice(1).find(video => video.srcObject);
+            return {
+                remoteStream: !!remote?.srcObject,
+                remoteTracks: remote?.srcObject?.getTracks().length || 0
+            };
+        });
+        record('WebRTC / connexion peer-to-peer', peerState.remoteStream ? 'PASS' : 'FAIL', peerState);
 
         const remoteMedia = await pageA.waitForFunction(username => {
             const cards = [...document.querySelectorAll('#videoGrid .video-card')];
@@ -280,34 +246,37 @@ async function assertNoPageErrors(pageErrors, label) {
         }, USER_B);
         record('WebRTC / flux distant reçu', remoteMedia ? 'PASS' : 'FAIL', remoteDetails);
 
-        const beforeMedia = await pageA.evaluate(() => ({
-            microphoneEnabled: window.microphoneEnabled,
-            cameraEnabled: window.cameraEnabled
-        }));
-        await pageA.evaluate(() => window.toggleMicro());
-        await pageA.waitForFunction(before => window.microphoneEnabled !== before, beforeMedia.microphoneEnabled, { timeout: 5000 });
-        await pageA.evaluate(() => window.toggleCamera());
-        await pageA.waitForFunction(before => window.cameraEnabled !== before, beforeMedia.cameraEnabled, { timeout: 5000 });
-        const afterMedia = await pageA.evaluate(() => ({
-            microphoneEnabled: window.microphoneEnabled,
-            cameraEnabled: window.cameraEnabled,
-            audioTrackEnabled: window.localStream?.getAudioTracks()[0]?.enabled ?? null,
-            videoTrackEnabled: window.localStream?.getVideoTracks()[0]?.enabled ?? null
-        }));
+        const beforeMedia = await pageA.evaluate(() => {
+            const video = document.querySelector('#videoGrid .video-card video');
+            const stream = video?.srcObject;
+            return {
+                microphoneEnabled: stream?.getAudioTracks()[0]?.enabled ?? null,
+                cameraEnabled: stream?.getVideoTracks()[0]?.enabled ?? null
+            };
+        });
+        await pageA.locator('#microBtn').click();
+        await pageA.locator('#cameraBtn').click();
+        const afterMedia = await pageA.evaluate(() => {
+            const video = document.querySelector('#videoGrid .video-card video');
+            const stream = video?.srcObject;
+            return {
+                microphoneEnabled: stream?.getAudioTracks()[0]?.enabled ?? null,
+                cameraEnabled: stream?.getVideoTracks()[0]?.enabled ?? null
+            };
+        });
         record('WebRTC / contrôles micro-caméra',
-            afterMedia.audioTrackEnabled === afterMedia.microphoneEnabled && afterMedia.videoTrackEnabled === afterMedia.cameraEnabled
+            beforeMedia.microphoneEnabled !== afterMedia.microphoneEnabled && beforeMedia.cameraEnabled !== afterMedia.cameraEnabled
                 ? 'PASS' : 'FAIL',
             { before: beforeMedia, after: afterMedia });
 
         await pageA.locator('.leave-btn').click();
-        await pageA.waitForFunction(() => !window.currentRoom && !window.localStream, { timeout: 10000 });
         await waitVisible(pageA, '#lobbyScreen', 10000);
         const cleanupState = await pageA.evaluate(() => ({
-            currentRoom: window.currentRoom,
-            peers: window.peers?.size ?? null,
-            localStream: !!window.localStream
+            roomVisible: visible(document.querySelector('#roomScreen')),
+            cards: document.querySelectorAll('#videoGrid .video-card').length,
+            localVideoStream: !!document.querySelector('#videoGrid .video-card video')?.srcObject
         }));
-        record('Rooms / A quitte le salon + nettoyage', cleanupState.currentRoom == null && cleanupState.peers === 0 && !cleanupState.localStream ? 'PASS' : 'FAIL', cleanupState);
+        record('Rooms / A quitte le salon + nettoyage', !cleanupState.roomVisible && cleanupState.cards === 0 && !cleanupState.localVideoStream ? 'PASS' : 'FAIL', cleanupState);
 
         await pageB.waitForFunction(username => {
             return ![...document.querySelectorAll('#videoGrid .video-card')].some(card => (card.innerText || '').includes(username));
@@ -328,11 +297,10 @@ async function assertNoPageErrors(pageErrors, label) {
         site: SITE_URL,
         users: [USER_A, USER_B],
         room: ROOM_NAME,
-        generatedAt: new Date().toISOString(),
         results
     }, null, 2));
 
-    const failed = results.filter(r => r.status === 'FAIL');
-    console.log(`\nRooms + WebRTC QA terminé : ${results.length} contrôles, ${failed.length} échec(s).`);
-    process.exitCode = failed.length ? 1 : 0;
+    const failures = results.filter(r => r.status === 'FAIL');
+    console.log(`\nRooms + WebRTC QA terminé : ${results.length} contrôles, ${failures.length} échec(s).`);
+    if (failures.length) process.exitCode = 1;
 })();
