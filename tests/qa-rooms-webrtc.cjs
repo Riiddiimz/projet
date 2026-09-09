@@ -15,6 +15,13 @@ function record(name, status, details = {}) {
     console.log(`[${status}] ${name}${Object.keys(details).length ? ` ${JSON.stringify(details)}` : ''}`);
 }
 
+function visible(el) {
+    if (!el) return false;
+    const s = getComputedStyle(el);
+    const r = el.getBoundingClientRect();
+    return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+}
+
 async function waitVisible(page, selector, timeout = 15000) {
     await page.waitForFunction(sel => {
         const el = document.querySelector(sel);
@@ -25,13 +32,54 @@ async function waitVisible(page, selector, timeout = 15000) {
     }, selector, { timeout });
 }
 
+async function visibleButtonContaining(page, text) {
+    const buttons = page.locator('button:visible');
+    for (let i = 0; i < await buttons.count(); i++) {
+        const button = buttons.nth(i);
+        const label = ((await button.innerText().catch(() => '')) || '').replace(/\s+/g, ' ').trim();
+        if (label.toLowerCase().includes(text.toLowerCase())) return button;
+    }
+    return null;
+}
+
 async function login(page, username) {
     await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(1000);
 
-    await page.locator('#usernameInput').fill(username);
-    await page.locator('#passwordInput').fill('');
-    await page.getByRole('button', { name: 'Se connecter' }).click();
+    // The current authentication UI exposes a required "Utilisateur" mode.
+    // Keep the selector compatible with both the current and legacy username input IDs.
+    const userMode = await visibleButtonContaining(page, 'Utilisateur');
+    if (userMode) {
+        await userMode.click();
+        await page.waitForTimeout(300);
+    }
+
+    const usernameInput = page.locator('#userUsernameInput, #usernameInput').filter({ visible: true }).first();
+    if (!(await usernameInput.count())) {
+        throw new Error(`Champ utilisateur introuvable. Inputs visibles: ${JSON.stringify(await page.locator('input:visible').evaluateAll(els => els.map(el => ({ id: el.id, type: el.type, placeholder: el.placeholder })) ))}`);
+    }
+
+    await usernameInput.fill(username);
+
+    const passwordInput = page.locator('#passwordInput').filter({ visible: true }).first();
+    if (await passwordInput.count()) await passwordInput.fill('');
+
+    const connectButton = await visibleButtonContaining(page, 'Se connecter');
+    if (!connectButton) throw new Error('Bouton Se connecter introuvable');
+    await connectButton.click();
+
+    await page.waitForFunction(() => {
+        const lobby = document.querySelector('#lobbyScreen');
+        const auth = document.querySelector('#authScreen');
+        const isVisible = el => {
+            if (!el) return false;
+            const s = getComputedStyle(el), r = el.getBoundingClientRect();
+            return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+        };
+        return isVisible(lobby) || !isVisible(auth);
+    }, { timeout: 30000 });
+
     await waitVisible(page, '#lobbyScreen', 30000);
     await page.waitForFunction(() => !!window.currentUser, { timeout: 30000 });
 }
@@ -80,27 +128,27 @@ async function assertNoPageErrors(pageErrors, label) {
     try {
         console.log(`\n===== ROOMS + WEBRTC QA / ${USER_A} + ${USER_B} =====`);
 
-        // 1. Authentication
         await login(pageA, USER_A);
         record('Rooms / A connecté', 'PASS', { username: USER_A });
 
         await login(pageB, USER_B);
         record('Rooms / B connecté', 'PASS', { username: USER_B });
 
-        // 2. Room creation through the real UI
+        // Room creation through the real UI.
         await pageA.getByRole('button', { name: /Créer un salon/i }).click();
-        const roomInput = pageA.locator('input').filter({ has: undefined });
         const dialogInputs = pageA.locator('input:visible');
-        const visibleInputs = [];
+        let roomInput = null;
         for (let i = 0; i < await dialogInputs.count(); i++) {
             const input = dialogInputs.nth(i);
             const placeholder = (await input.getAttribute('placeholder')) || '';
-            const value = (await input.inputValue().catch(() => '')) || '';
-            if (/salon|nom/i.test(placeholder) || /salon|nom/i.test(value)) visibleInputs.push(input);
+            if (/salon|nom/i.test(placeholder)) {
+                roomInput = input;
+                break;
+            }
         }
 
-        if (visibleInputs.length) {
-            await visibleInputs[0].fill(ROOM_NAME);
+        if (roomInput) {
+            await roomInput.fill(ROOM_NAME);
             const createButtons = pageA.locator('button:visible');
             let clicked = false;
             for (let i = 0; i < await createButtons.count(); i++) {
@@ -114,7 +162,7 @@ async function assertNoPageErrors(pageErrors, label) {
             }
             if (!clicked) throw new Error('Bouton de confirmation de création introuvable');
         } else {
-            // Fallback only if the UI implementation has no visible creation field.
+            // Current/legacy fallback: exercise the real application function.
             await pageA.evaluate(name => window.createRoom?.(name), ROOM_NAME);
         }
 
@@ -125,7 +173,7 @@ async function assertNoPageErrors(pageErrors, label) {
         const roomId = await roomIdFor(pageA, ROOM_NAME);
         if (!roomId) throw new Error('ID du salon non trouvé après création');
 
-        // 3. Join through the actual room card/button when possible.
+        // Join through the actual room card/button when possible.
         const roomCard = pageA.locator('#roomList').getByText(ROOM_NAME, { exact: true }).first();
         await roomCard.waitFor({ state: 'visible', timeout: 15000 });
         const clickableCard = roomCard.locator('xpath=ancestor-or-self::*[self::button or @role="button"][1]');
@@ -143,7 +191,6 @@ async function assertNoPageErrors(pageErrors, label) {
             cards: await pageA.locator('#videoGrid .video-card').count()
         });
 
-        // Verify local media really exists, not just the UI state.
         const localMediaA = await pageA.evaluate(() => ({
             stream: !!window.localStream,
             audioTracks: window.localStream?.getAudioTracks().length || 0,
@@ -153,7 +200,6 @@ async function assertNoPageErrors(pageErrors, label) {
         }));
         record('WebRTC / média local A', localMediaA.stream && localMediaA.audioTracks > 0 && localMediaA.videoTracks > 0 ? 'PASS' : 'FAIL', localMediaA);
 
-        // 4. Room chat
         await pageA.locator('#desktopRoomChatButton').click().catch(async () => {
             await pageA.evaluate(() => window.toggleRoomChat?.());
         });
@@ -162,7 +208,6 @@ async function assertNoPageErrors(pageErrors, label) {
         await pageA.waitForFunction(() => (document.querySelector('#roomChatMessages')?.innerText || '').includes('QA_ROOM_MESSAGE'), { timeout: 15000 });
         record('Rooms / chat du salon A', 'PASS');
 
-        // 5. B joins the same room.
         await waitForRoom(pageB, ROOM_NAME);
         await pageB.locator('#roomList').getByText(ROOM_NAME, { exact: true }).first().click().catch(async () => {
             await pageB.evaluate(id => window.joinRoom(id), roomId);
@@ -171,7 +216,6 @@ async function assertNoPageErrors(pageErrors, label) {
         await waitVisible(pageB, '#roomScreen', 10000);
         record('Rooms / B rejoint le salon', 'PASS', { roomId });
 
-        // 6. Participant discovery on both sides.
         await pageA.waitForFunction(username => {
             return [...document.querySelectorAll('#videoGrid .video-card')].some(card => (card.innerText || '').includes(username));
         }, USER_B, { timeout: 20000 });
@@ -186,13 +230,11 @@ async function assertNoPageErrors(pageErrors, label) {
         }));
         record('WebRTC / participants visibles', participantState.cards >= 2 ? 'PASS' : 'FAIL', participantState);
 
-        // 7. Room chat delivery A -> B.
         await pageA.locator('#roomChatInput').fill('QA_ROOM_A_TO_B');
         await pageA.locator('.room-chat .chat-send').click();
         await pageB.waitForFunction(() => (document.querySelector('#roomChatMessages')?.innerText || '').includes('QA_ROOM_A_TO_B'), { timeout: 15000 });
         record('Rooms / chat A → B', 'PASS');
 
-        // 8. WebRTC signaling and connection state.
         const connectionResult = await Promise.race([
             pageA.waitForFunction(() => {
                 for (const peer of (window.peers?.values?.() || [])) {
@@ -220,7 +262,6 @@ async function assertNoPageErrors(pageErrors, label) {
         })));
         record('WebRTC / connexion peer-to-peer', connectionResult ? 'PASS' : 'FAIL', { peers: peerState });
 
-        // 9. Remote media stream must actually reach a video element.
         const remoteMedia = await pageA.waitForFunction(username => {
             const cards = [...document.querySelectorAll('#videoGrid .video-card')];
             const card = cards.find(c => (c.innerText || '').includes(username));
@@ -239,7 +280,6 @@ async function assertNoPageErrors(pageErrors, label) {
         }, USER_B);
         record('WebRTC / flux distant reçu', remoteMedia ? 'PASS' : 'FAIL', remoteDetails);
 
-        // 10. Camera and microphone toggles are functional.
         const beforeMedia = await pageA.evaluate(() => ({
             microphoneEnabled: window.microphoneEnabled,
             cameraEnabled: window.cameraEnabled
@@ -259,15 +299,15 @@ async function assertNoPageErrors(pageErrors, label) {
                 ? 'PASS' : 'FAIL',
             { before: beforeMedia, after: afterMedia });
 
-        // 11. Leave room and verify cleanup on A and notification on B.
         await pageA.locator('.leave-btn').click();
-        await pageA.waitForFunction(() => !window.currentRoom && !!window.localStream === false, { timeout: 10000 });
+        await pageA.waitForFunction(() => !window.currentRoom && !window.localStream, { timeout: 10000 });
         await waitVisible(pageA, '#lobbyScreen', 10000);
-        record('Rooms / A quitte le salon + nettoyage', 'PASS', {
-            currentRoom: await pageA.evaluate(() => window.currentRoom),
-            peers: await pageA.evaluate(() => window.peers?.size ?? null),
-            localStream: await pageA.evaluate(() => !!window.localStream)
-        });
+        const cleanupState = await pageA.evaluate(() => ({
+            currentRoom: window.currentRoom,
+            peers: window.peers?.size ?? null,
+            localStream: !!window.localStream
+        }));
+        record('Rooms / A quitte le salon + nettoyage', cleanupState.currentRoom == null && cleanupState.peers === 0 && !cleanupState.localStream ? 'PASS' : 'FAIL', cleanupState);
 
         await pageB.waitForFunction(username => {
             return ![...document.querySelectorAll('#videoGrid .video-card')].some(card => (card.innerText || '').includes(username));
@@ -284,14 +324,13 @@ async function assertNoPageErrors(pageErrors, label) {
         await browser.close();
     }
 
-    const report = {
+    fs.writeFileSync(`${OUT}/report-rooms-webrtc.json`, JSON.stringify({
         site: SITE_URL,
         users: [USER_A, USER_B],
         room: ROOM_NAME,
         generatedAt: new Date().toISOString(),
         results
-    };
-    fs.writeFileSync(`${OUT}/report-rooms-webrtc.json`, JSON.stringify(report, null, 2));
+    }, null, 2));
 
     const failed = results.filter(r => r.status === 'FAIL');
     console.log(`\nRooms + WebRTC QA terminé : ${results.length} contrôles, ${failed.length} échec(s).`);
