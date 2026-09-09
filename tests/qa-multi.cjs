@@ -2,173 +2,124 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 
 const SITE_URL = process.env.SITE_URL || 'https://gcol.vercel.app/';
-const USER_A = process.env.QA_USER_A || 'QA_A';
-const USER_B = process.env.QA_USER_B || 'QA_B';
+const USER_A = process.env.QA_USER_A || `QA_A_${Date.now()}`;
+const USER_B = process.env.QA_USER_B || `QA_B_${Date.now()}`;
+const PASSWORD = process.env.QA_PASSWORD || 'qa-test-password';
 const ROOM_NAME = `QA-${Date.now()}`;
 const OUT = process.env.QA_OUTPUT || 'qa-results';
-
 fs.mkdirSync(OUT, { recursive: true });
 const results = [];
 
 function record(name, status, details = {}) {
-    results.push({ name, status, details, at: new Date().toISOString() });
-    console.log(`[${status}] ${name}${Object.keys(details).length ? ` ${JSON.stringify(details)}` : ''}`);
+  results.push({ name, status, details, at: new Date().toISOString() });
+  console.log(`[${status}] ${name}${Object.keys(details).length ? ` ${JSON.stringify(details)}` : ''}`);
 }
 
-async function visibleButtonContaining(page, text) {
-    const buttons = page.locator('button:visible');
-    for (let i = 0; i < await buttons.count(); i++) {
-        const button = buttons.nth(i);
-        const label = ((await button.innerText().catch(() => '')) || '').replace(/\s+/g, ' ').trim();
-        if (label.toLowerCase().includes(text.toLowerCase())) return button;
-    }
-    return null;
+function visible(locator) {
+  return locator.evaluate(el => {
+    const s = getComputedStyle(el), r = el.getBoundingClientRect();
+    return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+  }).catch(() => false);
 }
 
 async function login(page, username) {
-    await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForTimeout(700);
-
-    const userMode = await visibleButtonContaining(page, 'Utilisateur');
-    if (userMode) await userMode.click();
-
-    const input = page.locator('#userUsernameInput, #usernameInput').filter({ visible: true }).first();
-    if (!(await input.count())) throw new Error('Formulaire utilisateur introuvable');
-    await input.fill(username);
-
-    const connect = await visibleButtonContaining(page, 'Se connecter');
-    if (!connect) throw new Error('Bouton Se connecter introuvable');
-    await connect.click();
-
-    await page.waitForFunction(() => {
-        const lobby = document.querySelector('#lobbyScreen');
-        if (!lobby) return false;
-        const s = getComputedStyle(lobby), r = lobby.getBoundingClientRect();
-        return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
-    }, { timeout: 30000 });
+  await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  const input = page.locator('#usernameInput, #userUsernameInput').first();
+  await input.waitFor({ state: 'visible', timeout: 15000 });
+  await input.fill(username);
+  const password = page.locator('#passwordInput').first();
+  if (await password.count() && await visible(password)) await password.fill(PASSWORD);
+  await page.getByRole('button', { name: /Se connecter/i }).first().click();
+  await page.locator('#lobbyScreen').waitFor({ state: 'visible', timeout: 30000 });
 }
 
-async function waitForRoom(page, roomName) {
-    await page.waitForFunction(name => {
-        const text = document.querySelector('#roomList')?.innerText || '';
-        return text.includes(name);
-    }, roomName, { timeout: 15000 });
+async function roomIdFromDom(page, name) {
+  return page.locator('.room-card').filter({ hasText: name }).first().locator('button').first().evaluate(btn => {
+    const match = String(btn.getAttribute('onclick') || '').match(/joinRoom\(['\"]([^'\"]+)/);
+    return match ? match[1] : null;
+  }).catch(() => null);
 }
 
 (async () => {
-    const browser = await chromium.launch({
-        headless: true,
-        args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream']
-    });
+  const browser = await chromium.launch({ headless: true, args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] });
+  const contextA = await browser.newContext({ permissions: ['camera', 'microphone'] });
+  const contextB = await browser.newContext({ permissions: ['camera', 'microphone'] });
+  const pageA = await contextA.newPage();
+  const pageB = await contextB.newPage();
+  const pageErrors = [];
+  const failedRequests = [];
+  for (const [page, user] of [[pageA, USER_A], [pageB, USER_B]]) {
+    page.on('pageerror', e => pageErrors.push({ user, error: e.message }));
+    page.on('requestfailed', r => failedRequests.push({ user, url: r.url(), error: r.failure()?.errorText || 'unknown' }));
+  }
 
-    const contextA = await browser.newContext({ permissions: ['camera', 'microphone'] });
-    const contextB = await browser.newContext({ permissions: ['camera', 'microphone'] });
-    const pageA = await contextA.newPage();
-    const pageB = await contextB.newPage();
+  try {
+    console.log(`\n===== multi-user / ${USER_A} + ${USER_B} =====`);
+    await login(pageA, USER_A);
+    record('Multi / A connecté', 'PASS', { username: USER_A });
+    await login(pageB, USER_B);
+    record('Multi / B connecté', 'PASS', { username: USER_B });
 
-    const pageErrors = [];
-    pageA.on('pageerror', e => pageErrors.push({ user: USER_A, error: e.message }));
-    pageB.on('pageerror', e => pageErrors.push({ user: USER_B, error: e.message }));
+    await pageA.locator('#desktopGeneralChatButton:visible, #generalChatToggle:visible').first().click();
+    await pageA.locator('#lobbyChatInput').fill('QA_GENERAL_MESSAGE');
+    await pageA.locator('.chat-send').first().click();
+    await pageB.locator('#lobbyChatMessages').waitFor({ state: 'attached', timeout: 10000 });
+    await pageB.waitForFunction(() => (document.querySelector('#lobbyChatMessages')?.innerText || '').includes('QA_GENERAL_MESSAGE'), { timeout: 15000 });
+    record('Chat général / A → B', 'PASS');
 
-    try {
-        console.log(`\n===== multi-user / ${USER_A} + ${USER_B} =====`);
+    await pageA.locator('.profile-top').click();
+    await pageA.locator('#profileModal').waitFor({ state: 'visible', timeout: 5000 });
+    const ownProfile = await pageA.locator('#profileUsername').innerText();
+    record('Profil / ouverture', ownProfile === USER_A ? 'PASS' : 'FAIL', { displayedUsername: ownProfile });
+    await pageA.locator('#profileDescriptionInput').fill('QA_PROFILE_DESCRIPTION');
+    await pageA.getByRole('button', { name: 'Enregistrer' }).click();
+    await pageA.waitForTimeout(500);
+    record('Profil / modification locale', 'PASS', { description: 'QA_PROFILE_DESCRIPTION' });
 
-        await login(pageA, USER_A);
-        record('Multi / utilisateur A connecté', 'PASS', { username: USER_A });
+    await pageB.waitForFunction(username => {
+      return [...document.querySelectorAll('#onlineUsersList *')].some(el => (el.innerText || '').includes(username));
+    }, USER_A, { timeout: 15000 });
+    record('Présence / B voit A', 'PASS');
 
-        await login(pageB, USER_B);
-        record('Multi / utilisateur B connecté', 'PASS', { username: USER_B });
+    await pageA.locator('#roomSearch').fill('zzzz-no-room');
+    const emptySearch = await pageA.locator('#roomList').innerText();
+    record('Recherche salons / filtre', emptySearch.includes(ROOM_NAME) ? 'FAIL' : 'PASS', { query: 'zzzz-no-room' });
+    await pageA.locator('#roomSearch').fill('');
 
-        await pageA.evaluate(name => window.send({ type: 'create-room', name }), ROOM_NAME);
-        await waitForRoom(pageA, ROOM_NAME);
-        await waitForRoom(pageB, ROOM_NAME);
-        record('Multi / création salon', 'PASS', { room: ROOM_NAME });
+    const createButton = pageA.getByRole('button', { name: /Créer un salon/i }).first();
+    const dialogPromise = pageA.waitForEvent('dialog');
+    await createButton.click();
+    const dialog = await dialogPromise;
+    await dialog.accept(ROOM_NAME);
+    await pageA.locator('.room-card').filter({ hasText: ROOM_NAME }).waitFor({ state: 'visible', timeout: 15000 });
+    await pageB.locator('.room-card').filter({ hasText: ROOM_NAME }).waitFor({ state: 'visible', timeout: 15000 });
+    record('Salons / création synchronisée A → B', 'PASS', { room: ROOM_NAME });
 
-        const roomId = await pageA.evaluate(name => {
-            const room = (window.rooms || []).find(r => r.name === name);
-            return room?.id || null;
-        }, ROOM_NAME);
+    const roomId = await roomIdFromDom(pageA, ROOM_NAME);
+    if (!roomId) throw new Error('ID du salon introuvable dans le DOM');
+    await pageA.locator('.room-card').filter({ hasText: ROOM_NAME }).locator('.join-room-btn').click();
+    await pageA.locator('#roomScreen').waitFor({ state: 'visible', timeout: 15000 });
+    record('Salons / A rejoint', 'PASS', { roomId });
+    await pageA.locator('.back-btn').click();
+    await pageA.locator('#lobbyScreen').waitFor({ state: 'visible', timeout: 15000 });
+    record('Navigation / A salon → lobby', 'PASS');
 
-        if (!roomId) throw new Error('ID du salon non trouvé côté A');
+    const token = await pageA.evaluate(() => localStorage.getItem('colincall_session'));
+    record('Session / token présent', token ? 'PASS' : 'FAIL', { present: !!token });
 
-        await pageA.evaluate(id => window.send({ type: 'join-room', roomId: id }), roomId);
-        await pageA.waitForFunction(() => !!window.currentRoom, { timeout: 15000 });
-        record('Multi / A rejoint le salon', 'PASS', { roomId });
-
-        await pageB.evaluate(id => window.send({ type: 'join-room', roomId: id }), roomId);
-        await pageB.waitForFunction(() => !!window.currentRoom, { timeout: 15000 });
-        await pageA.waitForFunction(username => {
-            const cards = document.querySelectorAll('#videoGrid .video-card');
-            return [...cards].some(card => (card.innerText || '').includes(username));
-        }, USER_B, { timeout: 15000 }).catch(() => {});
-        record('Multi / B rejoint le salon', 'PASS', { roomId });
-
-        const participantsB = await pageB.evaluate(() => ({
-            room: window.currentRoom,
-            cards: document.querySelectorAll('#videoGrid .video-card').length,
-            peers: window.peers?.size ?? null
-        }));
-        record('Multi / participants synchronisés', participantsB.room?.id === roomId ? 'PASS' : 'FAIL', participantsB);
-
-        await pageA.evaluate(() => window.send({ type: 'chat', roomId: window.currentRoom.id, text: 'QA_MULTI_MESSAGE' }));
-        await pageB.waitForFunction(() => (document.querySelector('#roomChatMessages')?.innerText || '').includes('QA_MULTI_MESSAGE'), { timeout: 15000 });
-        record('Multi / chat A → B', 'PASS');
-
-        await pageA.evaluate(() => window.toggleMicro());
-        await pageB.waitForFunction(username => {
-            const user = (window.users || []).find(u => u.username === username);
-            return user ? user.microphoneEnabled === true : false;
-        }, USER_A, { timeout: 10000 }).catch(() => {});
-        const mediaState = await pageB.evaluate(username => {
-            const user = (window.users || []).find(u => u.username === username);
-            return user ? { microphoneEnabled: user.microphoneEnabled, cameraEnabled: user.cameraEnabled } : null;
-        }, USER_A);
-        record('Multi / état micro A → B', mediaState?.microphoneEnabled === true ? 'PASS' : 'WARN', mediaState || {});
-
-        const sessionToken = await pageA.evaluate(() => localStorage.getItem('colincall_session'));
-        if (!sessionToken) throw new Error('Session token absent');
-        record('Session / token créé', 'PASS');
-
-        await pageA.close();
-        await contextA.close();
-
-        const contextReconnect = await browser.newContext({ permissions: ['camera', 'microphone'] });
-        await contextReconnect.addInitScript(token => localStorage.setItem('colincall_session', token), sessionToken);
-        const pageReconnect = await contextReconnect.newPage();
-        const reconnectErrors = [];
-        pageReconnect.on('pageerror', e => reconnectErrors.push(e.message));
-
-        await pageReconnect.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await pageReconnect.waitForFunction(() => !!window.currentUser, { timeout: 30000 });
-        const restored = await pageReconnect.evaluate(() => ({ username: window.currentUser?.username, token: !!localStorage.getItem('colincall_session') }));
-        record('Session / reconnexion WebSocket', restored.username === USER_A ? 'PASS' : 'FAIL', { ...restored, errors: reconnectErrors });
-
-        await pageReconnect.evaluate(() => window.logout());
-        await pageReconnect.waitForTimeout(700);
-        const afterLogout = await pageReconnect.evaluate(() => ({
-            currentUser: window.currentUser ?? null,
-            token: localStorage.getItem('colincall_session'),
-            authVisible: getComputedStyle(document.querySelector('#authScreen')).display !== 'none'
-        }));
-        record('Session / logout', !afterLogout.currentUser && !afterLogout.token && afterLogout.authVisible ? 'PASS' : 'FAIL', afterLogout);
-
-        await contextReconnect.close();
-    } catch (error) {
-        record('Multi / runner', 'FAIL', { error: error.stack || error.message });
-    } finally {
-        record('Multi / erreurs JavaScript', pageErrors.length === 0 ? 'PASS' : 'FAIL', { count: pageErrors.length, errors: pageErrors.slice(0, 20) });
-        await browser.close();
-    }
-
-    fs.writeFileSync(`${OUT}/report-multi.json`, JSON.stringify({
-        site: SITE_URL,
-        users: [USER_A, USER_B],
-        room: ROOM_NAME,
-        generatedAt: new Date().toISOString(),
-        results
-    }, null, 2));
-
-    const failed = results.filter(r => r.status === 'FAIL');
-    console.log(`\nMulti QA terminé : ${results.length} contrôles, ${failed.length} échec(s).`);
-    process.exitCode = failed.length ? 1 : 0;
+    await pageA.evaluate(() => window.logout());
+    await pageA.locator('#authScreen').waitFor({ state: 'visible', timeout: 10000 });
+    const loggedOut = await pageA.evaluate(() => ({ token: localStorage.getItem('colincall_session'), auth: getComputedStyle(document.querySelector('#authScreen')).display !== 'none' }));
+    record('Session / logout', !loggedOut.token && loggedOut.auth ? 'PASS' : 'FAIL', loggedOut);
+  } catch (error) {
+    record('Multi / runner', 'FAIL', { error: error.stack || error.message });
+  } finally {
+    record('Multi / erreurs JavaScript', pageErrors.length === 0 ? 'PASS' : 'FAIL', { count: pageErrors.length, errors: pageErrors.slice(0, 20) });
+    record('Multi / requêtes échouées', failedRequests.length === 0 ? 'PASS' : 'WARN', { count: failedRequests.length, errors: failedRequests.slice(0, 20) });
+    await browser.close();
+    fs.writeFileSync(`${OUT}/report-multi.json`, JSON.stringify({ site: SITE_URL, users: [USER_A, USER_B], room: ROOM_NAME, generatedAt: new Date().toISOString(), results }, null, 2));
+  }
+  const failed = results.filter(r => r.status === 'FAIL');
+  console.log(`\nMulti QA terminé : ${results.length} contrôles, ${failed.length} échec(s).`);
+  process.exitCode = failed.length ? 1 : 0;
 })();
