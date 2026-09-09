@@ -4,44 +4,67 @@
         const lobby = document.getElementById("lobbyScreen");
         const sidebar = lobby?.querySelector(".users-sidebar");
         const button = document.getElementById("usersSidebarToggle");
+
         if(!lobby || !sidebar) return;
 
         const mobile = window.innerWidth <= 700;
+
         lobby.classList.toggle("users-hidden", mobile && hidden);
 
         if(mobile){
-            sidebar.style.transform = hidden ? "translateX(-105%)" : "translateX(0)";
+            /*
+             * Important :
+             * on force display:block pour éviter que le CSS conserve
+             * display:none après la première fermeture.
+             */
+            sidebar.style.display = "block";
+            sidebar.style.transform = hidden
+                ? "translateX(-105%)"
+                : "translateX(0)";
             sidebar.style.opacity = hidden ? "0" : "1";
             sidebar.style.pointerEvents = hidden ? "none" : "auto";
         }else{
+            sidebar.style.display = "";
             sidebar.style.transform = "";
             sidebar.style.opacity = "";
             sidebar.style.pointerEvents = "";
         }
 
         if(button){
-            button.textContent = hidden && mobile ? "👥 Utilisateurs" : "× Fermer";
+            button.textContent = hidden && mobile
+                ? "👥 Utilisateurs"
+                : "× Fermer";
+
             button.setAttribute(
                 "aria-label",
-                hidden && mobile ? "Afficher les utilisateurs" : "Fermer les utilisateurs"
+                hidden && mobile
+                    ? "Afficher les utilisateurs"
+                    : "Fermer les utilisateurs"
             );
         }
     }
 
     window.toggleUsersSidebar = function(){
         const lobby = document.getElementById("lobbyScreen");
+
         if(!lobby) return;
-        setUsersSidebarState(!lobby.classList.contains("users-hidden"));
+
+        const isHidden = lobby.classList.contains("users-hidden");
+        setUsersSidebarState(!isHidden);
     };
 
     function setupMobileUsersButton(){
         const button = document.getElementById("usersSidebarToggle");
         const lobby = document.getElementById("lobbyScreen");
+
         if(!button || !lobby) return;
 
         if(window.innerWidth <= 700){
             button.style.display = "flex";
-            setUsersSidebarState(lobby.classList.contains("users-hidden"));
+
+            setUsersSidebarState(
+                lobby.classList.contains("users-hidden")
+            );
         }else{
             setUsersSidebarState(false);
         }
@@ -52,25 +75,36 @@
     }
 
     if(document.readyState === "loading"){
-        document.addEventListener("DOMContentLoaded", setup, {once:true});
+        document.addEventListener(
+            "DOMContentLoaded",
+            setup,
+            {once:true}
+        );
     }else{
         setup();
     }
 
-    window.addEventListener("resize", setupMobileUsersButton);
+    window.addEventListener(
+        "resize",
+        setupMobileUsersButton
+    );
 
     /*
      * LOGIN MOBILE ROBUSTE
      *
-     * admin.js possède déjà le formulaire utilisateur. Sur certaines
-     * connexions mobiles, le WebSocket peut rester en CONNECTING plus
-     * longtemps que prévu. On intercepte uniquement le bouton utilisateur
-     * et on réessaie l'envoi jusqu'à ce que send() confirme OPEN.
-     * Aucun accès à window.socket n'est utilisé : socket est un binding
-     * lexical dans app.js.
+     * admin.js possède déjà le formulaire utilisateur.
+     * Sur certaines connexions mobiles, le WebSocket peut rester
+     * en CONNECTING plus longtemps que prévu.
+     *
+     * On intercepte uniquement le bouton utilisateur et on réessaie
+     * l'envoi jusqu'à ce que send() confirme OPEN.
+     *
+     * Aucun accès à window.socket n'est utilisé :
+     * socket est un binding lexical dans app.js.
      */
     function robustUserLogin(event){
         const button = event.target.closest?.("#userLoginButton");
+
         if(!button) return;
 
         const input = document.getElementById("userUsernameInput");
@@ -81,15 +115,28 @@
         event.stopPropagation();
         event.stopImmediatePropagation();
 
-        if(errorElement) errorElement.textContent = "";
+        if(errorElement){
+            errorElement.textContent = "";
+        }
 
         if(!username){
-            if(errorElement) errorElement.textContent = "Entrez un nom d'utilisateur.";
+            if(errorElement){
+                errorElement.textContent =
+                    "Entrez un nom d'utilisateur.";
+            }
+
             return;
         }
 
-        if(typeof window.connectSocket !== "function" || typeof window.send !== "function"){
-            if(errorElement) errorElement.textContent = "Connexion impossible.";
+        if(
+            typeof window.connectSocket !== "function" ||
+            typeof window.send !== "function"
+        ){
+            if(errorElement){
+                errorElement.textContent =
+                    "Connexion impossible.";
+            }
+
             return;
         }
 
@@ -108,7 +155,12 @@
             if(Date.now() - startedAt >= timeout){
                 finished = true;
                 clearInterval(timer);
-                if(errorElement) errorElement.textContent = "Connexion impossible.";
+
+                if(errorElement){
+                    errorElement.textContent =
+                        "Connexion impossible.";
+                }
+
                 return;
             }
 
@@ -125,15 +177,24 @@
                     clearInterval(timer);
                 }
             }catch(error){
-                /* Le WebSocket peut encore être en transition. On réessaie. */
+                /*
+                 * Le WebSocket peut encore être en transition.
+                 * On réessaie automatiquement.
+                 */
             }
         }, 100);
     }
 
-    document.addEventListener("click", robustUserLogin, true);
+    document.addEventListener(
+        "click",
+        robustUserLogin,
+        true
+    );
 
     const style = document.createElement("style");
-    style.id = "colincall-mobile-fixes-v6";
+
+    style.id = "colincall-mobile-fixes-v7";
+
     style.textContent = `
         .video-card .video-overlay{
             position:absolute;
@@ -162,7 +223,9 @@
             text-align:center;
         }
 
-        .video-card .video-media-state:empty{display:none;}
+        .video-card .video-media-state:empty{
+            display:none;
+        }
 
         @media (max-width:700px){
             #usersSidebarToggle{
@@ -176,6 +239,7 @@
             }
 
             .lobby-screen > .users-sidebar{
+                display:block !important;
                 position:fixed !important;
                 top:68px !important;
                 left:0 !important;
@@ -190,10 +254,13 @@
                 border-right:1px solid var(--border) !important;
                 box-shadow:18px 0 45px rgba(0,0,0,.45);
                 overflow-y:auto !important;
-                transition:transform .2s ease, opacity .2s ease !important;
+                transition:
+                    transform .2s ease,
+                    opacity .2s ease !important;
             }
 
             .lobby-screen.users-hidden > .users-sidebar{
+                display:block !important;
                 opacity:0 !important;
                 transform:translateX(-105%) !important;
                 pointer-events:none !important;
@@ -208,7 +275,8 @@
                 z-index:1000 !important;
             }
 
-            .room-screen:has(#roomChat.mobile-open) #roomChatMobileButton{
+            .room-screen:has(#roomChat.mobile-open)
+            #roomChatMobileButton{
                 display:none !important;
             }
 
@@ -237,10 +305,12 @@
                 transform:translateY(0);
             }
 
-            .room-screen:has(#roomChat.mobile-open) .room-bottom-controls{
+            .room-screen:has(#roomChat.mobile-open)
+            .room-bottom-controls{
                 display:none !important;
             }
         }
     `;
+
     document.head.appendChild(style);
 })();
