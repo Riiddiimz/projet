@@ -64,8 +64,6 @@ async function login(page, username) {
     if (!connectButton) throw new Error('Bouton Se connecter introuvable');
     await connectButton.click();
 
-    // currentUser est une variable let interne à app.js : elle n'est volontairement
-    // pas exposée sur window. Le bon signal observable ici est l'affichage du lobby.
     await waitVisible(page, '#lobbyScreen', 30000);
 }
 
@@ -78,8 +76,11 @@ async function waitForRoom(page, roomName) {
 
 async function roomIdFor(page, roomName) {
     return page.evaluate(name => {
-        const room = (window.rooms || []).find(r => r.name === name);
-        return room?.id || null;
+        const cards = [...document.querySelectorAll('#roomList .room-card')];
+        const card = cards.find(c => c.querySelector('.room-card-name')?.textContent?.trim() === name);
+        const button = card?.querySelector('.join-room-btn');
+        const onclick = button?.getAttribute('onclick') || '';
+        return onclick.match(/joinRoom\(['\"]([^'\"]+)['\"]\)/)?.[1] || null;
     }, roomName);
 }
 
@@ -119,35 +120,23 @@ async function assertNoPageErrors(pageErrors, label) {
         await login(pageB, USER_B);
         record('Rooms / B connecté', 'PASS', { username: USER_B });
 
-        await pageA.getByRole('button', { name: /Créer un salon/i }).click();
-        const dialogInputs = pageA.locator('input:visible');
-        let roomInput = null;
-        for (let i = 0; i < await dialogInputs.count(); i++) {
-            const input = dialogInputs.nth(i);
-            const placeholder = (await input.getAttribute('placeholder')) || '';
-            if (/salon|nom/i.test(placeholder)) {
-                roomInput = input;
-                break;
+        // L'application utilise un prompt() natif pour demander le nom du salon.
+        // On installe le handler avant le clic afin que Playwright accepte le nom réel.
+        let roomPromptSeen = false;
+        pageA.once('dialog', async dialog => {
+            roomPromptSeen = true;
+            if (dialog.type() !== 'prompt') {
+                await dialog.dismiss();
+                throw new Error(`Dialogue inattendu lors de la création : ${dialog.type()}`);
             }
-        }
+            await dialog.accept(ROOM_NAME);
+        });
 
-        if (roomInput) {
-            await roomInput.fill(ROOM_NAME);
-            const createButtons = pageA.locator('button:visible');
-            let clicked = false;
-            for (let i = 0; i < await createButtons.count(); i++) {
-                const b = createButtons.nth(i);
-                const text = ((await b.innerText().catch(() => '')) || '').trim();
-                if (/créer|valider|confirmer/i.test(text)) {
-                    await b.click();
-                    clicked = true;
-                    break;
-                }
-            }
-            if (!clicked) throw new Error('Bouton de confirmation de création introuvable');
-        } else {
-            await pageA.evaluate(name => window.createRoom?.(name), ROOM_NAME);
-        }
+        const createButton = await visibleButtonContaining(pageA, 'Créer un salon');
+        if (!createButton) throw new Error('Bouton Créer un salon introuvable');
+        await createButton.click();
+        await pageA.waitForTimeout(300);
+        if (!roomPromptSeen) throw new Error('Le prompt de création du salon n\'a pas été affiché');
 
         await waitForRoom(pageA, ROOM_NAME);
         await waitForRoom(pageB, ROOM_NAME);
@@ -156,14 +145,9 @@ async function assertNoPageErrors(pageErrors, label) {
         const roomId = await roomIdFor(pageA, ROOM_NAME);
         if (!roomId) throw new Error('ID du salon non trouvé après création');
 
-        const roomCard = pageA.locator('#roomList').getByText(ROOM_NAME, { exact: true }).first();
+        const roomCard = pageA.locator('#roomList .room-card').filter({ hasText: ROOM_NAME }).first();
         await roomCard.waitFor({ state: 'visible', timeout: 15000 });
-        const clickableCard = roomCard.locator('xpath=ancestor-or-self::*[self::button or @role="button"][1]');
-        if (await clickableCard.count()) {
-            await clickableCard.click();
-        } else {
-            await pageA.evaluate(id => window.joinRoom(id), roomId);
-        }
+        await roomCard.locator('.join-room-btn').click();
 
         await waitVisible(pageA, '#roomScreen', 20000);
         await pageA.waitForFunction(() => document.querySelectorAll('#videoGrid .video-card').length >= 1, { timeout: 10000 });
@@ -195,9 +179,9 @@ async function assertNoPageErrors(pageErrors, label) {
         record('Rooms / chat du salon A', 'PASS');
 
         await waitForRoom(pageB, ROOM_NAME);
-        await pageB.locator('#roomList').getByText(ROOM_NAME, { exact: true }).first().click().catch(async () => {
-            await pageB.evaluate(id => window.joinRoom(id), roomId);
-        });
+        const roomCardB = pageB.locator('#roomList .room-card').filter({ hasText: ROOM_NAME }).first();
+        await roomCardB.waitFor({ state: 'visible', timeout: 15000 });
+        await roomCardB.locator('.join-room-btn').click();
         await waitVisible(pageB, '#roomScreen', 20000);
         record('Rooms / B rejoint le salon', 'PASS', { roomId });
 
