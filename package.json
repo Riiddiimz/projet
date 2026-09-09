@@ -4,9 +4,14 @@
   "description": "Serveur Col'inCall",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "qa": "node tests/qa-full.cjs",
+    "qa:multi": "node tests/qa-multi.cjs"
   },
   "dependencies": {
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
   }
 }
