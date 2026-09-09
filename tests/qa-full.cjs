@@ -18,7 +18,40 @@ async function inspectElement(page, selector) {
   if (!(await loc.count())) return { exists: false };
   return await loc.evaluate(el => {
     const s = getComputedStyle(el), r = el.getBoundingClientRect();
-    return { exists: true, visible: !!(r.width && r.height && s.display !== 'none' && s.visibility !== 'hidden'), rect: { x: r.x, y: r.y, width: r.width, height: r.height }, display: s.display, visibility: s.visibility, opacity: s.opacity, pointerEvents: s.pointerEvents, transform: s.transform, zIndex: s.zIndex, disabled: !!el.disabled, text: (el.innerText || el.textContent || '').trim().slice(0, 300) };
+    return {
+      exists: true,
+      visible: !!(r.width && r.height && s.display !== 'none' && s.visibility !== 'hidden'),
+      rect: { x: r.x, y: r.y, width: r.width, height: r.height },
+      display: s.display,
+      visibility: s.visibility,
+      opacity: s.opacity,
+      pointerEvents: s.pointerEvents,
+      transform: s.transform,
+      zIndex: s.zIndex,
+      disabled: !!el.disabled,
+      text: (el.innerText || el.textContent || '').trim().slice(0, 300)
+    };
+  });
+}
+
+async function sidebarState(page) {
+  const loc = page.locator('#lobbyScreen .users-sidebar').first();
+  if (!(await loc.count())) return { exists: false };
+  return await loc.evaluate(el => {
+    const s = getComputedStyle(el), r = el.getBoundingClientRect();
+    return {
+      exists: true,
+      visible: s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0,
+      display: s.display,
+      visibility: s.visibility,
+      opacity: s.opacity,
+      transform: s.transform,
+      className: el.className,
+      ariaHidden: el.getAttribute('aria-hidden'),
+      dataState: el.getAttribute('data-state'),
+      width: r.width,
+      height: r.height
+    };
   });
 }
 
@@ -74,6 +107,7 @@ async function login(page) {
   }
 
   await username.fill(TEST_USERNAME);
+  await page.waitForTimeout(300);
   record('Auth / pseudo TEST', 'PASS', { username: TEST_USERNAME });
   await page.screenshot({ path: `${OUT}/02-test-filled.png`, fullPage: true });
 
@@ -87,15 +121,54 @@ async function login(page) {
   record('Auth / bouton Se connecter', 'PASS', { clickedText: ((await connectButton.innerText().catch(() => '')) || '').trim() });
 
   try {
-    await page.locator('#lobbyScreen').waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000);
+    await page.waitForFunction(() => {
+      const lobby = document.querySelector('#lobbyScreen');
+      const auth = document.querySelector('#authScreen');
+      const isVisible = el => {
+        if (!el) return false;
+        const style = getComputedStyle(el);
+        const rect = el.getBoundingClientRect();
+        return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+      };
+      return isVisible(lobby) || !isVisible(auth);
+    }, { timeout: 30000 });
+
+    await page.waitForTimeout(2500);
     const lobby = await inspectElement(page, '#lobbyScreen');
     const roomList = await inspectElement(page, '#roomList');
-    record('Authentication / arrivée menu salons', lobby.visible ? 'PASS' : 'FAIL', { lobby, roomList, username: TEST_USERNAME });
+    if (!lobby.visible) {
+      record('Authentication / arrivée menu salons', 'FAIL', {
+        reason: 'authentication transition completed but lobby is not visible',
+        authScreen: await inspectElement(page, '#authScreen'),
+        app: await inspectElement(page, '#app'),
+        lobby,
+        roomList,
+        loginError: ((await page.locator('#loginError').textContent().catch(() => '')) || '').trim(),
+        visibleInputs: await page.locator('input:visible').evaluateAll(els => els.map(el => ({ id: el.id, type: el.type, placeholder: el.placeholder, value: el.value }))).catch(() => []),
+        visibleButtons: await page.locator('button:visible').allTextContents().catch(() => []),
+        url: page.url(),
+        bodyPreview: (await page.locator('body').innerText().catch(() => '')).slice(0, 1500)
+      });
+      await page.screenshot({ path: `${OUT}/03-login-transition-failed.png`, fullPage: true }).catch(() => {});
+      return false;
+    }
+
+    record('Authentication / arrivée menu salons', 'PASS', { lobby, roomList, username: TEST_USERNAME });
     await page.screenshot({ path: `${OUT}/03-lobby-after-login.png`, fullPage: true });
-    return lobby.visible;
-  } catch {
-    record('Authentication / arrivée menu salons', 'FAIL', { username: TEST_USERNAME, error: ((await page.locator('#loginError').textContent().catch(() => '')) || '').trim(), url: page.url(), visibleButtons: await page.locator('button:visible').allTextContents().catch(() => []), bodyPreview: (await page.locator('body').innerText().catch(() => '')).slice(0, 1500) });
+    return true;
+  } catch (error) {
+    record('Authentication / arrivée menu salons', 'FAIL', {
+      username: TEST_USERNAME,
+      error: error.message,
+      authScreen: await inspectElement(page, '#authScreen'),
+      app: await inspectElement(page, '#app'),
+      lobby: await inspectElement(page, '#lobbyScreen'),
+      loginError: ((await page.locator('#loginError').textContent().catch(() => '')) || '').trim(),
+      url: page.url(),
+      visibleButtons: await page.locator('button:visible').allTextContents().catch(() => []),
+      visibleInputs: await page.locator('input:visible').evaluateAll(els => els.map(el => ({ id: el.id, type: el.type, placeholder: el.placeholder, value: el.value }))).catch(() => []),
+      bodyPreview: (await page.locator('body').innerText().catch(() => '')).slice(0, 1500)
+    });
     return false;
   }
 }
@@ -103,21 +176,34 @@ async function login(page) {
 async function testUsersSidebar(page) {
   const button = page.locator('#usersSidebarToggle'), sidebar = page.locator('#lobbyScreen .users-sidebar');
   if (!(await button.count()) || !(await sidebar.count())) { record('Lobby / Utilisateurs', 'FAIL', { reason: 'button or sidebar missing' }); return; }
-  const before = await snapshot(page, '04-before-users');
+
+  const before = await sidebarState(page);
   const buttonBefore = await inspectElement(page, '#usersSidebarToggle');
-  const sidebarBefore = await inspectElement(page, '#lobbyScreen .users-sidebar');
+  await snapshot(page, '04-before-users');
+
   await button.scrollIntoViewIfNeeded().catch(() => {});
   await button.click({ force: true });
   await page.waitForTimeout(700);
-  const after = await snapshot(page, '05-after-users');
+
+  const after = await sidebarState(page);
   const buttonAfter = await inspectElement(page, '#usersSidebarToggle');
-  const sidebarAfter = await inspectElement(page, '#lobbyScreen .users-sidebar');
+  const afterSnapshot = await snapshot(page, '05-after-users');
   await page.screenshot({ path: `${OUT}/05-after-users.png`, fullPage: true });
-  const changed = JSON.stringify(sidebarBefore) !== JSON.stringify(sidebarAfter) || JSON.stringify(before.lobby) !== JSON.stringify(after.lobby) || JSON.stringify(buttonBefore) !== JSON.stringify(buttonAfter);
-  record('Lobby / Utilisateurs', changed ? 'PASS' : 'FAIL', { buttonBefore, buttonAfter, sidebarBefore, sidebarAfter, lobbyAfter: after.lobby });
+
+  const changed = JSON.stringify(before) !== JSON.stringify(after) || JSON.stringify(buttonBefore) !== JSON.stringify(buttonAfter);
+  record('Lobby / Utilisateurs', changed ? 'PASS' : 'FAIL', {
+    before,
+    after,
+    buttonBefore,
+    buttonAfter,
+    lobbyAfter: afterSnapshot.lobby
+  });
+
   await button.click({ force: true });
-  await page.waitForTimeout(300);
-  record('Lobby / Utilisateurs / toggle retour', 'PASS', await inspectElement(page, '#lobbyScreen .users-sidebar'));
+  await page.waitForTimeout(700);
+  const returned = await sidebarState(page);
+  const returnedChanged = JSON.stringify(returned) !== JSON.stringify(after);
+  record('Lobby / Utilisateurs / toggle retour', returnedChanged ? 'PASS' : 'FAIL', { after, returned });
 }
 
 async function testLobby(page) {
