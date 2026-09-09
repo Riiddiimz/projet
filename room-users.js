@@ -7,15 +7,10 @@ let roomUsers = [];
 function updateRoomUsersMenu(){
     const list = document.getElementById("roomUsersList");
     const count = document.getElementById("roomUsersCount");
-
     if(!list) return;
 
     const users = Array.isArray(roomUsers) ? roomUsers : [];
-
-    if(count){
-        count.textContent = users.length;
-    }
-
+    if(count) count.textContent = users.length;
     list.innerHTML = "";
 
     users.forEach(user => {
@@ -28,8 +23,9 @@ function updateRoomUsersMenu(){
         avatar.className = "room-user-avatar";
         avatar.textContent = (user.username || "?").charAt(0).toUpperCase();
 
-        if(user.avatar){
-            avatar.style.backgroundImage = `url("${user.avatar}")`;
+        const avatarUrl = user.avatar || user.avatarUrl;
+        if(avatarUrl){
+            avatar.style.backgroundImage = "url(\"" + avatarUrl + "\")";
             avatar.classList.add("has-image");
             avatar.textContent = "";
         }
@@ -66,77 +62,55 @@ function updateRoomUsersMenu(){
 function toggleRoomUsers(){
     const menu = document.getElementById("roomUsersMenu");
     const button = document.getElementById("roomUsersToggle");
-
     if(!menu) return;
 
     const isOpen = menu.classList.contains("open");
-
     menu.classList.toggle("open", !isOpen);
     menu.setAttribute("aria-hidden", isOpen ? "true" : "false");
-
-    if(button){
-        button.classList.toggle("active", !isOpen);
-    }
-
-    if(!isOpen){
-        updateRoomUsersMenu();
-    }
+    if(button) button.classList.toggle("active", !isOpen);
+    if(!isOpen) updateRoomUsersMenu();
 }
 
 function closeRoomUsers(){
     const menu = document.getElementById("roomUsersMenu");
     const button = document.getElementById("roomUsersToggle");
-
     if(menu){
         menu.classList.remove("open");
         menu.setAttribute("aria-hidden", "true");
     }
-
-    if(button){
-        button.classList.remove("active");
-    }
+    if(button) button.classList.remove("active");
 }
 
 function setRoomUsers(users){
-    roomUsers = Array.isArray(users) ? [...users] : [];
+    const incoming = Array.isArray(users) ? [...users] : [];
+
+    /* Le serveur peut exclure l'utilisateur courant. */
+    if(currentUser && !incoming.some(user => user && user.id === currentUser.id)){
+        incoming.unshift(currentUser);
+    }
+
+    roomUsers = incoming;
     updateRoomUsersMenu();
 }
 
 function addRoomUser(user){
     if(!user || !user.id) return;
-
     const exists = roomUsers.some(existing => existing && existing.id === user.id);
-
-    if(!exists){
-        roomUsers.push(user);
-    }else{
-        roomUsers = roomUsers.map(existing =>
-            existing && existing.id === user.id ? user : existing
-        );
-    }
-
+    if(!exists) roomUsers.push(user);
+    else roomUsers = roomUsers.map(existing => existing && existing.id === user.id ? user : existing);
     updateRoomUsersMenu();
 }
 
 function removeRoomUser(userId){
     if(!userId) return;
-
     roomUsers = roomUsers.filter(user => !user || user.id !== userId);
     updateRoomUsersMenu();
 }
 
-/* On conserve les fonctions WebRTC existantes et on ajoute uniquement
-   la synchronisation de la liste des utilisateurs du salon. */
-
 if(typeof handleRoomJoined === "function"){
     const originalHandleRoomJoined = handleRoomJoined;
-
     handleRoomJoined = function(message){
-        const participants =
-            message.users ||
-            message.participants ||
-            [];
-
+        const participants = message.users || message.participants || [];
         setRoomUsers(participants);
         closeRoomUsers();
         originalHandleRoomJoined(message);
@@ -146,7 +120,6 @@ if(typeof handleRoomJoined === "function"){
 
 if(typeof handleRoomUserJoined === "function"){
     const originalHandleRoomUserJoined = handleRoomUserJoined;
-
     handleRoomUserJoined = function(message){
         const user = message && (message.user || message);
         addRoomUser(user);
@@ -156,15 +129,8 @@ if(typeof handleRoomUserJoined === "function"){
 
 if(typeof handleRoomUserLeft === "function"){
     const originalHandleRoomUserLeft = handleRoomUserLeft;
-
     handleRoomUserLeft = function(message){
-        const userId =
-            message && (
-                message.userId ||
-                (message.user && message.user.id) ||
-                message.id
-            );
-
+        const userId = message && (message.userId || (message.user && message.user.id) || message.id);
         removeRoomUser(userId);
         originalHandleRoomUserLeft(message);
     };
