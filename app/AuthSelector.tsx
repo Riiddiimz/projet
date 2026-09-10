@@ -85,7 +85,7 @@ export default function AuthSelector() {
   const choose = (next: Mode) => {
     setMode(next);
     setError('');
-    setUsername(next === 'admin' ? 'Riddimz' : '');
+    setUsername('');
     setPassword('');
   };
 
@@ -131,7 +131,7 @@ export default function AuthSelector() {
             <input id="authUsername" autoFocus value={username} onChange={e => setUsername(e.target.value)} onKeyDown={e => e.key === 'Enter' && (mode === 'admin' ? document.getElementById('authPassword')?.focus() : login())} placeholder={mode === 'admin' ? "Nom d'administrateur" : "Nom d'utilisateur"} autoComplete="username" className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition focus:border-fuchsia-400/60" />
             {mode === 'admin' && <input id="authPassword" type="password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && login()} placeholder="Code administrateur" autoComplete="current-password" className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition focus:border-fuchsia-400/60" />}
             {mode === 'user' && <p className="px-1 text-xs text-zinc-500">Le code est facultatif pour une connexion utilisateur.</p>}
-            {mode === 'admin' && <p className="px-1 text-xs text-zinc-500">Compte administrateur : <span className="font-semibold text-zinc-300">Riddimz</span>. Le code est défini côté serveur.</p>}
+            {mode === 'admin' && <p className="px-1 text-xs text-zinc-500">Le nom et le code administrateur sont à saisir manuellement.</p>}
             {error && <div role="alert" className="rounded-xl bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
             <button id="authLoginButton" type="button" onClick={login} disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-fuchsia-400 py-3.5 font-black text-zinc-950 disabled:cursor-wait disabled:opacity-60">
               {loading ? 'Connexion…' : mode === 'admin' ? 'Se connecter en administrateur' : 'Se connecter'}
