@@ -10,7 +10,8 @@
     "start": "next start",
     "server": "node server.js",
     "qa": "node tests/qa-full.cjs",
-    "qa:multi": "node tests/qa-multi.cjs"
+    "qa:multi": "node tests/qa-multi.cjs",
+    "qa:visual": "node tests/qa-visual-guardian.cjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.13",
