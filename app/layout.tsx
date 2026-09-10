@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import AuthSelector from "./AuthSelector";
+import ExperienceLayer from "./ExperienceLayer";
 
 export const metadata: Metadata = {
-  title: "Col'inCall",
-  description: "Parle. Rencontre. Passe un bon moment.",
+  title: "Col'inCall — Parle. Rencontre. Passe un bon moment.",
+  description: "Col'inCall, une expérience sociale audio et vidéo moderne.",
 };
 
 export default function RootLayout({
@@ -15,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body>
+        <ExperienceLayer />
         {children}
         <AuthSelector />
       </body>
