@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AuthSelector from "./AuthSelector";
 import ExperienceLayer from "./ExperienceLayer";
+import ImmersiveFX from "./ImmersiveFX";
 
 export const metadata: Metadata = {
   title: "Col'inCall — Parle. Rencontre. Passe un bon moment.",
@@ -17,6 +18,7 @@ export default function RootLayout({
     <html lang="fr">
       <body>
         <ExperienceLayer />
+        <ImmersiveFX />
         {children}
         <AuthSelector />
       </body>
