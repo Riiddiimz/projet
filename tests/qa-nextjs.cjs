@@ -35,12 +35,22 @@ async function login(page, username) {
 
 async function createRoom(page) {
   const button = page.getByRole('button', { name: /Créer un salon/i }).first();
+
   await button.waitFor({ state: 'visible', timeout: 15000 });
-  const dialogPromise = page.waitForEvent('dialog', { timeout: 10000 });
+
+  const dialogPromise = page.waitForEvent('dialog', { timeout: 10000 })
+    .then(async dialog => {
+      await dialog.accept(ROOM);
+    });
+
   await button.click();
-  const dialog = await dialogPromise;
-  await dialog.accept(ROOM);
-  await page.waitForFunction(name => document.body.innerText.includes(name), ROOM, { timeout: 15000 });
+  await dialogPromise;
+
+  await page.waitForFunction(
+    name => document.body.innerText.includes(name),
+    ROOM,
+    { timeout: 15000 }
+  );
 }
 
 (async () => {
@@ -65,7 +75,6 @@ async function createRoom(page) {
     record('Next.js / lobby A', await visible(pageA, 'main') ? 'PASS' : 'FAIL');
     record('Next.js / mobile viewport B', (pageB.viewportSize()?.width === 390) ? 'PASS' : 'FAIL');
 
-    const search = pageA.locator('input').filter({ has: undefined }).first();
     const inputs = await pageA.locator('input').evaluateAll(els => els.map(e => ({ id: e.id, placeholder: e.placeholder })));
     record('Next.js / champs lobby', inputs.length > 0 ? 'PASS' : 'FAIL', { inputs });
 
