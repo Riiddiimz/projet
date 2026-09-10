@@ -13,9 +13,7 @@
   --accent-soft: rgba(232, 121, 249, 0.14);
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html {
   min-height: 100%;
@@ -28,37 +26,59 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 15% -10%, rgba(217, 70, 239, 0.12), transparent 30rem),
-    radial-gradient(circle at 90% 10%, rgba(99, 102, 241, 0.09), transparent 28rem),
+    radial-gradient(circle at 15% -10%, rgba(217, 70, 239, 0.14), transparent 30rem),
+    radial-gradient(circle at 90% 10%, rgba(99, 102, 241, 0.12), transparent 28rem),
+    radial-gradient(circle at 50% 110%, rgba(168, 85, 247, 0.08), transparent 32rem),
     var(--background);
   color: var(--foreground);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
-button,
-input,
-textarea {
-  font: inherit;
+/* Living ambient background: subtle enough for usability, visible enough to give the app personality. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+  z-index: -1;
 }
+
+body::before {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(236, 72, 153, 0.11), transparent 18rem),
+    radial-gradient(circle at 80% 25%, rgba(124, 58, 237, 0.10), transparent 20rem),
+    radial-gradient(circle at 55% 75%, rgba(34, 211, 238, 0.055), transparent 22rem);
+  filter: blur(55px);
+  animation: ambient-drift 18s ease-in-out infinite alternate;
+}
+
+body::after {
+  opacity: 0.14;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+@keyframes ambient-drift {
+  0% { transform: translate3d(-2%, -1%, 0) scale(1); }
+  50% { transform: translate3d(2%, 2%, 0) scale(1.04); }
+  100% { transform: translate3d(-1%, 3%, 0) scale(1.08); }
+}
+
+button, input, textarea { font: inherit; }
 
 button {
-  transition:
-    transform 160ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    opacity 160ms ease;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
 }
 
-button:not(:disabled):hover {
-  transform: translateY(-1px);
-}
-
-button:not(:disabled):active {
-  transform: translateY(0) scale(0.98);
-}
+button:not(:disabled):hover { transform: translateY(-1px); }
+button:not(:disabled):active { transform: translateY(0) scale(0.98); }
 
 button:focus-visible,
 input:focus-visible,
@@ -67,103 +87,92 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-input,
-textarea {
+input, textarea {
   border-color: var(--border) !important;
   background: rgba(0, 0, 0, 0.24) !important;
   transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 
-input:hover,
-textarea:hover {
-  border-color: rgba(255, 255, 255, 0.15) !important;
+input:hover, textarea:hover { border-color: rgba(255,255,255,.15) !important; }
+input:focus, textarea:focus {
+  border-color: rgba(232,121,249,.5) !important;
+  background: rgba(0,0,0,.34) !important;
+  box-shadow: 0 0 0 4px rgba(232,121,249,.08), 0 0 30px rgba(217,70,239,.08);
 }
 
-input:focus,
-textarea:focus {
-  border-color: rgba(232, 121, 249, 0.5) !important;
-  background: rgba(0, 0, 0, 0.34) !important;
-  box-shadow: 0 0 0 4px rgba(232, 121, 249, 0.08);
-}
+::selection { background: rgba(232,121,249,.28); color: white; }
 
-::selection {
-  background: rgba(232, 121, 249, 0.28);
-  color: white;
-}
-
-/* Shared premium surfaces */
-section,
-aside {
+/* Glass surfaces */
+section, aside {
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+}
+
+/* Give the login card a soft animated aura without changing its layout. */
+main > section {
+  box-shadow: 0 24px 80px rgba(0,0,0,.38), 0 0 70px rgba(217,70,239,.055);
+}
+
+/* Buttons with the accent color get a subtle energy pulse. */
+.bg-fuchsia-400 {
+  box-shadow: 0 8px 30px rgba(232,121,249,.12);
+}
+
+.bg-fuchsia-400:hover {
+  box-shadow: 0 10px 38px rgba(232,121,249,.22);
 }
 
 /* Video area */
 .video-card {
   min-height: 220px;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255,255,255,.1) !important;
   background:
-    radial-gradient(circle at 50% 20%, rgba(232, 121, 249, 0.06), transparent 45%),
+    radial-gradient(circle at 50% 20%, rgba(232,121,249,.08), transparent 45%),
     #111116 !important;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.24);
+  box-shadow: 0 18px 45px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.035);
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .video-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(232, 121, 249, 0.2) !important;
-  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.3);
+  border-color: rgba(232,121,249,.25) !important;
+  box-shadow: 0 22px 55px rgba(0,0,0,.3), 0 0 35px rgba(232,121,249,.055);
 }
 
-.video-card video {
-  background: #09090b;
+.video-card video { background: #09090b; }
+
+/* Floating room controls */
+#microBtn, #cameraBtn, #videoGrid ~ div button {
+  box-shadow: 0 10px 30px rgba(0,0,0,.24);
+}
+
+/* Make chat / participant surfaces feel layered. */
+aside, [class*="bg-white/\[.03\]"], [class*="bg-white/\[.045\]"] {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 18px 50px rgba(0,0,0,.16);
 }
 
 /* Scrollbars */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
-}
-
-*::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-*::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.24);
-}
+* { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.16) transparent; }
+*::-webkit-scrollbar { width: 7px; height: 7px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(255,255,255,.14); }
+*::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.24); }
 
 @media (max-width: 640px) {
   body {
     background:
-      radial-gradient(circle at 50% -10%, rgba(217, 70, 239, 0.13), transparent 22rem),
+      radial-gradient(circle at 50% -10%, rgba(217,70,239,.15), transparent 22rem),
+      radial-gradient(circle at 100% 50%, rgba(99,102,241,.08), transparent 18rem),
       var(--background);
   }
-
-  .video-card {
-    min-height: 190px;
-  }
+  body::after { background-size: 46px 46px; opacity: .10; }
+  .video-card { min-height: 190px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
   }
 }
