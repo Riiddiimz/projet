@@ -1,80 +1,23 @@
-import { ArrowRight, MessageCircle, Mic2, Users, Video } from "lucide-react";
+'use client';
 
-const features = [
-  { icon: Users, label: "Rencontre des personnes" },
-  { icon: Video, label: "Vidéo en direct" },
-  { icon: Mic2, label: "Audio instantané" },
-  { icon: MessageCircle, label: "Discute en salon" },
-];
+import { useEffect, useRef, useState } from 'react';
+import { ArrowRight, MessageCircle, Plus, Search, Users, Video, X } from 'lucide-react';
 
-export default function Home() {
-  return (
-    <main className="min-h-screen overflow-hidden bg-zinc-950 text-zinc-50">
-      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8 sm:px-10 lg:px-16">
-        <header className="flex items-center justify-between">
-          <div className="text-lg font-black tracking-[-0.04em]">COL&apos;IN<span className="text-fuchsia-400">CALL</span></div>
-          <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-zinc-400">
-            Nouvelle interface
-          </div>
-        </header>
-
-        <section className="flex flex-1 items-center py-16 lg:py-24">
-          <div className="grid w-full gap-14 lg:grid-cols-[1.15fr_.85fr] lg:items-center">
-            <div>
-              <p className="mb-5 text-sm font-semibold uppercase tracking-[0.24em] text-fuchsia-300">
-                Social • vidéo • conversation
-              </p>
-              <h1 className="max-w-4xl text-5xl font-black leading-[0.92] tracking-[-0.055em] sm:text-7xl lg:text-8xl">
-                Parle.
-                <br />
-                Rencontre.
-                <br />
-                <span className="text-fuchsia-400">Passe un bon moment.</span>
-              </h1>
-              <p className="mt-8 max-w-xl text-lg leading-8 text-zinc-400">
-                Col&apos;inCall prépare une nouvelle expérience de salons vidéo et de conversations en ligne.
-              </p>
-              <div className="mt-10 flex flex-wrap gap-3">
-                <button className="inline-flex items-center gap-2 rounded-full bg-fuchsia-400 px-6 py-3.5 font-bold text-zinc-950 transition hover:scale-[1.02] hover:bg-fuchsia-300">
-                  Entrer dans Col&apos;inCall <ArrowRight size={18} />
-                </button>
-                <button className="rounded-full border border-white/10 bg-white/5 px-6 py-3.5 font-semibold text-zinc-200 transition hover:bg-white/10">
-                  Découvrir
-                </button>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute -inset-10 rounded-full bg-fuchsia-500/15 blur-3xl" />
-              <div className="relative rounded-[2rem] border border-white/10 bg-white/[0.045] p-4 shadow-2xl backdrop-blur-xl">
-                <div className="grid aspect-[4/5] grid-cols-2 gap-3 rounded-[1.5rem] bg-zinc-900 p-3 sm:aspect-square">
-                  {["A", "M", "S", "+"].map((item, index) => (
-                    <div
-                      key={item}
-                      className={`flex items-end rounded-2xl border border-white/10 p-4 ${index === 3 ? "items-center justify-center bg-fuchsia-400 text-4xl font-black text-zinc-950" : "bg-gradient-to-br from-zinc-700 to-zinc-900"}`}
-                    >
-                      {index === 3 ? item : <span className="rounded-full bg-black/50 px-3 py-1 text-xs font-semibold">Participant {item}</span>}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center justify-between px-2 pb-1 pt-4">
-                  <span className="text-sm font-semibold">Salon Chill</span>
-                  <span className="text-xs text-emerald-400">● 8 en ligne</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <footer className="grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-4">
-          {features.map(({ icon: Icon, label }) => (
-            <div key={label} className="flex items-center gap-3 text-sm text-zinc-400">
-              <Icon size={17} className="text-fuchsia-400" />
-              {label}
-            </div>
-          ))}
-        </footer>
-      </div>
-    </main>
-  );
+type User={id:string;username:string;avatarUrl?:string|null};
+type Room={id:string;name:string;userCount?:number};
+const WS='wss://projet-nz7b.onrender.com';
+function Avatar({u}:{u?:User|null}){return u?.avatarUrl?<img src={u.avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover"/>:<div className="flex h-9 w-9 items-center justify-center rounded-full bg-fuchsia-400 font-black text-zinc-950">{(u?.username||'?')[0].toUpperCase()}</div>}
+export default function Home(){
+ const [u,setU]=useState<User|null>(null),[name,setName]=useState(''),[code,setCode]=useState(''),[err,setErr]=useState('');
+ const [rooms,setRooms]=useState<Room[]>([]),[online,setOnline]=useState<User[]>([]),[q,setQ]=useState(''),[usersOpen,setUsersOpen]=useState(false),[chat,setChat]=useState(false),[msgs,setMsgs]=useState<any[]>([]),[text,setText]=useState('');
+ const socket=useRef<WebSocket|null>(null);
+ const send=(x:any)=>{if(socket.current?.readyState===WebSocket.OPEN)socket.current.send(JSON.stringify(x))};
+ const handle=(m:any)=>{if(['login-success','session-restored','restore-success'].includes(m.type)){setU(m.user);if(m.sessionToken)localStorage.setItem('colincall_session',m.sessionToken);send({type:'rooms'});send({type:'users'})}else if(['login-error','auth-error'].includes(m.type))setErr(m.message||'Connexion impossible.');else if(['rooms','room-list'].includes(m.type))setRooms(m.rooms||[]);else if(m.type==='room-created')setRooms(r=>r.some(x=>x.id===m.room.id)?r:[...r,m.room]);else if(['users','user-list','online-users','online-users-update'].includes(m.type))setOnline(m.users||m.onlineUsers||[]);else if(m.type==='chat')setMsgs(x=>[...x,m])};
+ useEffect(()=>{const token=localStorage.getItem('colincall_session');if(!token)return;const s=new WebSocket(WS);socket.current=s;s.onopen=()=>s.send(JSON.stringify({type:'restore-session',token}));s.onmessage=e=>{try{handle(JSON.parse(e.data))}catch{}};return()=>s.close()},[]);
+ function login(){const n=name.trim();if(!n){setErr("Entrez un nom d'utilisateur.");return}const open=()=>socket.current?.send(JSON.stringify({type:'login',username:n,password:code,isAdmin:false}));if(socket.current?.readyState===WebSocket.OPEN)open();else{const s=new WebSocket(WS);socket.current=s;s.addEventListener('open',open,{once:true});s.addEventListener('message',e=>{try{handle(JSON.parse(e.data))}catch{}})}}
+ function createRoom(){const n=prompt('Nom du salon :');if(n?.trim())send({type:'create-room',name:n.trim()})}
+ function sendChat(){if(text.trim()){send({type:'chat',text:text.trim(),roomId:null});setText('')}}
+ if(!u)return <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-950 px-5 text-zinc-50"><div className="absolute -left-40 top-0 h-96 w-96 rounded-full bg-fuchsia-500/20 blur-[120px]"/><section className="relative w-full max-w-md rounded-[2rem] border border-white/10 bg-white/[.045] p-8 shadow-2xl"><div className="mb-8 text-center"><div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-fuchsia-400 font-black text-zinc-950">C</div><b className="text-2xl">COL&apos;IN<span className="text-fuchsia-400">CALL</span></b><p className="mt-2 text-sm text-zinc-500">Parle. Rencontre. Passe un bon moment.</p></div><button type="button" aria-label="Utilisateur" className="mb-5 w-full rounded-2xl bg-fuchsia-400/10 py-3 font-bold text-fuchsia-200">👤 Utilisateur</button><div className="space-y-3"><input id="userUsernameInput" value={name} onChange={e=>setName(e.target.value)} placeholder="Nom d'utilisateur" aria-label="Nom d'utilisateur" className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none"/><input id="passwordInput" type="password" value={code} onChange={e=>setCode(e.target.value)} placeholder="Code (facultatif)" aria-label="Code" className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none"/><button id="userLoginButton" onClick={login} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-fuchsia-400 py-3.5 font-black text-zinc-950">Se connecter <ArrowRight size={18}/></button>{err&&<div id="userLoginError" className="rounded-xl bg-rose-500/10 p-3 text-sm text-rose-300">{err}</div>}</div></section></main>;
+ const filtered=rooms.filter(r=>r.name.toLowerCase().includes(q.toLowerCase()));
+ return <main className="min-h-screen bg-zinc-950 text-zinc-50"><header className="flex h-16 items-center justify-between border-b border-white/10 px-4 sm:px-7"><div className="flex items-center gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-fuchsia-400 font-black text-zinc-950">C</div><div><b>COL&apos;IN<span className="text-fuchsia-400">CALL</span></b><div className="text-[10px] text-emerald-400">● Connecté</div></div></div><button aria-label="Profil" className="rounded-full bg-white/5 p-1.5"><Avatar u={u}/></button></header><div className="mx-auto flex max-w-7xl gap-6 px-4 py-7 sm:px-7"><aside className={`${usersOpen?'translate-x-0':'-translate-x-full'} fixed inset-y-16 left-0 z-30 w-72 bg-zinc-950 p-5 transition-transform sm:static sm:w-60 sm:translate-x-0 sm:bg-transparent sm:p-0`}><div className="mb-4 flex justify-between"><b className="text-xs uppercase tracking-widest text-zinc-500">Utilisateurs</b><span>{online.length}</span></div>{online.map(x=><div key={x.id} className="flex items-center gap-2 p-2"><Avatar u={x}/><span>{x.username}</span><span className="ml-auto h-2 w-2 rounded-full bg-emerald-400"/></div>)}</aside><section className="min-w-0 flex-1"><div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="mb-2 text-xs font-black uppercase tracking-[.25em] text-fuchsia-300">Social • vidéo • conversation</p><h1 className="text-5xl font-black tracking-[-.06em]">Salons<span className="text-fuchsia-400">.</span></h1><p className="mt-2 text-zinc-500">Rejoignez une conversation.</p></div><button onClick={createRoom} className="create-room-btn inline-flex items-center justify-center gap-2 rounded-full bg-fuchsia-400 px-5 py-3 font-black text-zinc-950"><Plus size={18}/> Créer un salon</button></div><div className="mb-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.035] px-4 py-3"><Search size={18} className="text-zinc-500"/><input id="roomSearch" value={q} onChange={e=>setQ(e.target.value)} placeholder="Rechercher un salon..." aria-label="Rechercher un salon" className="w-full bg-transparent outline-none"/></div><div id="roomList" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{filtered.map(r=><article key={r.id} className="room-card rounded-[1.5rem] border border-white/10 bg-white/[.035] p-5"><div className="mb-8 flex justify-between"><Video size={20} className="text-fuchsia-300"/><span className="text-xs text-emerald-300">● {r.userCount??0} en ligne</span></div><h2 className="mb-5 text-xl font-black">{r.name}</h2><button onClick={()=>location.href='/?room='+encodeURIComponent(r.id)} className="join-room-btn flex w-full items-center justify-between rounded-xl bg-white/5 px-4 py-3 text-sm font-bold">Entrer <ArrowRight size={17}/></button></article>)}</div></section></div><button id="usersSidebarToggle" onClick={()=>setUsersOpen(v=>!v)} className="fixed bottom-4 left-4 z-50 flex gap-2 rounded-full border border-white/10 bg-zinc-900 px-4 py-3 font-bold sm:hidden"><Users size={17}/>{usersOpen?'Fermer':'Utilisateurs'}</button><button id="generalChatToggle" onClick={()=>setChat(true)} className="fixed bottom-4 right-4 z-50 rounded-full bg-fuchsia-400 p-3 text-zinc-950 sm:hidden"><MessageCircle size={18}/></button>{chat&&<aside id="lobbyChat" className="fixed inset-x-0 bottom-0 top-16 z-50 flex flex-col bg-zinc-950 sm:left-auto sm:w-[390px]"><div className="flex justify-between border-b border-white/10 p-4"><b>Général</b><button onClick={()=>setChat(false)} aria-label="Fermer"><X/></button></div><div id="lobbyChatMessages" className="flex-1 overflow-y-auto p-4">{msgs.map((m,i)=><div key={m.id||i} className="mb-3 rounded-xl bg-white/5 p-3"><b className="text-xs text-fuchsia-300">{m.username}</b><div>{m.text}</div></div>)}</div><div className="flex gap-2 border-t border-white/10 p-3"><input id="lobbyChatInput" value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>e.key==='Enter'&&sendChat()} placeholder="Écrire un message..." aria-label="Message" className="min-w-0 flex-1 rounded-xl bg-white/5 p-3"/><button onClick={sendChat} aria-label="Envoyer" className="rounded-xl bg-fuchsia-400 px-4 text-zinc-950">➤</button></div></aside>}</main>;
 }
