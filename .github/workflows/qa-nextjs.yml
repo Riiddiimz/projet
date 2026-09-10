@@ -29,7 +29,14 @@ jobs:
         run: npm run start -- -p 3000 > /tmp/next.log 2>&1 &
 
       - name: Wait for Next.js
-        run: npx playwright install --with-deps chromium && npx wait-on http://127.0.0.1:3000
+        run: |
+          npx playwright install --with-deps chromium
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3000 >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/next.log
+          exit 1
 
       - name: Run migration smoke QA
         run: node tests/qa-nextjs.cjs
