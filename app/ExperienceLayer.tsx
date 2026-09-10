@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Sparkles, Wifi, Zap } from 'lucide-react';
 
-const dots = Array.from({ length: 44 }, (_, i) => i);
+const dots = Array.from({ length: 64 }, (_, i) => i);
 
 export default function ExperienceLayer() {
   const [online, setOnline] = useState(true);
@@ -30,6 +30,7 @@ export default function ExperienceLayer() {
         <div className="experience-aurora aurora-one" />
         <div className="experience-aurora aurora-two" />
         <div className="experience-aurora aurora-three" />
+        <img src="/neon-mesh.svg" alt="" className="absolute inset-0 h-full w-full object-cover opacity-50 mix-blend-screen" />
         <div className="experience-ring ring-one" />
         <div className="experience-ring ring-two" />
         <div className="experience-ring ring-three" />
