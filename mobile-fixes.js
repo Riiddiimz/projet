@@ -59,13 +59,29 @@
 
         if(!button || !lobby) return;
 
-        if(window.innerWidth <= 700){
+        const mobile = window.innerWidth <= 700;
+        const wasMobile = lobby.dataset.mobileUsersMode === "true";
+
+        if(mobile){
             button.style.display = "flex";
 
-            setUsersSidebarState(
-                lobby.classList.contains("users-hidden")
-            );
+            /*
+             * Première entrée en mode mobile :
+             * le panneau utilisateurs est fermé par défaut.
+             *
+             * Ensuite, on conserve l'état choisi par l'utilisateur
+             * lors des redimensionnements.
+             */
+            if(!wasMobile){
+                lobby.dataset.mobileUsersMode = "true";
+                setUsersSidebarState(true);
+            }else{
+                setUsersSidebarState(
+                    lobby.classList.contains("users-hidden")
+                );
+            }
         }else{
+            lobby.dataset.mobileUsersMode = "false";
             setUsersSidebarState(false);
         }
     }
