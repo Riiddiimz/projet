@@ -26,11 +26,25 @@ async function visible(page, selector) {
 
 async function login(page, username) {
   await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
-  const input = page.locator('#userUsernameInput').first();
-  await input.waitFor({ state: 'visible', timeout: 20000 });
-  await input.fill(username);
-  await page.getByRole('button', { name: /Se connecter/i }).click();
+  await page.locator('#authUserMode').waitFor({ state: 'visible', timeout: 20000 });
+  await page.locator('#authUserMode').click();
+  await page.locator('#authUsername').waitFor({ state: 'visible', timeout: 10000 });
+  await page.locator('#authUsername').fill(username);
+  await page.locator('#authLoginButton').click();
   await page.waitForFunction(() => document.body.innerText.includes('Salons') || document.body.innerText.includes('Créer un salon'), { timeout: 30000 });
+}
+
+async function checkAuthSelector(page) {
+  await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.locator('#authUserMode').waitFor({ state: 'visible', timeout: 20000 });
+  record('Next.js / choix Utilisateur', await visible(page, '#authUserMode') ? 'PASS' : 'FAIL');
+  record('Next.js / choix Administrateur', await visible(page, '#authAdminMode') ? 'PASS' : 'FAIL');
+  await page.locator('#authAdminMode').click();
+  record('Next.js / formulaire administrateur', (await visible(page, '#authUsername') && await visible(page, '#authPassword')) ? 'PASS' : 'FAIL');
+  record('Next.js / bouton retour authentification', await visible(page, '#authBackButton') ? 'PASS' : 'FAIL');
+  await page.locator('#authBackButton').click();
+  await page.locator('#authUserMode').click();
+  record('Next.js / formulaire utilisateur', await visible(page, '#authUsername') ? 'PASS' : 'FAIL');
 }
 
 async function createRoom(page) {
@@ -67,6 +81,7 @@ async function createRoom(page) {
   }
 
   try {
+    await checkAuthSelector(pageA);
     await login(pageA, USER_A);
     record('Next.js / A connexion', 'PASS', { username: USER_A });
     await login(pageB, USER_B);
