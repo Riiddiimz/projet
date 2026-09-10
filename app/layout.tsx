@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import AuthSelector from "./AuthSelector";
 
 export const metadata: Metadata = {
   title: "Col'inCall",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body>
+        {children}
+        <AuthSelector />
+      </body>
     </html>
   );
 }
