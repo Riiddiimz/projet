@@ -1,16 +1,17 @@
 # Next.js migration QA
 
-Validation target: `migration-nextjs`.
+## Automated checks
 
-Current migration smoke coverage includes:
-- Utilisateur / Administrateur authentication selector
-- user and mobile login
-- lobby and room list
-- room creation and synchronization
-- room entry
-- video grid and local media
-- microphone and camera controls
-- room chat opening
-- JavaScript errors and failed requests
+- `npm run build` — production build + type validation
+- `npm run qa` — full browser QA
+- `npm run qa:multi` — multi-user QA
+- `npm run qa:visual` — visual/layout guardian
+- `npm run qa:all` — aggregate command running the complete suite
 
-Existing dedicated QA workflows also cover UX, robustness, chaos and WebRTC behavior.
+## Visual Guardian
+
+The guardian checks desktop, tablet and mobile layouts for clipping, overflow, tiny controls, fixed-element collisions and JavaScript/runtime errors.
+
+## Current architecture
+
+The frontend is Next.js + TypeScript + Tailwind CSS. The realtime backend remains the existing WebSocket service.
