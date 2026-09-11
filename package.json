@@ -1,18 +1,13 @@
 {
   "name": "colincall",
-  "version": "2.0.0-migration",
+  "version": "3.0.0",
   "private": true,
-  "description": "Col'inCall — migration progressive vers Next.js, TypeScript et Tailwind CSS",
-  "main": "server.js",
+  "description": "Col'inCall — Next.js, TypeScript et Tailwind CSS",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "server": "node server.js",
-    "qa": "node tests/qa-full.cjs",
-    "qa:multi": "node tests/qa-multi.cjs",
-    "qa:visual": "node tests/qa-visual-guardian.cjs",
-    "qa:all": "npm run build && npm run qa && npm run qa:multi && npm run qa:visual"
+    "server": "node server.js"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.13",
@@ -27,7 +22,6 @@
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
-    "playwright": "^1.55.0",
     "typescript": "^5.9.2"
   }
 }
