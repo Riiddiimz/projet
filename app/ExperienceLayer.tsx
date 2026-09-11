@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Sparkles, Wifi, Zap } from 'lucide-react';
 
-const dots = Array.from({ length: 44 }, (_, i) => i);
+const dots = Array.from({ length: 64 }, (_, i) => i);
 
 export default function ExperienceLayer() {
   const [online, setOnline] = useState(true);
@@ -30,6 +30,7 @@ export default function ExperienceLayer() {
         <div className="experience-aurora aurora-one" />
         <div className="experience-aurora aurora-two" />
         <div className="experience-aurora aurora-three" />
+        <img src="/neon-mesh.svg" alt="" className="absolute inset-0 h-full w-full object-cover opacity-50 mix-blend-screen" />
         <div className="experience-ring ring-one" />
         <div className="experience-ring ring-two" />
         <div className="experience-ring ring-three" />
@@ -46,7 +47,11 @@ export default function ExperienceLayer() {
         <span>{online ? 'Réseau opérationnel' : 'Hors connexion'}</span>
         {time && <span className="status-time">{time}</span>}
       </div>
-      <div className="experience-badge" aria-hidden="true"><Sparkles size={14} /> Col&apos;inCall <span>LIVE</span></div>
+      <div className="experience-badge" aria-hidden="true">
+        <img src="/logo.png" alt="" className="experience-logo" />
+        <span>Col&apos;inCall</span>
+        <span className="experience-live">LIVE</span>
+      </div>
       <div className="experience-corner" aria-hidden="true"><Zap size={12} /> SOCIAL / VIDEO</div>
     </>
   );

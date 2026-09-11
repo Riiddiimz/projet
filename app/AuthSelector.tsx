@@ -18,7 +18,7 @@ export default function AuthSelector() {
 
   useEffect(() => {
     setMounted(true);
-    const sync = () => setVisible(!!document.getElementById('userUsernameInput'));
+    const sync = () => setVisible(!localStorage.getItem('colincall_session') && !!document.getElementById('userUsernameInput'));
     sync();
     const observer = new MutationObserver(sync);
     observer.observe(document.body, { childList: true, subtree: true });
@@ -114,8 +114,8 @@ export default function AuthSelector() {
               <span className="flex-1"><span className="block">Utilisateur</span><span className="block text-xs font-medium opacity-65">Accéder aux salons et conversations</span></span>
               <ArrowRight size={19} />
             </button>
-            <button id="authAdminMode" type="button" onClick={() => choose('admin')} className="flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-left font-black transition hover:bg-white/10">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10"><Shield size={21} /></span>
+            <button id="authAdminMode" type="button" onClick={() => choose('admin')} className="flex w-full items-center gap-4 rounded-2xl border border-fuchsia-400/20 bg-white/5 px-5 py-4 text-left font-black transition hover:border-fuchsia-400/40 hover:bg-white/10">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-fuchsia-400/10"><Shield size={21} className="text-fuchsia-300" /></span>
               <span className="flex-1"><span className="block">Administrateur</span><span className="block text-xs font-medium text-zinc-500">Accès à la gestion de Col&apos;inCall</span></span>
               <ArrowRight size={19} />
             </button>
@@ -124,13 +124,14 @@ export default function AuthSelector() {
 
         {mode !== 'choice' && (
           <div className="space-y-3">
-            <div className="mb-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-3">
+            <div className="mb-5 flex items-center gap-3 rounded-2xl border border-fuchsia-400/15 bg-fuchsia-400/[.045] p-3">
               {mode === 'admin' ? <Shield size={20} className="text-fuchsia-300" /> : <UserRound size={20} className="text-fuchsia-300" />}
               <div><b>{mode === 'admin' ? 'Administrateur' : 'Utilisateur'}</b><div className="text-xs text-zinc-500">{mode === 'admin' ? 'Connexion sécurisée administrateur' : 'Connexion à Col&apos;inCall'}</div></div>
             </div>
             <input id="authUsername" autoFocus value={username} onChange={e => setUsername(e.target.value)} onKeyDown={e => e.key === 'Enter' && (mode === 'admin' ? document.getElementById('authPassword')?.focus() : login())} placeholder={mode === 'admin' ? "Nom d'administrateur" : "Nom d'utilisateur"} autoComplete="username" className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition focus:border-fuchsia-400/60" />
             {mode === 'admin' && <input id="authPassword" type="password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && login()} placeholder="Code administrateur" autoComplete="current-password" className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition focus:border-fuchsia-400/60" />}
             {mode === 'user' && <p className="px-1 text-xs text-zinc-500">Le code est facultatif pour une connexion utilisateur.</p>}
+            {mode === 'admin' && <p className="px-1 text-xs text-zinc-500">Le nom et le code administrateur sont à saisir manuellement.</p>}
             {error && <div role="alert" className="rounded-xl bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
             <button id="authLoginButton" type="button" onClick={login} disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-fuchsia-400 py-3.5 font-black text-zinc-950 disabled:cursor-wait disabled:opacity-60">
               {loading ? 'Connexion…' : mode === 'admin' ? 'Se connecter en administrateur' : 'Se connecter'}

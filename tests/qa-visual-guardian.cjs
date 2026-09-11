@@ -19,28 +19,12 @@ async function auditViewport(page, label) {
       const s = getComputedStyle(e), r = e.getBoundingClientRect();
       return s.display !== 'none' && s.visibility !== 'hidden' && parseFloat(s.opacity || '1') > 0 && r.width > 0 && r.height > 0;
     };
-
-    const raw = [...document.querySelectorAll('button,a,input,textarea,select,[role="button"]')].filter(isVisible);
-
-    // Ignore controls visually covered by another element (for example the lobby behind
-    // the full-screen authentication modal). This makes overlap checks describe what the
-    // user can actually interact with rather than invisible/blocked controls underneath.
-    const interactive = raw.filter(e => {
-      const r = e.getBoundingClientRect();
-      const points = [
-        [r.left + r.width / 2, r.top + r.height / 2],
-        [r.left + Math.min(12, r.width / 2), r.top + Math.min(12, r.height / 2)],
-        [r.right - Math.min(12, r.width / 2), r.bottom - Math.min(12, r.height / 2)]
-      ];
-      return points.some(([x, y]) => {
-        const top = document.elementFromPoint(x, y);
-        return top === e || e.contains(top);
+    const interactive = [...document.querySelectorAll('button,a,input,textarea,select,[role="button"]')]
+      .filter(isVisible)
+      .map(e => {
+        const r = e.getBoundingClientRect();
+        return { tag:e.tagName, id:e.id, text:(e.innerText || e.getAttribute('aria-label') || e.getAttribute('placeholder') || '').trim().slice(0,80), x:r.x,y:r.y,w:r.width,h:r.height, fixed:['fixed','sticky'].includes(getComputedStyle(e).position) };
       });
-    }).map(e => {
-      const r = e.getBoundingClientRect();
-      return { tag:e.tagName, id:e.id, text:(e.innerText || e.getAttribute('aria-label') || e.getAttribute('placeholder') || '').trim().slice(0,80), x:r.x,y:r.y,w:r.width,h:r.height, fixed:['fixed','sticky'].includes(getComputedStyle(e).position) };
-    });
-
     const clipped = interactive.filter(e => e.x < -2 || e.y < -2 || e.x + e.w > vw + 2 || e.y + e.h > vh + 2);
     const tiny = interactive.filter(e => e.w < 32 || e.h < 32);
     const fixedClipped = interactive.filter(e => e.fixed && (e.x < 0 || e.y < 0 || e.x + e.w > vw || e.y + e.h > vh));

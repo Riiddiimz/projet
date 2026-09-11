@@ -2,10 +2,16 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AuthSelector from "./AuthSelector";
 import ExperienceLayer from "./ExperienceLayer";
+import ImmersiveFX from "./ImmersiveFX";
 
 export const metadata: Metadata = {
   title: "Col'inCall — Parle. Rencontre. Passe un bon moment.",
   description: "Col'inCall, une expérience sociale audio et vidéo moderne.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -17,6 +23,7 @@ export default function RootLayout({
     <html lang="fr">
       <body>
         <ExperienceLayer />
+        <ImmersiveFX />
         {children}
         <AuthSelector />
       </body>
