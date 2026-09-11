@@ -1,0 +1,45 @@
+name: Mirror local camera
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Patch local camera mirror
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'app/page.tsx';
+          let s = fs.readFileSync(path, 'utf8');
+          const oldText = "v.autoplay=true;v.playsInline=true;v.muted=true;v.className='absolute inset-0 h-full w-full object-cover';v.srcObject=localStream.current;";
+          const newText = "v.autoplay=true;v.playsInline=true;v.muted=true;v.className='absolute inset-0 h-full w-full object-cover scale-x-[-1]';v.srcObject=localStream.current;";
+          if (!s.includes(oldText)) {
+            console.log('Local video pattern not found; nothing to patch.');
+            process.exit(0);
+          }
+          s = s.replace(oldText, newText);
+          fs.writeFileSync(path, s);
+          NODE
+      - name: Commit and push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/page.tsx
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'feat: mirror local camera preview'
+          git push
