@@ -1,0 +1,74 @@
+/* Col'inCall Galaxy UI layer — intentionally loaded after globals.css */
+:root {
+  --galaxy-bg: #07070f;
+  --galaxy-surface: rgba(13, 12, 30, .68);
+  --galaxy-border: rgba(255,255,255,.10);
+  --galaxy-cyan: #22d3ee;
+  --galaxy-violet: #8b5cf6;
+  --galaxy-pink: #ec4899;
+}
+
+html, body { background: var(--galaxy-bg) !important; }
+body {
+  background:
+    radial-gradient(900px 500px at 15% 5%, rgba(139,92,246,.18), transparent 65%),
+    radial-gradient(800px 500px at 88% 12%, rgba(236,72,153,.13), transparent 65%),
+    radial-gradient(900px 600px at 50% 100%, rgba(34,211,238,.08), transparent 68%),
+    #07070f !important;
+}
+body::before {
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,.55) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(34,211,238,.32) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(236,72,153,.25) 0 1px, transparent 1.5px);
+  background-size: 97px 113px, 173px 151px, 211px 197px;
+  background-position: 12px 31px, 71px 11px, 23px 97px;
+  filter: none;
+  opacity: .42;
+  animation: galaxy-stars 24s linear infinite;
+}
+body::after { opacity: .025 !important; }
+
+@keyframes galaxy-stars {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(-35px, 24px, 0); }
+}
+
+header {
+  background: linear-gradient(180deg, rgba(7,7,15,.92), rgba(7,7,15,.62)) !important;
+  border-bottom: 1px solid rgba(139,92,246,.14) !important;
+  box-shadow: 0 12px 50px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+button:not(:disabled):hover {
+  box-shadow: 0 0 0 1px rgba(139,92,246,.16), 0 10px 35px rgba(139,92,246,.13);
+}
+
+.video-card {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(139,92,246,.18), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(236,72,153,.10), transparent 45%),
+    linear-gradient(145deg, rgba(18,17,35,.95), rgba(7,7,15,.98)) !important;
+  border-color: rgba(139,92,246,.20) !important;
+}
+
+/* Subtle neon speaking / active-state hooks for future real-time indicators. */
+.galaxy-speaking {
+  box-shadow: 0 0 0 2px rgba(34,211,238,.55), 0 0 28px rgba(34,211,238,.25), 0 20px 65px rgba(0,0,0,.35) !important;
+}
+.galaxy-live {
+  position: relative;
+}
+.galaxy-live::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  border: 1px solid rgba(34,211,238,.32);
+  box-shadow: 0 0 24px rgba(34,211,238,.10);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+}
