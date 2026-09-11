@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Sparkles, Wifi, Zap } from 'lucide-react';
+import { Wifi } from 'lucide-react';
 
 const dots = Array.from({ length: 64 }, (_, i) => i);
 
@@ -47,12 +47,6 @@ export default function ExperienceLayer() {
         <span>{online ? 'Réseau opérationnel' : 'Hors connexion'}</span>
         {time && <span className="status-time">{time}</span>}
       </div>
-      <div className="experience-badge" aria-hidden="true">
-        <img src="/logo.png" alt="" className="experience-logo" />
-        <span>Col&apos;inCall</span>
-        <span className="experience-live">LIVE</span>
-      </div>
-      <div className="experience-corner" aria-hidden="true"><Zap size={12} /> SOCIAL / VIDEO</div>
     </>
   );
 }
