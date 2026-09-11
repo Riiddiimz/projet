@@ -19,22 +19,38 @@ async function auditViewport(page, label) {
       const s = getComputedStyle(e), r = e.getBoundingClientRect();
       return s.display !== 'none' && s.visibility !== 'hidden' && parseFloat(s.opacity || '1') > 0 && r.width > 0 && r.height > 0;
     };
+
     const interactive = [...document.querySelectorAll('button,a,input,textarea,select,[role="button"]')]
       .filter(isVisible)
       .map(e => {
         const r = e.getBoundingClientRect();
-        return { tag:e.tagName, id:e.id, text:(e.innerText || e.getAttribute('aria-label') || e.getAttribute('placeholder') || '').trim().slice(0,80), x:r.x,y:r.y,w:r.width,h:r.height, fixed:['fixed','sticky'].includes(getComputedStyle(e).position) };
-      });
+        const centerX = Math.max(0, Math.min(vw - 1, r.left + r.width / 2));
+        const centerY = Math.max(0, Math.min(vh - 1, r.top + r.height / 2));
+        const top = document.elementFromPoint(centerX, centerY);
+        const occluded = !!top && top !== e && !e.contains(top) && !top.contains(e);
+        return {
+          tag:e.tagName,
+          id:e.id,
+          text:(e.innerText || e.getAttribute('aria-label') || e.getAttribute('placeholder') || '').trim().slice(0,80),
+          x:r.x,y:r.y,w:r.width,h:r.height,
+          fixed:['fixed','sticky'].includes(getComputedStyle(e).position),
+          occluded
+        };
+      })
+      .filter(e => !e.occluded);
+
     const clipped = interactive.filter(e => e.x < -2 || e.y < -2 || e.x + e.w > vw + 2 || e.y + e.h > vh + 2);
     const tiny = interactive.filter(e => e.w < 32 || e.h < 32);
     const fixedClipped = interactive.filter(e => e.fixed && (e.x < 0 || e.y < 0 || e.x + e.w > vw || e.y + e.h > vh));
     const overlaps = [];
+
     for (let i=0;i<interactive.length;i++) for (let j=i+1;j<interactive.length;j++) {
       const a=interactive[i], b=interactive[j];
       const area=Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y));
       const minArea=Math.min(a.w*a.h,b.w*b.h);
-      if (area > 12 && area / minArea > 0.20) overlaps.push({a:a.id||a.text,b:b.id||b.text,ratio:+(area/minArea).toFixed(2)});
+      if (area > 12 && minArea > 0 && area / minArea > 0.20) overlaps.push({a:a.id||a.text,b:b.id||b.text,ratio:+(area/minArea).toFixed(2)});
     }
+
     const scrollWidth=document.documentElement.scrollWidth;
     const horizontalOverflow=scrollWidth > vw + 2;
     return { viewport:[vw,vh], interactiveCount:interactive.length, clipped, tiny, fixedClipped, overlaps:overlaps.slice(0,20), horizontalOverflow, scrollWidth };
