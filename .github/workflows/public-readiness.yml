@@ -17,6 +17,10 @@ jobs:
           node-version: 24
       - name: Install dependencies
         run: npm install
+      - name: Validate runtime JavaScript
+        run: |
+          node --check server.js
+          node --check public/sw.js
       - name: Production build
         run: npm run build
       - name: Report
