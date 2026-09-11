@@ -66,7 +66,7 @@ wss.on("connection", ws => {
       if (!username) { safeSend(ws, { type: "login-error", message: "Nom d'utilisateur obligatoire." }); return; }
       const isAdmin = username.toLowerCase() === ADMIN_USERNAME.toLowerCase() && !!ADMIN_PASSWORD && password === ADMIN_PASSWORD;
       if (wantsAdmin && !isAdmin) { safeSend(ws, { type: "login-error", message: "Identifiants administrateur incorrects." }); return; }
-      if (username.toLowerCase() === ADMIN_USERNAME.toLowerCase() && !isAdmin) { safeSend(ws, { type: "login-error", message: "Ce nom d'utilisateur est réservé." }); return; }
+      if (username.toLowerCase() === ADMIN_USERNAME.toLowerCase() && !isAdmin) { safeSend(ws, { type: "login-error", message: "Identifiants administrateur incorrects." }); return; }
       const existing = findUserByUsername(username); if (existing && isOnline(existing)) { safeSend(ws, { type: "login-error", message: "Ce nom d'utilisateur est déjà utilisé." }); return; }
       const user = existing || { id: `user-${nextUserId++}`, username, isAdmin, ws: null, roomId: null, microphoneEnabled: false, cameraEnabled: false, microphoneLocked: false, cameraLocked: false, diagnosticOptIn: false, description: "", avatarUrl: null, connectedAt: Date.now(), lastSeenAt: Date.now() };
       user.username = username; user.isAdmin = isAdmin; user.ws = ws; user.lastSeenAt = Date.now(); user.microphoneEnabled = false; user.cameraEnabled = false; user.diagnosticOptIn = false;
