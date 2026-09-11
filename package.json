@@ -11,7 +11,8 @@
     "server": "node server.js",
     "qa": "node tests/qa-full.cjs",
     "qa:multi": "node tests/qa-multi.cjs",
-    "qa:visual": "node tests/qa-visual-guardian.cjs"
+    "qa:visual": "node tests/qa-visual-guardian.cjs",
+    "qa:all": "npm run build && npm run qa && npm run qa:multi && npm run qa:visual"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.13",
