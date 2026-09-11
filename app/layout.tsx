@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./logo-fix.css";
 import AuthSelector from "./AuthSelector";
 import ExperienceLayer from "./ExperienceLayer";
 import ImmersiveFX from "./ImmersiveFX";
