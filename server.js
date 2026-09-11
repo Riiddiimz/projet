@@ -2,6 +2,7 @@ const http = require("http");
 const crypto = require("crypto");
 const WebSocket = require("ws");
 const { supabaseAdmin, supabaseConfigured } = require("./lib/supabase");
+const { redis, redisConfigured } = require("./lib/redis");
 
 const PORT = Number(process.env.PORT || 3000);
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Riddimz";
@@ -16,7 +17,7 @@ const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 // Persistent data lives in Supabase. These maps only hold live WebSocket state.
 const users = new Map();
 const rooms = new Map();
-const sessions = new Map();
+const sessions = new Map(); // local fallback when Redis is unavailable
 let GENERAL_ROOM_ID = null;
 
 function safeSend(ws, data) {
@@ -208,13 +209,51 @@ async function persistProfile(user, avatarInput) {
   await dbUpdateUser(user);
 }
 
-function invalidateUserSessions(userId) {
-  for (const [token, session] of sessions) if (session.userId === userId) sessions.delete(token);
+// REDIS_SESSIONS_WIRED
+const SESSION_PREFIX = "colincall:session:";
+
+async function invalidateUserSessions(userId) {
+  if (redisConfigured && redis) {
+    try {
+      const token = await redis.get(`${SESSION_PREFIX}user:${userId}`);
+      if (token) await redis.del(`${SESSION_PREFIX}${token}`);
+      await redis.del(`${SESSION_PREFIX}user:${userId}`);
+      return;
+    } catch (error) {
+      console.error("[Redis] invalidate session", error);
+    }
+  }
+  for (const [token, session] of sessions) {
+    if (session.userId === userId) sessions.delete(token);
+  }
 }
-function createSession(user) {
-  invalidateUserSessions(user.id);
+
+async function getStoredSession(token) {
+  if (redisConfigured && redis) {
+    try {
+      return await redis.get(`${SESSION_PREFIX}${token}`);
+    } catch (error) {
+      console.error("[Redis] get session", error);
+    }
+  }
+  return sessions.get(token) || null;
+}
+
+async function createSession(user) {
+  await invalidateUserSessions(user.id);
   const token = crypto.randomBytes(32).toString("hex");
-  sessions.set(token, { userId: user.id, createdAt: Date.now() });
+  const session = { userId: user.id, createdAt: Date.now() };
+  if (redisConfigured && redis) {
+    try {
+      const ttlSeconds = Math.floor(SESSION_TTL_MS / 1000);
+      await redis.set(`${SESSION_PREFIX}${token}`, session, { ex: ttlSeconds });
+      await redis.set(`${SESSION_PREFIX}user:${user.id}`, token, { ex: ttlSeconds });
+      return token;
+    } catch (error) {
+      console.error("[Redis] create session", error);
+    }
+  }
+  sessions.set(token, session);
   return token;
 }
 function leaveRoom(user) {
@@ -252,7 +291,7 @@ function sendIceConfig(ws) {
 const server = http.createServer((req, res) => {
   if (req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
-    res.end(JSON.stringify({ status: "ok", supabaseConfigured, turnConfigured: !!(TURN_URLS.length && TURN_USERNAME && TURN_CREDENTIAL) }));
+    res.end(JSON.stringify({ status: "ok", supabaseConfigured, redisConfigured, turnConfigured: !!(TURN_URLS.length && TURN_USERNAME && TURN_CREDENTIAL) }));
     return;
   }
   res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
@@ -274,7 +313,7 @@ wss.on("connection", ws => {
 
       if (type === "restore-session") {
         const token = String(message.sessionToken || message.token || "");
-        const session = sessions.get(token);
+        const session = await getStoredSession(token);
         if (!session || Date.now() - session.createdAt > SESSION_TTL_MS) {
           if (session) sessions.delete(token);
           safeSend(ws, { type: "session-invalid" }); return;
@@ -355,7 +394,7 @@ wss.on("connection", ws => {
         user.cameraEnabled = false;
         user.diagnosticOptIn = false;
         currentUser = user;
-        const token = createSession(user);
+        const token = await createSession(user);
         safeSend(ws, { type: "login-success", user: publicUser(user), sessionToken: token });
         sendIceConfig(ws); sendRoomList(); sendUserList(); return;
       }
