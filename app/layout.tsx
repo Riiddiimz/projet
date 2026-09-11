@@ -3,6 +3,7 @@ import "./globals.css";
 import AuthSelector from "./AuthSelector";
 import ExperienceLayer from "./ExperienceLayer";
 import ImmersiveFX from "./ImmersiveFX";
+import SocialHUD from "./SocialHUD";
 
 export const metadata: Metadata = {
   title: "Col'inCall — Parle. Rencontre. Passe un bon moment.",
@@ -24,6 +25,7 @@ export default function RootLayout({
       <body>
         <ExperienceLayer />
         <ImmersiveFX />
+        <SocialHUD />
         {children}
         <AuthSelector />
       </body>
