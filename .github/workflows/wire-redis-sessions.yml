@@ -25,86 +25,96 @@ jobs:
         run: |
           python3 <<'PY'
           from pathlib import Path
-          p = Path('server.js')
+          p = Path("server.js")
           s = p.read_text()
-          marker = '// REDIS_SESSIONS_WIRED'
+          marker = "// REDIS_SESSIONS_WIRED"
+
           if marker in s:
-              print('Already wired')
+              print("Redis sessions already wired")
               raise SystemExit(0)
 
-          s = s.replace(
-              'const { supabaseAdmin, supabaseConfigured } = require("./lib/supabase");',
-              'const { supabaseAdmin, supabaseConfigured } = require("./lib/supabase");\nconst { redis, redisConfigured } = require("./lib/redis");'
-          )
+          old_import = 'const { supabaseAdmin, supabaseConfigured } = require("./lib/supabase");'
+          new_import = old_import + '\nconst { redis, redisConfigured } = require("./lib/redis");'
+          if old_import not in s:
+              raise SystemExit("Supabase import not found")
+          s = s.replace(old_import, new_import, 1)
 
-          s = s.replace(
-              'const sessions = new Map();',
-              'const sessions = new Map(); // local fallback when Redis is unavailable'
-          )
+          old_sessions = 'const sessions = new Map();'
+          new_sessions = 'const sessions = new Map(); // local fallback when Redis is unavailable'
+          if old_sessions not in s:
+              raise SystemExit("sessions map not found")
+          s = s.replace(old_sessions, new_sessions, 1)
 
-          start = s.index('function invalidateUserSessions(userId) {')
-          end = s.index('\nfunction leaveRoom(user) {', start)
-          replacement = r'''// REDIS_SESSIONS_WIRED
-const SESSION_PREFIX = "colincall:session:";
+          start = s.index("function invalidateUserSessions(userId) {")
+          end = s.index("\nfunction leaveRoom(user) {", start)
+          replacement = '''// REDIS_SESSIONS_WIRED
+          const SESSION_PREFIX = "colincall:session:";
 
-async function invalidateUserSessions(userId) {
-  if (redisConfigured && redis) {
-    try {
-      const token = await redis.get(`${SESSION_PREFIX}user:${userId}`);
-      if (token) await redis.del(`${SESSION_PREFIX}${token}`);
-      await redis.del(`${SESSION_PREFIX}user:${userId}`);
-      return;
-    } catch (error) {
-      console.error("[Redis] invalidate session", error);
-    }
-  }
-  for (const [token, session] of sessions) if (session.userId === userId) sessions.delete(token);
-}
+          async function invalidateUserSessions(userId) {
+            if (redisConfigured && redis) {
+              try {
+                const token = await redis.get(`${SESSION_PREFIX}user:${userId}`);
+                if (token) await redis.del(`${SESSION_PREFIX}${token}`);
+                await redis.del(`${SESSION_PREFIX}user:${userId}`);
+                return;
+              } catch (error) {
+                console.error("[Redis] invalidate session", error);
+              }
+            }
+            for (const [token, session] of sessions) {
+              if (session.userId === userId) sessions.delete(token);
+            }
+          }
 
-async function getStoredSession(token) {
-  if (redisConfigured && redis) {
-    try {
-      return await redis.get(`${SESSION_PREFIX}${token}`);
-    } catch (error) {
-      console.error("[Redis] get session", error);
-    }
-  }
-  return sessions.get(token) || null;
-}
+          async function getStoredSession(token) {
+            if (redisConfigured && redis) {
+              try {
+                return await redis.get(`${SESSION_PREFIX}${token}`);
+              } catch (error) {
+                console.error("[Redis] get session", error);
+              }
+            }
+            return sessions.get(token) || null;
+          }
 
-async function createSession(user) {
-  await invalidateUserSessions(user.id);
-  const token = crypto.randomBytes(32).toString("hex");
-  const session = { userId: user.id, createdAt: Date.now() };
-  if (redisConfigured && redis) {
-    try {
-      const ttlSeconds = Math.floor(SESSION_TTL_MS / 1000);
-      await redis.set(`${SESSION_PREFIX}${token}`, session, { ex: ttlSeconds });
-      await redis.set(`${SESSION_PREFIX}user:${user.id}`, token, { ex: ttlSeconds });
-      return token;
-    } catch (error) {
-      console.error("[Redis] create session", error);
-    }
-  }
-  sessions.set(token, session);
-  return token;
-}'''
+          async function createSession(user) {
+            await invalidateUserSessions(user.id);
+            const token = crypto.randomBytes(32).toString("hex");
+            const session = { userId: user.id, createdAt: Date.now() };
+            if (redisConfigured && redis) {
+              try {
+                const ttlSeconds = Math.floor(SESSION_TTL_MS / 1000);
+                await redis.set(`${SESSION_PREFIX}${token}`, session, { ex: ttlSeconds });
+                await redis.set(`${SESSION_PREFIX}user:${user.id}`, token, { ex: ttlSeconds });
+                return token;
+              } catch (error) {
+                console.error("[Redis] create session", error);
+              }
+            }
+            sessions.set(token, session);
+            return token;
+          }'''
           s = s[:start] + replacement + s[end:]
 
-          s = s.replace('const session = sessions.get(token);', 'const session = await getStoredSession(token);')
-          s = s.replace('const token = createSession(user);', 'const token = await createSession(user);')
-          s = s.replace('invalidateUserSessions(user.id);', 'await invalidateUserSessions(user.id);')
-          # The replacement above can only occur inside async functions; restore the
-          # helper itself is already async and createSession awaits its helper.
-          s = s.replace('async function createSession(user) {\n  await await invalidateUserSessions(user.id);', 'async function createSession(user) {\n  await invalidateUserSessions(user.id);')
+          s = s.replace(
+              'const session = sessions.get(token);',
+              'const session = await getStoredSession(token);',
+              1,
+          )
+          s = s.replace(
+              'const token = createSession(user);',
+              'const token = await createSession(user);',
+              1,
+          )
 
-          # Session invalidation on a kicked user must also hit Redis.
-          s = s.replace('invalidateUserSessions(target.id);', 'await invalidateUserSessions(target.id);')
+          # These calls occur inside the async WebSocket message handler.
+          s = s.replace('        invalidateUserSessions(user.id);', '        await invalidateUserSessions(user.id);')
+          s = s.replace('        invalidateUserSessions(target.id);', '        await invalidateUserSessions(target.id);')
 
-          # Redis health visibility without exposing credentials.
           s = s.replace(
               'supabaseConfigured, turnConfigured:',
-              'supabaseConfigured, redisConfigured, turnConfigured:'
+              'supabaseConfigured, redisConfigured, turnConfigured:',
+              1,
           )
 
           p.write_text(s)
