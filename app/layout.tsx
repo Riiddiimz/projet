@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./galaxy.css";
 import PwaRegister from "./PwaRegister";
+import PwaInstall from "./PwaInstall";
 
 export const metadata: Metadata = {
   title: "Col'inCall — Parle. Rencontre. Passe un bon moment.",
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="fr">
       <body>
         <PwaRegister />
+        <PwaInstall />
         {children}
       </body>
     </html>
