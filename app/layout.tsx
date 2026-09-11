@@ -5,28 +5,26 @@ import ExperienceLayer from "./ExperienceLayer";
 import ImmersiveFX from "./ImmersiveFX";
 import SocialHUD from "./SocialHUD";
 import LobbyDock from "./LobbyDock";
+import LiveTicker from "./LiveTicker";
+import CommunityBeacon from "./CommunityBeacon";
+import ExperienceCorners from "./ExperienceCorners";
 
 export const metadata: Metadata = {
   title: "Col'inCall — Parle. Rencontre. Passe un bon moment.",
   description: "Col'inCall, une expérience sociale audio et vidéo moderne.",
-  icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
-  },
+  icons: { icon: "/logo.png", shortcut: "/logo.png", apple: "/logo.png" },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr">
       <body>
         <ExperienceLayer />
         <ImmersiveFX />
         <SocialHUD />
+        <ExperienceCorners />
+        <CommunityBeacon />
+        <LiveTicker />
         <LobbyDock />
         {children}
         <AuthSelector />
