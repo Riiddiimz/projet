@@ -1,0 +1,29 @@
+name: Public Smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '47 * * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check production health
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 https://gcol.vercel.app/health
+          echo
+
+      - name: Check production homepage
+        run: |
+          set -euo pipefail
+          body="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 https://gcol.vercel.app/)"
+          echo "$body" | grep -qi "COL.*CALL"
+          echo "Homepage smoke check passed."
