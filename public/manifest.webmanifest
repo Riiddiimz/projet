@@ -1,0 +1,25 @@
+{
+  "name": "Col'inCall",
+  "short_name": "Col'inCall",
+  "description": "Expérience sociale audio et vidéo en temps réel.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07070f",
+  "theme_color": "#07070f",
+  "lang": "fr-FR",
+  "icons": [
+    {
+      "src": "/logogcol.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logogcol.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
