@@ -5,6 +5,9 @@ const WebSocket = require("ws");
 const PORT = Number(process.env.PORT || 3000);
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Riddimz";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
+const TURN_URLS = String(process.env.TURN_URLS || "").split(",").map(x => x.trim()).filter(Boolean);
+const TURN_USERNAME = String(process.env.TURN_USERNAME || "");
+const TURN_CREDENTIAL = String(process.env.TURN_CREDENTIAL || "");
 const MAX_AVATAR_LENGTH = 300000;
 const MAX_DESCRIPTION_LENGTH = 300;
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -22,7 +25,7 @@ rooms.set(GENERAL_ROOM_ID, { id: GENERAL_ROOM_ID, name: "Discussion générale",
 const server = http.createServer((req, res) => {
   if (req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
-    res.end(JSON.stringify({ status: "ok" }));
+    res.end(JSON.stringify({ status: "ok", turnConfigured: !!(TURN_URLS.length && TURN_USERNAME && TURN_CREDENTIAL) }));
     return;
   }
   res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
@@ -45,6 +48,16 @@ function createSession(user) { invalidateUserSessions(user.id); const token = cr
 function findUserByUsername(username) { const normalized = username.toLowerCase(); for (const user of users.values()) if (user.username.toLowerCase() === normalized) return user; return null; }
 function leaveRoom(user) { if (!user?.roomId) return; const roomId = user.roomId; removeUserFromRoom(user, true); safeSend(user.ws, { type: "room-left", roomId }); }
 function chatMessage(user, text, roomId) { return { type: "chat", id: nextMessageId++, userId: user.id, username: user.username, text, roomId, timestamp: Date.now() }; }
+function sendIceConfig(ws) {
+  if (!TURN_URLS.length || !TURN_USERNAME || !TURN_CREDENTIAL) {
+    safeSend(ws, { type: "ice-config", iceServers: [{ urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }], turnConfigured: false });
+    return;
+  }
+  safeSend(ws, { type: "ice-config", iceServers: [
+    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+    { urls: TURN_URLS, username: TURN_USERNAME, credential: TURN_CREDENTIAL }
+  ], turnConfigured: true });
+}
 
 wss.on("connection", ws => {
   let currentUser = null;
@@ -59,7 +72,7 @@ wss.on("connection", ws => {
       const user = users.get(session.userId); if (!user) { sessions.delete(token); safeSend(ws, { type: "session-invalid" }); return; }
       if (user.ws && user.ws !== ws) try { user.ws.close(4001, "Session reprise"); } catch {}
       currentUser = user; currentUser.ws = ws; currentUser.lastSeenAt = Date.now();
-      safeSend(ws, { type: "session-restored", user: publicUser(user), sessionToken: token }); sendRoomList(); sendUserList(); return;
+      safeSend(ws, { type: "session-restored", user: publicUser(user), sessionToken: token }); sendIceConfig(ws); sendRoomList(); sendUserList(); return;
     }
     if (type === "login") {
       const username = String(message.username || "").trim().slice(0, 50); const password = String(message.password || ""); const wantsAdmin = !!message.isAdmin;
@@ -71,10 +84,11 @@ wss.on("connection", ws => {
       const user = existing || { id: `user-${nextUserId++}`, username, isAdmin, ws: null, roomId: null, microphoneEnabled: false, cameraEnabled: false, microphoneLocked: false, cameraLocked: false, diagnosticOptIn: false, description: "", avatarUrl: null, connectedAt: Date.now(), lastSeenAt: Date.now() };
       user.username = username; user.isAdmin = isAdmin; user.ws = ws; user.lastSeenAt = Date.now(); user.microphoneEnabled = false; user.cameraEnabled = false; user.diagnosticOptIn = false;
       users.set(user.id, user); currentUser = user; const token = createSession(user);
-      safeSend(ws, { type: "login-success", user: publicUser(user), sessionToken: token }); sendRoomList(); sendUserList(); return;
+      safeSend(ws, { type: "login-success", user: publicUser(user), sessionToken: token }); sendIceConfig(ws); sendRoomList(); sendUserList(); return;
     }
     if (!currentUser) { safeSend(ws, { type: "error", message: "Vous devez être connecté." }); return; }
     currentUser.lastSeenAt = Date.now();
+    if (type === "ice-config") { sendIceConfig(ws); return; }
     if (type === "logout") { const user = currentUser; currentUser = null; removeUserFromRoom(user, true); invalidateUserSessions(user.id); users.delete(user.id); safeSend(ws, { type: "logout-success" }); try { ws.close(1000, "Logout"); } catch {} sendRoomList(); sendUserList(); return; }
     if (type === "update-profile") { if (typeof message.description === "string") currentUser.description = message.description.slice(0, MAX_DESCRIPTION_LENGTH); if (typeof message.avatarUrl === "string" && message.avatarUrl.length <= MAX_AVATAR_LENGTH) currentUser.avatarUrl = message.avatarUrl; else if (message.avatarUrl === null) currentUser.avatarUrl = null; safeSend(ws, { type: "profile-updated", user: publicUser(currentUser) }); sendUserList(); return; }
     if (type === "diagnostic-opt-in") { currentUser.diagnosticOptIn = !!message.enabled; safeSend(ws, { type: "diagnostic-state", enabled: currentUser.diagnosticOptIn }); sendUserList(); return; }
@@ -118,4 +132,5 @@ wss.on("connection", ws => {
 });
 setInterval(() => { const now = Date.now(); for (const [token, session] of sessions) { if (now - session.createdAt <= SESSION_TTL_MS) continue; sessions.delete(token); const user = users.get(session.userId); if (user && !isOnline(user)) users.delete(user.id); } sendRoomList(); sendUserList(); }, 60 * 60 * 1000);
 if (!ADMIN_PASSWORD) console.warn("ADMIN_PASSWORD is not configured: administrator login is disabled.");
+if (!TURN_URLS.length || !TURN_USERNAME || !TURN_CREDENTIAL) console.warn("TURN is not configured: WebRTC will use STUN only.");
 server.listen(PORT, () => console.log(`Col'inCall signaling server running on port ${PORT}`));
