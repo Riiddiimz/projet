@@ -1,0 +1,24 @@
+/* Logo sizing guardrails: keep branding assets visually stable across browsers. */
+header img[alt="Col'inCall"] {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  object-fit: contain !important;
+  display: block !important;
+  flex: 0 0 40px !important;
+}
+
+@media (max-width: 640px) {
+  header img[alt="Col'inCall"] {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    flex-basis: 36px !important;
+  }
+}
