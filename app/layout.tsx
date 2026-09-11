@@ -8,6 +8,7 @@ import LobbyDock from "./LobbyDock";
 import LiveTicker from "./LiveTicker";
 import CommunityBeacon from "./CommunityBeacon";
 import ExperienceCorners from "./ExperienceCorners";
+import SessionGuard from "./SessionGuard";
 
 export const metadata: Metadata = {
   title: "Col'inCall — Parle. Rencontre. Passe un bon moment.",
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <CommunityBeacon />
         <LiveTicker />
         <LobbyDock />
+        <SessionGuard />
         {children}
         <AuthSelector />
       </body>
