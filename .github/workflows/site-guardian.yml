@@ -1,0 +1,40 @@
+name: Site Guardian
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+
+permissions:
+  contents: read
+
+env:
+  SITE_URL: https://gcol.vercel.app
+  SIGNALING_URL: wss://projet-nz7b.onrender.com
+
+jobs:
+  guardian:
+    name: Full production audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run Site Guardian bot
+        run: node tests/site-guardian.mjs
+
+      - name: Upload screenshots and report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-guardian-report
+          path: artifacts/site-guardian/
+          if-no-files-found: warn
+          retention-days: 14
