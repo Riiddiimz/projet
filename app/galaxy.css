@@ -178,3 +178,41 @@ button:not(:disabled):active { transform: scale(.97); }
 /* Absolute final no-green override. */
 [class*="bg-emerald"], [class*="bg-green"] { background: linear-gradient(135deg,#312e81,#7c3aed) !important; }
 [class*="text-emerald"], [class*="text-green"] { color: #67e8f9 !important; }
+
+
+/* FINAL GALAXY PALETTE: NO GREEN */
+[class*="bg-emerald"], [class*="bg-green"] {
+  background: linear-gradient(135deg, #312e81, #7c3aed) !important;
+  box-shadow: 0 0 14px rgba(124,58,237,.28) !important;
+}
+[class*="text-emerald"], [class*="text-green"] {
+  color: #67e8f9 !important;
+  text-shadow: 0 0 12px rgba(34,211,238,.45) !important;
+}
+[class*="border-emerald"], [class*="border-green"] {
+  border-color: rgba(57,231,255,.35) !important;
+}
+button[aria-label="Installer Col'inCall"] {
+  background: linear-gradient(135deg, rgba(49,46,129,.96), rgba(126,34,206,.96)) !important;
+  border-color: rgba(103,232,249,.32) !important;
+  color: #f5f3ff !important;
+  box-shadow: 0 0 28px rgba(124,58,237,.28), inset 0 1px rgba(255,255,255,.12) !important;
+}
+button[aria-label="Installer Col'inCall"]:hover {
+  box-shadow: 0 0 36px rgba(57,231,255,.22), 0 12px 35px rgba(124,58,237,.28) !important;
+}
+#userLoginButton {
+  background: linear-gradient(135deg, #312e81, #7c3aed, #c026d3) !important;
+}
+#userLoginButton + *, #userLoginButton ~ * {
+  --tw-ring-color: rgba(139,92,246,.35);
+}
+
+/* Explicit status elements: cyan/violet instead of green. */
+.text-emerald-400, .text-emerald-300 {
+  color: #67e8f9 !important;
+}
+.bg-emerald-400 {
+  background: #22d3ee !important;
+  box-shadow: 0 0 12px rgba(34,211,238,.8) !important;
+}
