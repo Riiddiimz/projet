@@ -10,12 +10,17 @@
   filter: drop-shadow(0 0 18px rgba(139,92,246,.42)) !important;
 }
 
-button.login-user-choice,
-.login-page button.login-user-choice {
+/* The project contains legacy/global green-theme rules. This selector intentionally
+   has very high specificity so the login control cannot inherit that theme. */
+html body .login-page button.login-user-choice,
+html body .login-page button.login-user-choice:hover,
+html body .login-page button.login-user-choice:focus,
+html body .login-page button.login-user-choice:active {
   appearance: none !important;
   -webkit-appearance: none !important;
   position: relative !important;
   background: transparent !important;
+  background-color: transparent !important;
   background-image: none !important;
   color: #f5f3ff !important;
   border: 0 !important;
@@ -27,8 +32,12 @@ button.login-user-choice,
   transition: color .2s ease, transform .2s ease, text-shadow .2s ease !important;
 }
 
-button.login-user-choice::after,
-.login-page button.login-user-choice::after {
+html body .login-page button.login-user-choice::before {
+  content: none !important;
+  display: none !important;
+}
+
+html body .login-page button.login-user-choice::after {
   content: "Utilisateur" !important;
   display: inline-block !important;
   font-size: .95rem !important;
@@ -37,15 +46,12 @@ button.login-user-choice::after,
   text-shadow: 0 0 18px rgba(168,85,247,.45) !important;
 }
 
-button.login-user-choice:hover,
-.login-page button.login-user-choice:hover {
-  background: transparent !important;
+html body .login-page button.login-user-choice:hover {
   transform: translateY(-1px) !important;
   color: #e9d5ff !important;
   text-shadow: 0 0 22px rgba(168,85,247,.7) !important;
 }
 
-button.login-user-choice:hover::after,
-.login-page button.login-user-choice:hover::after {
+html body .login-page button.login-user-choice:hover::after {
   color: #e9d5ff !important;
 }
