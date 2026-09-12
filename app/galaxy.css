@@ -141,3 +141,11 @@ button[type="button"][class*="bg-violet-500/10"] {
 /* HARD LOGIN USER BUTTON OVERRIDE */
 button[type="button"][class*="bg-fuchsia-400/10"] { background: linear-gradient(135deg,#312e81,#7c3aed,#c026d3) !important; color:#f5f3ff !important; border-color:rgba(103,232,249,.28) !important; box-shadow:0 8px 30px rgba(124,58,237,.28),inset 0 1px rgba(255,255,255,.12) !important; }
 button[type="button"][class*="bg-fuchsia-400/10"]:hover { background:linear-gradient(135deg,#3730a3,#8b5cf6,#d946ef) !important; }
+
+
+/* GALAXY NEBULA STACKING FIX */
+html, body { background: #03040b !important; }
+body { position: relative !important; isolation: isolate !important; }
+body::before { z-index: 0 !important; opacity: .95 !important; filter: blur(10px) saturate(125%) !important; }
+body::after { z-index: 0 !important; opacity: .72 !important; }
+body > * { position: relative; z-index: 1; }
