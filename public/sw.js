@@ -1,5 +1,5 @@
-const CACHE = 'colincall-shell-v1';
-const SHELL = ['/', '/manifest.webmanifest', '/logogcol.png'];
+const CACHE = 'colincall-shell-v2';
+const SHELL = ['/', '/manifest.webmanifest', '/clogo-galaxy.svg'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
