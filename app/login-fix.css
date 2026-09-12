@@ -1,7 +1,12 @@
 /* Final login visual overrides — loaded after galaxy.css */
 .login-logo {
-  content: url('/clogo.png') !important;
+  content: none !important;
   display: block !important;
+  width: min(100%, 240px) !important;
+  max-width: 240px !important;
+  height: auto !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
   filter: drop-shadow(0 0 18px rgba(139,92,246,.42)) !important;
 }
 
