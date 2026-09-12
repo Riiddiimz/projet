@@ -143,3 +143,10 @@ body button[aria-label="Installer Col'inCall"] {
 /* HARD LOGIN USER BUTTON OVERRIDE */
 button[type="button"][class*="bg-fuchsia-400/10"] { background: linear-gradient(135deg,#312e81,#7c3aed,#c026d3) !important; color:#f5f3ff !important; border-color:rgba(103,232,249,.28) !important; box-shadow:0 8px 30px rgba(124,58,237,.28),inset 0 1px rgba(255,255,255,.12) !important; }
 button[type="button"][class*="bg-fuchsia-400/10"]:hover { background:linear-gradient(135deg,#3730a3,#8b5cf6,#d946ef) !important; }
+
+
+/* SPEAKING CAMERA INDICATOR */
+[class*="text-fuchsia"] { color: #c4b5fd !important; }
+[class*="text-emerald"], [class*="text-green"] { color: #67e8f9 !important; }
+.speaking-indicator { position:absolute; top:12px; right:12px; width:34px; height:34px; align-items:center; justify-content:center; border-radius:999px; background:linear-gradient(135deg,#312e81,#7c3aed,#c026d3); border:1px solid rgba(103,232,249,.55); box-shadow:0 0 24px rgba(124,58,237,.55), inset 0 1px rgba(255,255,255,.18); font-size:17px; line-height:1; z-index:20; animation:speaking-pulse 1s ease-in-out infinite; }
+@keyframes speaking-pulse { 0%,100%{transform:scale(1);box-shadow:0 0 18px rgba(124,58,237,.45),inset 0 1px rgba(255,255,255,.18)} 50%{transform:scale(1.08);box-shadow:0 0 30px rgba(236,72,153,.65),inset 0 1px rgba(255,255,255,.18)} }
