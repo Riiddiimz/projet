@@ -11,9 +11,7 @@
   --g-text: #f5f3ff;
   --g-muted: #9b98b8;
 }
-
 html, body { min-height: 100%; background: var(--g-bg) !important; }
-
 body {
   color: var(--g-text);
   overflow-x: hidden;
@@ -23,14 +21,8 @@ body {
     radial-gradient(ellipse 70% 50% at 50% 105%, rgba(6,182,212,.22), transparent 62%),
     #03040b !important;
 }
-
-/* Full-screen animated nebula. */
 body::before {
-  content: "";
-  position: fixed;
-  inset: -30%;
-  z-index: -2;
-  pointer-events: none;
+  content: ""; position: fixed; inset: -30%; z-index: -2; pointer-events: none;
   background:
     radial-gradient(ellipse 35% 28% at 18% 25%, rgba(124,58,237,.55), transparent 70%),
     radial-gradient(ellipse 30% 24% at 78% 22%, rgba(236,72,153,.38), transparent 72%),
@@ -39,188 +31,79 @@ body::before {
     radial-gradient(circle at 50% 50%, rgba(255,255,255,.08), transparent 42%),
     radial-gradient(circle, rgba(255,255,255,.82) 0 1px, transparent 1.5px);
   background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 125px 137px;
-  background-position: center;
-  filter: blur(14px);
-  opacity: .82;
-  animation: galaxy-nebula-drift 34s ease-in-out infinite alternate;
+  filter: blur(14px); opacity: .82; animation: galaxy-nebula-drift 34s ease-in-out infinite alternate;
   transform: translate3d(0,0,0) scale(1.08);
 }
-
 body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
     radial-gradient(circle at 14% 18%, rgba(255,255,255,.8) 0 1px, transparent 1.5px),
     radial-gradient(circle at 83% 68%, rgba(57,231,255,.75) 0 1px, transparent 1.5px),
     radial-gradient(circle at 62% 35%, rgba(236,72,153,.65) 0 1px, transparent 1.5px),
     radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.34) 100%);
-  background-size: 173px 151px, 211px 197px, 263px 223px, 100% 100%;
-  opacity: .58;
+  background-size: 173px 151px, 211px 197px, 263px 223px, 100% 100%; opacity: .58;
   animation: star-drift 55s linear infinite;
 }
-
-@keyframes galaxy-nebula-drift {
-  0% { transform: translate3d(-2%,-1%,0) rotate(-1deg) scale(1.08); }
-  50% { transform: translate3d(2%,1.5%,0) rotate(1deg) scale(1.13); }
-  100% { transform: translate3d(-1%,3%,0) rotate(-.5deg) scale(1.1); }
-}
-
-@keyframes star-drift {
-  from { transform: translate3d(0,0,0) scale(1); }
-  to { transform: translate3d(-18px,12px,0) scale(1.015); }
-}
-
+@keyframes galaxy-nebula-drift { 0%{transform:translate3d(-2%,-1%,0) rotate(-1deg) scale(1.08)} 50%{transform:translate3d(2%,1.5%,0) rotate(1deg) scale(1.13)} 100%{transform:translate3d(-1%,3%,0) rotate(-.5deg) scale(1.1)} }
+@keyframes star-drift { from{transform:translate3d(0,0,0) scale(1)} to{transform:translate3d(-18px,12px,0) scale(1.015)} }
 main.min-h-screen, main.relative.min-h-screen { background: transparent !important; }
-
 header {
-  background: rgba(4,5,14,.62) !important;
-  border-color: rgba(139,92,246,.24) !important;
+  background: rgba(4,5,14,.62) !important; border-color: rgba(139,92,246,.24) !important;
   box-shadow: 0 12px 50px rgba(0,0,0,.38), inset 0 -1px rgba(255,255,255,.035) !important;
-  backdrop-filter: blur(20px) saturate(145%);
-  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  backdrop-filter: blur(20px) saturate(145%); -webkit-backdrop-filter: blur(20px) saturate(145%);
 }
-
-/* New uploaded logo replaces the legacy logo everywhere. */
-img[src="/logogcol.png"] { content: url("/clogo.png"); }
-/* clogo.png still contains the legacy green accent: shift it to cyan/blue Galaxy tones. */
-img[src="/clogo.png"] { filter: hue-rotate(58deg) saturate(1.05); }
-
+/* Use the new logo: COL'IN and CALL are explicitly violet/cyan/pink, never white/green. */
+img[src="/logogcol.png"], img[src="/clogo.png"] { content: url("/clogo-galaxy.svg") !important; filter: none !important; }
 main section, .room-card, #roomList article, #lobbyChat, main aside,
 #videoGrid > div, .fixed.z-\[60px\] section, .fixed.z-\[80px\] section {
-  border-color: var(--g-border) !important;
-  box-shadow: 0 18px 60px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.035);
+  border-color: var(--g-border) !important; box-shadow: 0 18px 60px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.035);
 }
-
 main.relative.min-h-screen > section {
-  background:
-    radial-gradient(circle at 15% 0%, rgba(168,85,247,.2), transparent 42%),
-    radial-gradient(circle at 90% 100%, rgba(34,211,238,.12), transparent 38%),
-    rgba(10,10,28,.76) !important;
-  border: 1px solid rgba(168,85,247,.3) !important;
-  box-shadow: 0 0 80px rgba(124,58,237,.18), 0 30px 90px rgba(0,0,0,.55) !important;
-  backdrop-filter: blur(22px);
+  background: radial-gradient(circle at 15% 0%, rgba(168,85,247,.2), transparent 42%), radial-gradient(circle at 90% 100%, rgba(34,211,238,.12), transparent 38%), rgba(10,10,28,.76) !important;
+  border: 1px solid rgba(168,85,247,.3) !important; box-shadow: 0 0 80px rgba(124,58,237,.18), 0 30px 90px rgba(0,0,0,.55) !important; backdrop-filter: blur(22px);
 }
-
-.room-card, #roomList article {
-  position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 90% 0%, rgba(236,72,153,.16), transparent 40%),
-    radial-gradient(circle at 0% 100%, rgba(34,211,238,.11), transparent 45%),
-    linear-gradient(145deg, rgba(20,16,45,.82), rgba(6,7,18,.82)) !important;
-  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
-}
-.room-card:hover, #roomList article:hover { transform: translateY(-3px); border-color: rgba(57,231,255,.42) !important; box-shadow: 0 0 35px rgba(139,92,246,.16), 0 20px 55px rgba(0,0,0,.35); }
-
-input, textarea { color: var(--g-text) !important; }
-input:not([type="password"]), textarea, #roomSearch, #lobbyChatInput, #userUsernameInput, #passwordInput {
+.room-card, #roomList article { position:relative; overflow:hidden; background:radial-gradient(circle at 90% 0%,rgba(236,72,153,.16),transparent 40%),radial-gradient(circle at 0% 100%,rgba(34,211,238,.11),transparent 45%),linear-gradient(145deg,rgba(20,16,45,.82),rgba(6,7,18,.82)) !important; transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease; }
+.room-card:hover, #roomList article:hover { transform:translateY(-3px); border-color:rgba(57,231,255,.42) !important; box-shadow:0 0 35px rgba(139,92,246,.16),0 20px 55px rgba(0,0,0,.35); }
+input, textarea, select { color:var(--g-text) !important; }
+input, textarea, select {
   background: rgba(4,5,15,.56) !important;
-  border-color: rgba(139,92,246,.22) !important;
-  box-shadow: inset 0 0 25px rgba(76,29,149,.08);
+  border-color: rgba(139,92,246,.28) !important;
+  box-shadow: inset 0 0 25px rgba(76,29,149,.08) !important;
+  outline: none !important;
 }
-input:focus, textarea:focus { border-color: rgba(57,231,255,.55) !important; box-shadow: 0 0 0 3px rgba(57,231,255,.08), 0 0 25px rgba(139,92,246,.12) !important; }
-
-.bg-fuchsia-400, .bg-fuchsia-400\/10, .create-room-btn, #userLoginButton, .join-room-btn {
-  background: linear-gradient(135deg, #7c3aed, #c026d3 52%, #ec4899) !important;
-  color: #fff !important;
-  border: 1px solid rgba(255,255,255,.16) !important;
-  box-shadow: 0 8px 30px rgba(168,85,247,.22), inset 0 1px rgba(255,255,255,.16) !important;
+input:focus, input:focus-visible, textarea:focus, textarea:focus-visible, select:focus, select:focus-visible {
+  border-color: #8b5cf6 !important;
+  outline: 2px solid rgba(139,92,246,.32) !important;
+  outline-offset: 0 !important;
+  box-shadow: 0 0 0 3px rgba(139,92,246,.12), 0 0 28px rgba(57,231,255,.14) !important;
 }
+input::selection, textarea::selection { background:rgba(139,92,246,.45); }
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus { -webkit-text-fill-color:#f5f3ff !important; -webkit-box-shadow:0 0 0 1000px #08091a inset !important; border-color:#8b5cf6 !important; }
 
-#videoGrid { perspective: 1000px; }
-#videoGrid > div {
-  background: radial-gradient(circle at 20% 10%, rgba(139,92,246,.17), transparent 45%), radial-gradient(circle at 85% 85%, rgba(34,211,238,.09), transparent 45%), #060711 !important;
-  border: 1px solid rgba(139,92,246,.24) !important;
-  box-shadow: inset 0 0 45px rgba(76,29,149,.10), 0 18px 55px rgba(0,0,0,.3);
-}
-
-.galaxy-speaking {
-  border-color: rgba(57,231,255,.75) !important;
-  box-shadow: 0 0 0 2px rgba(57,231,255,.28), 0 0 28px rgba(57,231,255,.34), 0 0 70px rgba(139,92,246,.24) !important;
-}
-
-.text-emerald-400, .text-emerald-300, [class*="text-green"] { color: #67e8f9 !important; text-shadow: 0 0 12px rgba(34,211,238,.45) !important; }
-.bg-emerald-400, [class*="bg-green"] { background: #22d3ee !important; box-shadow: 0 0 12px rgba(34,211,238,.8) !important; }
-[class*="border-emerald"], [class*="border-green"] { border-color: rgba(57,231,255,.35) !important; }
-
-button[aria-label="Installer Col'inCall"] {
-  background: linear-gradient(135deg, rgba(49,46,129,.96), rgba(126,34,206,.96)) !important;
-  border-color: rgba(103,232,249,.32) !important;
+/* Galaxy controls: eliminate every remaining green/fuchsia legacy state. */
+.bg-fuchsia-400, .bg-fuchsia-400\/10, .bg-violet-500, .bg-violet-500\/10, .create-room-btn, #userLoginButton, .join-room-btn,
+button[aria-label="Utilisateur"] {
+  background: linear-gradient(135deg, #312e81, #7c3aed 52%, #c026d3) !important;
   color: #f5f3ff !important;
-  box-shadow: 0 0 28px rgba(124,58,237,.28), inset 0 1px rgba(255,255,255,.12) !important;
+  border: 1px solid rgba(167,139,250,.34) !important;
+  box-shadow: 0 8px 30px rgba(124,58,237,.22), inset 0 1px rgba(255,255,255,.12) !important;
 }
+button[aria-label="Utilisateur"] { color:#c4b5fd !important; }
+button[aria-label="Utilisateur"]:hover { background:linear-gradient(135deg,#3730a3,#8b5cf6,#d946ef) !important; color:#fff !important; }
+#userLoginButton { background:linear-gradient(135deg,#312e81,#7c3aed,#c026d3) !important; }
 
-#userLoginButton { background: linear-gradient(135deg, #312e81, #7c3aed, #c026d3) !important; }
+/* Absolutely no green: remap semantic Tailwind classes to Galaxy cyan/violet. */
+[class*="bg-emerald"], [class*="bg-green"] { background:linear-gradient(135deg,#312e81,#7c3aed) !important; box-shadow:0 0 14px rgba(124,58,237,.28) !important; }
+[class*="text-emerald"], [class*="text-green"] { color:#67e8f9 !important; text-shadow:0 0 12px rgba(34,211,238,.45) !important; }
+[class*="border-emerald"], [class*="border-green"] { border-color:rgba(57,231,255,.35) !important; }
 
-#lobbyChat, .fixed.z-\[60px\] section, .fixed.z-\[80px\] section {
-  background: radial-gradient(circle at 0 0, rgba(139,92,246,.14), transparent 35%), rgba(7,8,20,.92) !important;
-  backdrop-filter: blur(24px) saturate(140%);
-}
-
-* { scrollbar-width: thin; scrollbar-color: rgba(139,92,246,.5) rgba(255,255,255,.03); }
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: rgba(255,255,255,.025); }
-::-webkit-scrollbar-thumb { background: linear-gradient(#7c3aed,#ec4899); border-radius: 999px; }
-button:not(:disabled) { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
-button:not(:disabled):hover { box-shadow: 0 0 24px rgba(139,92,246,.2); }
-button:not(:disabled):active { transform: scale(.97); }
-
-@media (max-width:640px) {
-  body::before { opacity: .62; filter: blur(18px); }
-  .room-card:hover, #roomList article:hover { transform: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  body::before, body::after { animation: none; }
-  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
-}
-
-/* Absolute final no-green override. */
-[class*="bg-emerald"], [class*="bg-green"] { background: linear-gradient(135deg,#312e81,#7c3aed) !important; }
-[class*="text-emerald"], [class*="text-green"] { color: #67e8f9 !important; }
-[class*="border-emerald"], [class*="border-green"] { border-color: rgba(57,231,255,.35) !important; }
-
-
-/* FINAL GALAXY PALETTE: NO GREEN */
-[class*="bg-emerald"], [class*="bg-green"] {
-  background: linear-gradient(135deg, #312e81, #7c3aed) !important;
-  box-shadow: 0 0 14px rgba(124,58,237,.28) !important;
-}
-[class*="text-emerald"], [class*="text-green"] {
-  color: #67e8f9 !important;
-  text-shadow: 0 0 12px rgba(34,211,238,.45) !important;
-}
-[class*="border-emerald"], [class*="border-green"] {
-  border-color: rgba(57,231,255,.35) !important;
-}
-button[aria-label="Installer Col'inCall"] {
-  background: linear-gradient(135deg, rgba(49,46,129,.96), rgba(126,34,206,.96)) !important;
-  border-color: rgba(103,232,249,.32) !important;
-  color: #f5f3ff !important;
-  box-shadow: 0 0 28px rgba(124,58,237,.28), inset 0 1px rgba(255,255,255,.12) !important;
-}
-button[aria-label="Installer Col'inCall"]:hover {
-  box-shadow: 0 0 36px rgba(57,231,255,.22), 0 12px 35px rgba(124,58,237,.28) !important;
-}
-#userLoginButton {
-  background: linear-gradient(135deg, #312e81, #7c3aed, #c026d3) !important;
-}
-#userLoginButton + *, #userLoginButton ~ * {
-  --tw-ring-color: rgba(139,92,246,.35);
-}
-
-/* Explicit status elements: cyan/violet instead of green. */
-.text-emerald-400, .text-emerald-300 {
-  color: #67e8f9 !important;
-}
-.bg-emerald-400 {
-  background: #22d3ee !important;
-  box-shadow: 0 0 12px rgba(34,211,238,.8) !important;
-}
-
-
-/* HARD LOGIN USER BUTTON OVERRIDE */
-button[type="button"][class*="bg-fuchsia-400/10"] { background: linear-gradient(135deg,#312e81,#7c3aed,#c026d3) !important; color:#f5f3ff !important; border-color:rgba(103,232,249,.28) !important; box-shadow:0 8px 30px rgba(124,58,237,.28),inset 0 1px rgba(255,255,255,.12) !important; }
-button[type="button"][class*="bg-fuchsia-400/10"]:hover { background:linear-gradient(135deg,#3730a3,#8b5cf6,#d946ef) !important; }
+#videoGrid { perspective:1000px; }
+#videoGrid > div { background:radial-gradient(circle at 20% 10%,rgba(139,92,246,.17),transparent 45%),radial-gradient(circle at 85% 85%,rgba(34,211,238,.09),transparent 45%),#060711 !important; border:1px solid rgba(139,92,246,.24) !important; box-shadow:inset 0 0 45px rgba(76,29,149,.10),0 18px 55px rgba(0,0,0,.3); }
+.galaxy-speaking { border-color:rgba(57,231,255,.75) !important; box-shadow:0 0 0 2px rgba(57,231,255,.28),0 0 28px rgba(57,231,255,.34),0 0 70px rgba(139,92,246,.24) !important; }
+button[aria-label="Installer Col'inCall"] { background:linear-gradient(135deg,rgba(49,46,129,.96),rgba(126,34,206,.96)) !important; border-color:rgba(103,232,249,.32) !important; color:#f5f3ff !important; box-shadow:0 0 28px rgba(124,58,237,.28),inset 0 1px rgba(255,255,255,.12) !important; }
+#lobbyChat, .fixed.z-\[60px\] section, .fixed.z-\[80px\] section { background:radial-gradient(circle at 0 0,rgba(139,92,246,.14),transparent 35%),rgba(7,8,20,.92) !important; backdrop-filter:blur(24px) saturate(140%); }
+* { scrollbar-width:thin; scrollbar-color:rgba(139,92,246,.5) rgba(255,255,255,.03); }
+::-webkit-scrollbar { width:8px; height:8px; } ::-webkit-scrollbar-track { background:rgba(255,255,255,.025); } ::-webkit-scrollbar-thumb { background:linear-gradient(#7c3aed,#ec4899); border-radius:999px; }
+button:not(:disabled) { transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease; } button:not(:disabled):hover { box-shadow:0 0 24px rgba(139,92,246,.2); } button:not(:disabled):active { transform:scale(.97); }
+@media (max-width:640px) { body::before{opacity:.62;filter:blur(18px)} .room-card:hover,#roomList article:hover{transform:none} }
+@media (prefers-reduced-motion:reduce) { body::before,body::after{animation:none} *,*::before,*::after{scroll-behavior:auto !important;transition:none !important} }
