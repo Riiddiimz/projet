@@ -24,8 +24,8 @@ jobs:
           p=Path('app/page.tsx')
           s=p.read_text()
           old='<header className="flex h-16 items-center justify-between border-b border-white/10 px-4 sm:px-7"><div className="flex items-center gap-3"><img src="/logogcol.png" alt="Col\'inCall" className="h-10 w-auto max-w-[180px] object-contain"/><div><div className="text-[10px] text-emerald-400">● Connecté</div></div></header>'
-          new='<header className="flex h-16 items-center justify-between border-b border-white/10 px-4 sm:px-7"><div className="flex items-center gap-3"><img src="/logogcol.png" alt="Col\'inCall" className="h-10 w-auto max-w-[180px] object-contain"/><div><div className="text-[10px] text-emerald-400">● Connecté</div></div></div><div className="flex items-center gap-2">{user.isAdmin&&<button onClick={openAdmin} aria-label="Administration" className="inline-flex items-center gap-2 rounded-xl bg-fuchsia-400 px-3 py-2 font-black text-zinc-950"><Shield size={17}/><span className="hidden sm:inline">Admin</span></button>}<button onClick={()=>setProfileOpen(true)} aria-label="Profil" className="rounded-full bg-white/5 p-1.5"><Avatar u={user}/></button><button onClick={logout} aria-label="Déconnexion" className="rounded-xl bg-white/5 p-2"><LogOut size={18}/></button></div></header>'
-          if old not in s: raise SystemExit('lobby header anchor not found')
+          new='<header className="flex h-16 items-center justify-between border-b border-white/10 px-4 sm:px-7"><div className="flex items-center gap-3"><img src="/clogo-galaxy.svg" alt="Col\'inCall" className="h-10 w-auto max-w-[180px] object-contain"/><div><div className="text-[10px] text-emerald-400">● Connecté</div></div></div><div className="flex items-center gap-2">{user.isAdmin&&<button onClick={openAdmin} aria-label="Administration" className="inline-flex items-center gap-2 rounded-xl bg-fuchsia-400 px-3 py-2 font-black text-zinc-950"><Shield size={17}/><span className="hidden sm:inline">Admin</span></button>}<button onClick={()=>setProfileOpen(true)} aria-label="Profil" className="rounded-full bg-white/5 p-1.5"><Avatar u={user}/></button><button onClick={logout} aria-label="Déconnexion" className="rounded-xl bg-white/5 p-2"><LogOut size={18}/></button></div></header>'
+          if old not in s: raise SystemExit('legacy lobby header anchor not found')
           p.write_text(s.replace(old,new,1))
           PY
       - name: Verify
@@ -38,5 +38,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app/page.tsx
-          git commit -m "fix: restore lobby header controls"
+          git commit -m "fix: restore lobby admin button"
           git push
