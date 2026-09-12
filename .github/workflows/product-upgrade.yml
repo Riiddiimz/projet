@@ -1,0 +1,75 @@
+name: Product upgrade
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/product-upgrade.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add speaking detection and screen sharing
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path('app/page.tsx')
+          s = p.read_text()
+          marker = '// PRODUCT_UPGRADE_20260912'
+          if marker in s:
+              print('Already upgraded')
+              raise SystemExit(0)
+
+          s = s.replace(
+              "import { ArrowLeft, ArrowRight, Camera, CameraOff, LogOut, MessageCircle, Mic, MicOff, Plus, Search, Send, Shield, Users, Video, X } from 'lucide-react';",
+              "import { ArrowLeft, ArrowRight, Camera, CameraOff, LogOut, MessageCircle, Mic, MicOff, MonitorUp, Plus, Radio, Search, Send, Shield, Users, Video, X } from 'lucide-react';"
+          )
+          s = s.replace(
+              " const [mic,setMic]=useState(false),[camera,setCamera]=useState(false),[profileOpen,setProfileOpen]=useState(false),[description,setDescription]=useState('');",
+              " const [mic,setMic]=useState(false),[camera,setCamera]=useState(false),[profileOpen,setProfileOpen]=useState(false),[description,setDescription]=useState('');\n const [speaking,setSpeaking]=useState(false),[sharing,setSharing]=useState(false);\n const screenStream=useRef<MediaStream|null>(null);\n // PRODUCT_UPGRADE_20260912"
+          )
+
+          anchor = " useEffect(()=>{if(!room)return;const grid=document.getElementById('videoGrid');if(!grid||!userRef.current)return;grid.innerHTML='';addLocalCard();participants.forEach(addRemoteCard);participants.forEach(offerUser)},[room,participants]);"
+          inject = anchor + "\n useEffect(()=>{if(!room||!localStream.current)return;const track=localStream.current.getAudioTracks()[0];if(!track)return;const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const ctx=new C();const source=ctx.createMediaStreamSource(new MediaStream([track]));const analyser=ctx.createAnalyser();analyser.fftSize=512;source.connect(analyser);const data=new Uint8Array(analyser.frequencyBinCount);let raf=0;const tick=()=>{analyser.getByteFrequencyData(data);let sum=0;for(const n of data)sum+=n*n;const rms=Math.sqrt(sum/data.length)/255;setSpeaking(rms>.045);raf=requestAnimationFrame(tick)};tick();return()=>{cancelAnimationFrame(raf);try{source.disconnect()}catch{}try{analyser.disconnect()}catch{}void ctx.close()}},[room,mic]);\n useEffect(()=>{const el=document.getElementById('video-card-'+userRef.current?.id);if(el)el.classList.toggle('galaxy-speaking',speaking)},[speaking]);"
+          s = s.replace(anchor, inject)
+
+          fn_anchor = " function toggleCamera(){if(!localStream.current||user?.cameraLocked)return;"
+          share_fn = " async function toggleScreenShare(){if(!localStream.current)return;if(sharing){screenStream.current?.getTracks().forEach(t=>t.stop());return}try{const display=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});const screenTrack=display.getVideoTracks()[0];if(!screenTrack)return;screenStream.current=display;const connections=[...peers.current.values()];for(const p of connections){const sender=p.getSenders().find(x=>x.track?.kind==='video');if(sender)await sender.replaceTrack(screenTrack)}const local=document.getElementById('local-video') as HTMLVideoElement|null;if(local){local.srcObject=display;local.classList.remove('scale-x-[-1]');void local.play().catch(()=>{})}setSharing(true);screenTrack.onended=()=>{void stopScreenShare()}}catch(e){console.warn('[WebRTC] screen share cancelled',e)}}\n async function stopScreenShare(){const cameraTrack=localStream.current?.getVideoTracks()[0]||null;for(const p of peers.current.values()){const sender=p.getSenders().find(x=>x.track?.kind==='video');if(sender)await sender.replaceTrack(cameraTrack)}const local=document.getElementById('local-video') as HTMLVideoElement|null;if(local&&localStream.current){local.srcObject=localStream.current;local.classList.add('scale-x-[-1]');void local.play().catch(()=>{})}screenStream.current?.getTracks().forEach(t=>t.stop());screenStream.current=null;setSharing(false)}\n" + fn_anchor
+          s = s.replace(fn_anchor, share_fn)
+
+          old_controls = "<button id=\"cameraBtn\" aria-label=\"Caméra\" disabled={!!user.cameraLocked} onClick={toggleCamera} className={`rounded-full p-4 ${user.cameraLocked?'bg-amber-500/30 text-amber-300':camera?'bg-white/10':'bg-rose-500'}`}>{camera?<Camera/>:<CameraOff/>}</button>"
+          new_controls = old_controls + "<button onClick={()=>void toggleScreenShare()} aria-label={sharing?'Arrêter le partage':'Partager l’écran'} className={`rounded-full p-4 ${sharing?'bg-cyan-400 text-zinc-950':'bg-white/10'}`}>{sharing?<Radio/>:<MonitorUp/>}</button>"
+          if old_controls not in s: raise SystemExit('camera control anchor not found')
+          s = s.replace(old_controls,new_controls,1)
+
+          s = s.replace(
+              '<div id="roomStatus" className="text-xs text-emerald-400">Vous êtes connecté</div>',
+              '<div id="roomStatus" className="flex items-center justify-center gap-2 text-xs text-emerald-400"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400"/>Vous êtes connecté{speaking&&<><span className="text-cyan-300">·</span><span className="text-cyan-300">Vous parlez</span></>}</div>'
+          )
+
+          p.write_text(s)
+          PY
+
+      - name: Validate
+        run: |
+          node --check server.js
+          npm ci --ignore-scripts
+          npx tsc --noEmit
+          npm run build
+
+      - name: Commit upgrade
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/page.tsx
+          git commit -m "feat: add speaking indicator and screen sharing"
+          git push
