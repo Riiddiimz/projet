@@ -52,7 +52,6 @@ header {
   box-shadow: 0 12px 50px rgba(0,0,0,.38), inset 0 -1px rgba(255,255,255,.035) !important;
   backdrop-filter: blur(20px) saturate(145%); -webkit-backdrop-filter: blur(20px) saturate(145%);
 }
-/* Use the new logo: COL'IN and CALL are explicitly violet/cyan/pink, never white/green. */
 img[src="/logogcol.png"], img[src="/clogo.png"] { content: url("/clogo-galaxy.svg") !important; filter: none !important; }
 main section, .room-card, #roomList article, #lobbyChat, main aside,
 #videoGrid > div, .fixed.z-\[60px\] section, .fixed.z-\[80px\] section {
@@ -80,7 +79,6 @@ input:focus, input:focus-visible, textarea:focus, textarea:focus-visible, select
 input::selection, textarea::selection { background:rgba(139,92,246,.45); }
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus { -webkit-text-fill-color:#f5f3ff !important; -webkit-box-shadow:0 0 0 1000px #08091a inset !important; border-color:#8b5cf6 !important; }
 
-/* Galaxy controls: eliminate every remaining green/fuchsia legacy state. */
 .bg-fuchsia-400, .bg-fuchsia-400\/10, .bg-violet-500, .bg-violet-500\/10, .create-room-btn, #userLoginButton, .join-room-btn,
 button[aria-label="Utilisateur"] {
   background: linear-gradient(135deg, #312e81, #7c3aed 52%, #c026d3) !important;
@@ -92,7 +90,6 @@ button[aria-label="Utilisateur"] { color:#c4b5fd !important; }
 button[aria-label="Utilisateur"]:hover { background:linear-gradient(135deg,#3730a3,#8b5cf6,#d946ef) !important; color:#fff !important; }
 #userLoginButton { background:linear-gradient(135deg,#312e81,#7c3aed,#c026d3) !important; }
 
-/* Absolutely no green: remap semantic Tailwind classes to Galaxy cyan/violet. */
 [class*="bg-emerald"], [class*="bg-green"] { background:linear-gradient(135deg,#312e81,#7c3aed) !important; box-shadow:0 0 14px rgba(124,58,237,.28) !important; }
 [class*="text-emerald"], [class*="text-green"] { color:#67e8f9 !important; text-shadow:0 0 12px rgba(34,211,238,.45) !important; }
 [class*="border-emerald"], [class*="border-green"] { border-color:rgba(57,231,255,.35) !important; }
@@ -108,40 +105,15 @@ button:not(:disabled) { transition:transform .18s ease,box-shadow .18s ease,bord
 @media (max-width:640px) { body::before{opacity:.62;filter:blur(18px)} .room-card:hover,#roomList article:hover{transform:none} }
 @media (prefers-reduced-motion:reduce) { body::before,body::after{animation:none} *,*::before,*::after{scroll-behavior:auto !important;transition:none !important} }
 
-
 /* FINAL GALAXY PALETTE: NO GREEN */
-[class*="bg-emerald"], [class*="bg-green"] {
-  background: linear-gradient(135deg, #312e81, #7c3aed) !important;
-  box-shadow: 0 0 14px rgba(124,58,237,.28) !important;
-}
-[class*="text-emerald"], [class*="text-green"] {
-  color: #67e8f9 !important;
-  text-shadow: 0 0 12px rgba(34,211,238,.45) !important;
-}
-[class*="border-emerald"], [class*="border-green"] {
-  border-color: rgba(57,231,255,.35) !important;
-}
-button[aria-label="Installer Col'inCall"] {
-  background: linear-gradient(135deg, rgba(49,46,129,.96), rgba(126,34,206,.96)) !important;
-  border-color: rgba(103,232,249,.32) !important;
-  color: #f5f3ff !important;
-  box-shadow: 0 0 28px rgba(124,58,237,.28), inset 0 1px rgba(255,255,255,.12) !important;
-}
-#userLoginButton {
-  background: linear-gradient(135deg, #312e81, #7c3aed, #c026d3) !important;
-}
-button[type="button"][class*="bg-violet-500/10"] {
-  background: linear-gradient(135deg,#312e81,#7c3aed,#c026d3) !important;
-  color:#f5f3ff !important;
-  border-color:rgba(103,232,249,.28) !important;
-  box-shadow:0 8px 30px rgba(124,58,237,.28),inset 0 1px rgba(255,255,255,.12) !important;
-}
-
-
-/* HARD LOGIN USER BUTTON OVERRIDE */
+[class*="bg-emerald"], [class*="bg-green"] { background: linear-gradient(135deg, #312e81, #7c3aed) !important; box-shadow: 0 0 14px rgba(124,58,237,.28) !important; }
+[class*="text-emerald"], [class*="text-green"] { color: #67e8f9 !important; text-shadow: 0 0 12px rgba(34,211,238,.45) !important; }
+[class*="border-emerald"], [class*="border-green"] { border-color: rgba(57,231,255,.35) !important; }
+button[aria-label="Installer Col'inCall"] { background: linear-gradient(135deg, rgba(49,46,129,.96), rgba(126,34,206,.96)) !important; border-color: rgba(103,232,249,.32) !important; color: #f5f3ff !important; box-shadow: 0 0 28px rgba(124,58,237,.28), inset 0 1px rgba(255,255,255,.12) !important; }
+#userLoginButton { background: linear-gradient(135deg, #312e81, #7c3aed, #c026d3) !important; }
+button[type="button"][class*="bg-violet-500/10"] { background: linear-gradient(135deg,#312e81,#7c3aed,#c026d3) !important; color:#f5f3ff !important; border-color:rgba(103,232,249,.28) !important; box-shadow:0 8px 30px rgba(124,58,237,.28),inset 0 1px rgba(255,255,255,.12) !important; }
 button[type="button"][class*="bg-fuchsia-400/10"] { background: linear-gradient(135deg,#312e81,#7c3aed,#c026d3) !important; color:#f5f3ff !important; border-color:rgba(103,232,249,.28) !important; box-shadow:0 8px 30px rgba(124,58,237,.28),inset 0 1px rgba(255,255,255,.12) !important; }
 button[type="button"][class*="bg-fuchsia-400/10"]:hover { background:linear-gradient(135deg,#3730a3,#8b5cf6,#d946ef) !important; }
-
 
 /* GALAXY NEBULA STACKING FIX */
 html, body { background: #03040b !important; }
@@ -149,3 +121,20 @@ body { position: relative !important; isolation: isolate !important; }
 body::before { z-index: 0 !important; opacity: .95 !important; filter: blur(10px) saturate(125%) !important; }
 body::after { z-index: 0 !important; opacity: .72 !important; }
 body > * { position: relative; z-index: 1; }
+
+/* PWA INSTALL BUTTON MUST STAY FIXED TO THE VIEWPORT */
+body button[aria-label="Installer Col'inCall"] {
+  position: fixed !important;
+  top: auto !important;
+  left: auto !important;
+  right: 16px !important;
+  bottom: 12px !important;
+  z-index: 120 !important;
+  transform: none;
+}
+@media (min-width:640px) {
+  body button[aria-label="Installer Col'inCall"] {
+    right: 20px !important;
+    bottom: 16px !important;
+  }
+}
