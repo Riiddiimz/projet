@@ -34,10 +34,11 @@ export default function PwaInstall() {
         await promptEvent.prompt();
         await promptEvent.userChoice.catch(() => null);
       }}
-      className="fixed bottom-5 right-5 z-[120] rounded-full border border-cyan-300/25 bg-zinc-950/90 px-4 py-2.5 text-xs font-black text-cyan-50 shadow-[0_0_35px_rgba(124,58,237,.28)] backdrop-blur-xl"
+      className="fixed bottom-3 right-4 z-[120] inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-cyan-300/25 bg-zinc-950/90 px-4 py-2 text-xs font-black leading-none text-cyan-50 shadow-[0_0_35px_rgba(124,58,237,.28)] backdrop-blur-xl sm:bottom-4 sm:right-5"
       aria-label="Installer Col'inCall"
     >
-      ✦ Installer Col'inCall
+      <span className="inline-flex items-center leading-none">✦</span>
+      <span className="leading-none">Installer Col'inCall</span>
     </button>
   );
 }
