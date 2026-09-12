@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Repair malformed lobby header and remove green theme remnants
+      - name: Repair malformed lobby header and enforce galaxy palette
         shell: python
         run: |
           from pathlib import Path
@@ -22,13 +22,25 @@ jobs:
           fixed = '<div><div className="text-[10px] text-emerald-400">● Connecté</div></div></div></header>'
           if broken in s:
               s = s.replace(broken, fixed, 1)
-              p.write_text(s, encoding='utf-8')
+
+          # Replace the remaining login fuchsia Tailwind classes directly in JSX.
+          # This avoids relying on CSS specificity/order in the production build.
+          replacements = {
+              'bg-fuchsia-400/10': 'bg-violet-500/10',
+              'text-fuchsia-200': 'text-violet-200',
+              'text-fuchsia-400': 'text-violet-400',
+              'bg-fuchsia-400': 'bg-violet-500',
+          }
+          for old, new in replacements.items():
+              s = s.replace(old, new)
+
+          p.write_text(s, encoding='utf-8')
 
           css = Path('app/galaxy.css')
           c = css.read_text(encoding='utf-8')
           marker = '/* FINAL GALAXY PALETTE: NO GREEN */'
           if marker not in c:
-              c += '''\n\n/* FINAL GALAXY PALETTE: NO GREEN */\n[class*="bg-emerald"], [class*="bg-green"] {\n  background: linear-gradient(135deg, #312e81, #7c3aed) !important;\n  box-shadow: 0 0 14px rgba(124,58,237,.28) !important;\n}\n[class*="text-emerald"], [class*="text-green"] {\n  color: #67e8f9 !important;\n  text-shadow: 0 0 12px rgba(34,211,238,.45) !important;\n}\n[class*="border-emerald"], [class*="border-green"] {\n  border-color: rgba(57,231,255,.35) !important;\n}\nbutton[aria-label="Installer Col'inCall"] {\n  background: linear-gradient(135deg, rgba(49,46,129,.96), rgba(126,34,206,.96)) !important;\n  border-color: rgba(103,232,249,.32) !important;\n  color: #f5f3ff !important;\n  box-shadow: 0 0 28px rgba(124,58,237,.28), inset 0 1px rgba(255,255,255,.12) !important;\n}\nbutton[aria-label="Installer Col'inCall"]:hover {\n  box-shadow: 0 0 36px rgba(57,231,255,.22), 0 12px 35px rgba(124,58,237,.28) !important;\n}\n#userLoginButton {\n  background: linear-gradient(135deg, #312e81, #7c3aed, #c026d3) !important;\n}\n#userLoginButton + *, #userLoginButton ~ * {\n  --tw-ring-color: rgba(139,92,246,.35);\n}\n\n/* Explicit status elements: cyan/violet instead of green. */\n.text-emerald-400, .text-emerald-300 {\n  color: #67e8f9 !important;\n}\n.bg-emerald-400 {\n  background: #22d3ee !important;\n  box-shadow: 0 0 12px rgba(34,211,238,.8) !important;\n}\n'''
+              c += '''\n\n/* FINAL GALAXY PALETTE: NO GREEN */\n[class*="bg-emerald"], [class*="bg-green"] {\n  background: linear-gradient(135deg, #312e81, #7c3aed) !important;\n  box-shadow: 0 0 14px rgba(124,58,237,.28) !important;\n}\n[class*="text-emerald"], [class*="text-green"] {\n  color: #67e8f9 !important;\n  text-shadow: 0 0 12px rgba(34,211,238,.45) !important;\n}\n[class*="border-emerald"], [class*="border-green"] {\n  border-color: rgba(57,231,255,.35) !important;\n}\nbutton[aria-label="Installer Col'inCall"] {\n  background: linear-gradient(135deg, rgba(49,46,129,.96), rgba(126,34,206,.96)) !important;\n  border-color: rgba(103,232,249,.32) !important;\n  color: #f5f3ff !important;\n  box-shadow: 0 0 28px rgba(124,58,237,.28), inset 0 1px rgba(255,255,255,.12) !important;\n}\n#userLoginButton {\n  background: linear-gradient(135deg, #312e81, #7c3aed, #c026d3) !important;\n}\nbutton[type="button"][class*="bg-violet-500/10"] {\n  background: linear-gradient(135deg,#312e81,#7c3aed,#c026d3) !important;\n  color:#f5f3ff !important;\n  border-color:rgba(103,232,249,.28) !important;\n  box-shadow:0 8px 30px rgba(124,58,237,.28),inset 0 1px rgba(255,255,255,.12) !important;\n}\n'''
               css.write_text(c, encoding='utf-8')
 
           pwa = Path('app/PwaInstall.tsx')
@@ -42,5 +54,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add app/page.tsx app/galaxy.css app/PwaInstall.tsx
           git diff --cached --quiet && exit 0
-          git commit -m 'style: remove green remnants from galaxy theme'
+          git commit -m 'style: replace remaining fuchsia login colors directly'
           git push
