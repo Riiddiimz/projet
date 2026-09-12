@@ -1,74 +1,305 @@
-/* Col'inCall Galaxy UI layer — intentionally loaded after globals.css */
+/* Col'inCall — Galaxy Nebula theme
+   This file is intentionally visual: it overrides the old zinc/fuchsia UI
+   instead of merely adding a few decorative effects. */
 :root {
-  --galaxy-bg: #07070f;
-  --galaxy-surface: rgba(13, 12, 30, .68);
-  --galaxy-border: rgba(255,255,255,.10);
-  --galaxy-cyan: #22d3ee;
-  --galaxy-violet: #8b5cf6;
-  --galaxy-pink: #ec4899;
+  --g-bg: #03040b;
+  --g-panel: rgba(10, 12, 28, .72);
+  --g-panel-strong: rgba(12, 14, 34, .9);
+  --g-border: rgba(151, 120, 255, .22);
+  --g-cyan: #39e7ff;
+  --g-violet: #8b5cf6;
+  --g-purple: #a855f7;
+  --g-pink: #ec4899;
+  --g-text: #f5f3ff;
+  --g-muted: #9b98b8;
 }
 
-html, body { background: var(--galaxy-bg) !important; }
+html,
 body {
+  min-height: 100%;
+  background: var(--g-bg) !important;
+}
+
+body {
+  color: var(--g-text);
   background:
-    radial-gradient(900px 500px at 15% 5%, rgba(139,92,246,.18), transparent 65%),
-    radial-gradient(800px 500px at 88% 12%, rgba(236,72,153,.13), transparent 65%),
-    radial-gradient(900px 600px at 50% 100%, rgba(34,211,238,.08), transparent 68%),
-    #07070f !important;
+    radial-gradient(ellipse 75% 55% at 8% 0%, rgba(109, 40, 217, .42), transparent 62%),
+    radial-gradient(ellipse 65% 48% at 92% 8%, rgba(219, 39, 119, .28), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 50% 105%, rgba(6, 182, 212, .22), transparent 62%),
+    radial-gradient(ellipse 45% 35% at 50% 45%, rgba(76, 29, 149, .12), transparent 70%),
+    #03040b !important;
+  overflow-x: hidden;
 }
+
+/* Deep moving nebula + star field. */
 body::before {
-  background-image:
-    radial-gradient(circle, rgba(255,255,255,.55) 0 1px, transparent 1.5px),
-    radial-gradient(circle, rgba(34,211,238,.32) 0 1px, transparent 1.5px),
-    radial-gradient(circle, rgba(236,72,153,.25) 0 1px, transparent 1.5px);
-  background-size: 97px 113px, 173px 151px, 211px 197px;
-  background-position: 12px 31px, 71px 11px, 23px 97px;
-  filter: none;
-  opacity: .42;
-  animation: galaxy-stars 24s linear infinite;
+  content: "";
+  position: fixed;
+  inset: -25%;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 25% 30%, rgba(139, 92, 246, .24), transparent 22%),
+    radial-gradient(ellipse at 70% 25%, rgba(236, 72, 153, .17), transparent 20%),
+    radial-gradient(ellipse at 55% 72%, rgba(34, 211, 238, .13), transparent 23%),
+    radial-gradient(circle, rgba(255,255,255,.8) 0 1px, transparent 1.5px);
+  background-size: auto, auto, auto, 115px 137px;
+  background-position: center, center, center, 12px 23px;
+  opacity: .72;
+  filter: blur(.1px);
+  animation: nebula-drift 28s ease-in-out infinite alternate;
 }
-body::after { opacity: .025 !important; }
 
-@keyframes galaxy-stars {
-  from { transform: translate3d(0,0,0); }
-  to { transform: translate3d(-35px, 24px, 0); }
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,.7) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 82% 68%, rgba(57,231,255,.65) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 62% 35%, rgba(236,72,153,.55) 0 1px, transparent 1.5px);
+  background-size: 173px 151px, 211px 197px, 263px 223px;
+  opacity: .38;
 }
 
+@keyframes nebula-drift {
+  0% { transform: translate3d(-1%, -1%, 0) scale(1); }
+  50% { transform: translate3d(1%, 1%, 0) scale(1.025); }
+  100% { transform: translate3d(-.5%, 1.5%, 0) scale(1.05); }
+}
+
+/* Replace the flat page backgrounds. */
+main.min-h-screen,
+main.relative.min-h-screen {
+  background: transparent !important;
+}
+
+/* Glass navigation/header. */
 header {
-  background: linear-gradient(180deg, rgba(7,7,15,.92), rgba(7,7,15,.62)) !important;
-  border-bottom: 1px solid rgba(139,92,246,.14) !important;
-  box-shadow: 0 12px 50px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.04) !important;
+  background: rgba(4, 5, 14, .68) !important;
+  border-color: rgba(139, 92, 246, .24) !important;
+  box-shadow: 0 12px 50px rgba(0,0,0,.38), inset 0 -1px rgba(255,255,255,.035) !important;
+  backdrop-filter: blur(20px) saturate(145%);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+}
+
+/* Main lobby/login cards become nebula glass. */
+main section,
+.room-card,
+#roomList article,
+#lobbyChat,
+main aside,
+#videoGrid > div,
+.fixed.z-\[60px\] section,
+.fixed.z-\[80px\] section {
+  border-color: var(--g-border) !important;
+  box-shadow: 0 18px 60px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.035);
+}
+
+/* Login card. */
+main.relative.min-h-screen > section {
+  background:
+    radial-gradient(circle at 15% 0%, rgba(168,85,247,.2), transparent 42%),
+    radial-gradient(circle at 90% 100%, rgba(34,211,238,.12), transparent 38%),
+    rgba(10, 10, 28, .76) !important;
+  border: 1px solid rgba(168,85,247,.3) !important;
+  box-shadow: 0 0 80px rgba(124,58,237,.18), 0 30px 90px rgba(0,0,0,.55) !important;
+  backdrop-filter: blur(22px);
+}
+
+/* Lobby room cards. */
+.room-card,
+#roomList article {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(236,72,153,.16), transparent 40%),
+    radial-gradient(circle at 0% 100%, rgba(34,211,238,.11), transparent 45%),
+    linear-gradient(145deg, rgba(20,16,45,.82), rgba(6,7,18,.82)) !important;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.room-card::before,
+#roomList article::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 25%, rgba(139,92,246,.08), transparent 70%);
+}
+
+.room-card:hover,
+#roomList article:hover {
+  transform: translateY(-3px);
+  border-color: rgba(57,231,255,.42) !important;
+  box-shadow: 0 0 35px rgba(139,92,246,.16), 0 20px 55px rgba(0,0,0,.35);
+}
+
+/* Search/input surfaces. */
+input,
+textarea {
+  color: var(--g-text) !important;
+}
+
+input:not([type="password"]),
+textarea,
+#roomSearch,
+#lobbyChatInput,
+#userUsernameInput,
+#passwordInput {
+  background: rgba(4,5,15,.56) !important;
+  border-color: rgba(139,92,246,.22) !important;
+  box-shadow: inset 0 0 25px rgba(76,29,149,.08);
+}
+
+input:focus,
+textarea:focus {
+  border-color: rgba(57,231,255,.55) !important;
+  box-shadow: 0 0 0 3px rgba(57,231,255,.08), 0 0 25px rgba(139,92,246,.12) !important;
+}
+
+/* Turn the old pink primary controls into Galaxy neon controls. */
+.bg-fuchsia-400,
+.bg-fuchsia-400\/10,
+.create-room-btn,
+#userLoginButton,
+.join-room-btn {
+  background: linear-gradient(135deg, #7c3aed, #c026d3 52%, #ec4899) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  box-shadow: 0 8px 30px rgba(168,85,247,.22), inset 0 1px rgba(255,255,255,.16) !important;
+}
+
+.create-room-btn:hover,
+#userLoginButton:hover,
+.join-room-btn:hover,
+.bg-fuchsia-400:hover {
+  box-shadow: 0 0 30px rgba(236,72,153,.28), 0 12px 40px rgba(124,58,237,.25) !important;
+}
+
+/* Video room: make each slot feel like a sci-fi glass viewport. */
+#videoGrid {
+  perspective: 1000px;
+}
+
+#videoGrid > div {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(139,92,246,.17), transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(34,211,238,.09), transparent 45%),
+    #060711 !important;
+  border: 1px solid rgba(139,92,246,.24) !important;
+  box-shadow: inset 0 0 45px rgba(76,29,149,.10), 0 18px 55px rgba(0,0,0,.3);
+}
+
+#videoGrid > div:empty::after {
+  content: "NEBULA SPACE";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(168,85,247,.22);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .28em;
+}
+
+#videoGrid [id^="video-card-"] {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(139,92,246,.16), transparent 35%),
+    #05060d !important;
+  border: 1px solid rgba(139,92,246,.18);
+}
+
+#videoGrid [id^="video-card-"] > div:last-child {
+  background: linear-gradient(180deg, transparent, rgba(3,4,11,.92)) !important;
+  text-shadow: 0 1px 8px #000;
+}
+
+/* Speaking = strong cyan/violet aura. */
+.galaxy-speaking {
+  border-color: rgba(57,231,255,.75) !important;
+  box-shadow:
+    0 0 0 2px rgba(57,231,255,.28),
+    0 0 28px rgba(57,231,255,.34),
+    0 0 70px rgba(139,92,246,.24) !important;
+}
+
+/* Online dots become neon. */
+.bg-emerald-400 {
+  background: #39ffb0 !important;
+  box-shadow: 0 0 10px rgba(57,255,176,.8);
+}
+
+.text-emerald-400,
+.text-emerald-300 {
+  color: #61ffc0 !important;
+  text-shadow: 0 0 12px rgba(57,255,176,.35);
+}
+
+.text-fuchsia-300,
+.text-fuchsia-400,
+.text-fuchsia-200 {
+  color: #d8b4fe !important;
+  text-shadow: 0 0 16px rgba(168,85,247,.35);
+}
+
+.text-cyan-300 {
+  color: #67e8f9 !important;
+  text-shadow: 0 0 14px rgba(34,211,238,.5);
+}
+
+/* Control dock in rooms. */
+#microBtn,
+#cameraBtn,
+button[aria-label="Partager l’écran"],
+button[aria-label="Arrêter le partage"],
+button[aria-label="Chat"] {
+  border: 1px solid rgba(139,92,246,.25);
+  box-shadow: 0 8px 30px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.06);
+}
+
+/* Chat/admin panels use the same glass language. */
+#lobbyChat,
+.fixed.z-\[60px\] section,
+.fixed.z-\[80px\] section {
+  background:
+    radial-gradient(circle at 0 0, rgba(139,92,246,.14), transparent 35%),
+    rgba(7,8,20,.92) !important;
+  backdrop-filter: blur(24px) saturate(140%);
+}
+
+/* Scrollbars. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139,92,246,.5) rgba(255,255,255,.03);
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,.025); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#7c3aed, #ec4899);
+  border-radius: 999px;
+}
+
+button:not(:disabled) {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 
 button:not(:disabled):hover {
-  box-shadow: 0 0 0 1px rgba(139,92,246,.16), 0 10px 35px rgba(139,92,246,.13);
+  box-shadow: 0 0 24px rgba(139,92,246,.2);
 }
 
-.video-card {
-  background:
-    radial-gradient(circle at 20% 10%, rgba(139,92,246,.18), transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(236,72,153,.10), transparent 45%),
-    linear-gradient(145deg, rgba(18,17,35,.95), rgba(7,7,15,.98)) !important;
-  border-color: rgba(139,92,246,.20) !important;
-}
+button:not(:disabled):active { transform: scale(.97); }
 
-/* Subtle neon speaking / active-state hooks for future real-time indicators. */
-.galaxy-speaking {
-  box-shadow: 0 0 0 2px rgba(34,211,238,.55), 0 0 28px rgba(34,211,238,.25), 0 20px 65px rgba(0,0,0,.35) !important;
-}
-.galaxy-live {
-  position: relative;
-}
-.galaxy-live::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  pointer-events: none;
-  border: 1px solid rgba(34,211,238,.32);
-  box-shadow: 0 0 24px rgba(34,211,238,.10);
+@media (max-width: 640px) {
+  body::before { opacity: .58; }
+  .room-card:hover,
+  #roomList article:hover { transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   body::before { animation: none; }
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
 }
