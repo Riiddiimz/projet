@@ -1,0 +1,29 @@
+name: Fix login user button
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply galaxy override
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('app/galaxy.css')
+          s=p.read_text(encoding='utf-8')
+          marker='/* HARD LOGIN USER BUTTON OVERRIDE */'
+          if marker not in s:
+            s += '''\n\n/* HARD LOGIN USER BUTTON OVERRIDE */\nbutton[type="button"][class*="bg-fuchsia-400/10"] { background: linear-gradient(135deg,#312e81,#7c3aed,#c026d3) !important; color:#f5f3ff !important; border-color:rgba(103,232,249,.28) !important; box-shadow:0 8px 30px rgba(124,58,237,.28),inset 0 1px rgba(255,255,255,.12) !important; }\nbutton[type="button"][class*="bg-fuchsia-400/10"]:hover { background:linear-gradient(135deg,#3730a3,#8b5cf6,#d946ef) !important; }\n'''
+            p.write_text(s,encoding='utf-8')
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/galaxy.css
+          git diff --cached --quiet && exit 0
+          git commit -m 'style: galaxy login user button'
+          git push
