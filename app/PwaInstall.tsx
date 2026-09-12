@@ -34,7 +34,7 @@ export default function PwaInstall() {
         await promptEvent.prompt();
         await promptEvent.userChoice.catch(() => null);
       }}
-      className="fixed bottom-5 right-5 z-[120] rounded-full border border-fuchsia-300/25 bg-zinc-950/85 px-4 py-2.5 text-xs font-black text-fuchsia-100 shadow-[0_0_35px_rgba(217,70,239,.18)] backdrop-blur-xl"
+      className="fixed bottom-5 right-5 z-[120] rounded-full border border-cyan-300/25 bg-zinc-950/90 px-4 py-2.5 text-xs font-black text-cyan-50 shadow-[0_0_35px_rgba(124,58,237,.28)] backdrop-blur-xl"
       aria-label="Installer Col'inCall"
     >
       ✦ Installer Col'inCall
