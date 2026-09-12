@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./galaxy.css";
+import "./login-fix.css";
 import PwaRegister from "./PwaRegister";
 import PwaInstall from "./PwaInstall";
 
