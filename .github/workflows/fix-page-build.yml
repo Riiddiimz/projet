@@ -12,23 +12,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Repair broken lobby header
+      - name: Repair malformed lobby header
         shell: python
         run: |
           from pathlib import Path
           p = Path('app/page.tsx')
           s = p.read_text(encoding='utf-8')
-          broken = '<header className="flex h-16 items-center justify-between border-b border-white/10 px-4 sm:px-7"><div className="flex items-center gap-3"><img src="/logogcol.png" alt="Col\'inCall" className="h-10 w-auto max-w-[180px] object-contain"/><div><div className="text-[10px] text-emerald-400">● Connecté</div></div></header>'
-          fixed = '<header className="flex h-16 items-center justify-between border-b border-white/10 px-4 sm:px-7"><div className="flex items-center gap-3"><img src="/logogcol.png" alt="Col\'inCall" className="h-10 w-auto max-w-[180px] object-contain"/><div><div className="text-[10px] text-emerald-400">● Connecté</div></div></div><div className="flex items-center gap-2"><button onClick={()=>setProfileOpen(true)} aria-label="Profil" className="rounded-full bg-white/5 p-1.5"><Avatar u={user}/></button><button onClick={logout} aria-label="Déconnexion" className="rounded-xl bg-white/5 p-2"><LogOut size={18}/></button></div></header>'
-          if broken not in s:
-              print('No broken header found; nothing to commit.')
-              raise SystemExit(0)
-          p.write_text(s.replace(broken, fixed, 1), encoding='utf-8')
+          broken = '<div><div className="text-[10px] text-emerald-400">● Connecté</div></div></header>'
+          fixed = '<div><div className="text-[10px] text-emerald-400">● Connecté</div></div></div></header>'
+          if broken in s:
+              s = s.replace(broken, fixed, 1)
+              p.write_text(s, encoding='utf-8')
+              print('Lobby header repaired.')
+          else:
+              print('No malformed lobby header found; nothing to commit.')
       - name: Commit fix
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add app/page.tsx
           git diff --cached --quiet && exit 0
-          git commit -m 'fix: repair broken lobby header'
+          git commit -m 'fix: close lobby header JSX'
           git push
