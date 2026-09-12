@@ -1,0 +1,23 @@
+/* Final login visual overrides — loaded after galaxy.css */
+.login-logo {
+  content: url('/clogo.png') !important;
+  display: block !important;
+  filter: drop-shadow(0 0 18px rgba(139,92,246,.42)) !important;
+}
+
+button.login-user-choice,
+.login-page button.login-user-choice {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-color: #08091a !important;
+  background-image: linear-gradient(135deg, #17133d 0%, #312e81 52%, #6d28d9 100%) !important;
+  color: #f5f3ff !important;
+  border: 1px solid rgba(167,139,250,.48) !important;
+  box-shadow: 0 8px 30px rgba(124,58,237,.32), inset 0 1px rgba(255,255,255,.12) !important;
+}
+
+button.login-user-choice:hover,
+.login-page button.login-user-choice:hover {
+  background-color: #11102b !important;
+  background-image: linear-gradient(135deg, #21195a 0%, #4338ca 52%, #9333ea 100%) !important;
+}
