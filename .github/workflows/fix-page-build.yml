@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Repair malformed lobby header and enforce galaxy palette
+      - name: Repair page, galaxy palette and speaking indicators
         shell: python
         run: |
           from pathlib import Path
@@ -23,29 +23,60 @@ jobs:
           if broken in s:
               s = s.replace(broken, fixed, 1)
 
-          # Remove the duplicate plain-text COL'INCALL label under the logo on the login screen.
           duplicate_logo = '<b className="text-2xl">COL&apos;IN<span className="text-violet-400">CALL</span></b>'
           s = s.replace(duplicate_logo, '', 1)
 
-          # Replace the remaining login fuchsia Tailwind classes directly in JSX.
+          # Remove remaining fuchsia/green login accents directly from JSX.
           replacements = {
               'bg-fuchsia-400/10': 'bg-violet-500/10',
               'text-fuchsia-200': 'text-violet-200',
               'text-fuchsia-400': 'text-violet-400',
+              'text-fuchsia-300': 'text-violet-300',
               'bg-fuchsia-400': 'bg-violet-500',
           }
           for old, new in replacements.items():
               s = s.replace(old, new)
+
+          # Speaking text is removed: the camera tile will show the speaking icon instead.
+          s = s.replace('{speaking&&<span className="text-cyan-300">Vous parlez</span>}', '')
+          s = s.replace('Vous parlez', '')
+
+          # Keep speaking state in the participant model.
+          s = s.replace('microphoneLocked?:boolean;cameraLocked?:boolean};', 'microphoneLocked?:boolean;cameraLocked?:boolean;speaking?:boolean};', 1)
+
+          # Add remote speaking detection directly from each WebRTC audio stream.
+          marker = 'const remoteSpeaking=useRef<Map<string,{ctx:AudioContext,raf:number}>>(new Map());'
+          if marker not in s:
+              s = s.replace('const socket=useRef<WebSocket|null>(null),localStream=useRef<MediaStream|null>(null),peers=useRef<Map<string,RTCPeerConnection>>(new Map()),pending=useRef<Map<string,RTCIceCandidateInit[]>>(new Map()),pendingMessages=useRef<any[]>([]),userRef=useRef<User|null>(null),screenStream=useRef<MediaStream|null>(null);', 'const socket=useRef<WebSocket|null>(null),localStream=useRef<MediaStream|null>(null),peers=useRef<Map<string,RTCPeerConnection>>(new Map()),pending=useRef<Map<string,RTCIceCandidateInit[]>>(new Map()),pendingMessages=useRef<any[]>([]),userRef=useRef<User|null>(null),screenStream=useRef<MediaStream|null>(null),remoteSpeaking=useRef<Map<string,{ctx:AudioContext,raf:number}>>(new Map());')
+
+          helper = "const watchRemoteSpeaking=(id:string,stream:MediaStream)=>{const old=remoteSpeaking.current.get(id);if(old){cancelAnimationFrame(old.raf);void old.ctx.close().catch(()=>{});remoteSpeaking.current.delete(id)};const C=window.AudioContext||(window as any).webkitAudioContext;if(!C||!stream.getAudioTracks().length)return;try{const ctx=new C();const source=ctx.createMediaStreamSource(new MediaStream(stream.getAudioTracks()));const analyser=ctx.createAnalyser();analyser.fftSize=512;source.connect(analyser);const data=new Uint8Array(analyser.frequencyBinCount);let raf=0;const tick=()=>{analyser.getByteFrequencyData(data);let sum=0;for(const n of data)sum+=n*n;const rms=Math.sqrt(sum/data.length)/255;const indicator=document.getElementById('speaking-indicator-'+id);if(indicator)indicator.style.display=rms>.045?'flex':'none';raf=requestAnimationFrame(tick)};tick();remoteSpeaking.current.set(id,{ctx,raf})}catch(e){console.warn('[WebRTC] remote speaking detection',id,e)}};"
+          if 'const watchRemoteSpeaking=' not in s:
+              s = s.replace('const send=(x:any)=>{', helper + '\n const send=(x:any)=>{', 1)
+
+          s = s.replace("const closePeer=(id:string)=>{const p=peers.current.get(id);try{p?.close()}catch{}peers.current.delete(id);pending.current.delete(id)};", "const closePeer=(id:string)=>{const p=peers.current.get(id);try{p?.close()}catch{}const audio=remoteSpeaking.current.get(id);if(audio){cancelAnimationFrame(audio.raf);void audio.ctx.close().catch(()=>{});remoteSpeaking.current.delete(id)}peers.current.delete(id);pending.current.delete(id)};", 1)
+
+          old_track = "p.ontrack=e=>{console.log('[WebRTC] track received',id,e.track.kind);const el=document.getElementById('remote-video-'+id) as HTMLVideoElement|null;if(el&&e.streams[0]){el.style.display='block';el.srcObject=e.streams[0];void el.play().catch(err=>console.warn('[WebRTC] video play',id,err))}};"
+          new_track = "p.ontrack=e=>{console.log('[WebRTC] track received',id,e.track.kind);const el=document.getElementById('remote-video-'+id) as HTMLVideoElement|null;if(el&&e.streams[0]){el.style.display='block';el.srcObject=e.streams[0];void el.play().catch(err=>console.warn('[WebRTC] video play',id,err));watchRemoteSpeaking(id,e.streams[0])}};"
+          s = s.replace(old_track, new_track, 1)
+
+          old_speaking_effect = "useEffect(()=>{const el=document.getElementById('video-card-'+userRef.current?.id);if(el)el.classList.toggle('galaxy-speaking',speaking)},[speaking]);"
+          new_speaking_effect = "useEffect(()=>{const el=document.getElementById('video-card-'+userRef.current?.id);if(el)el.classList.toggle('galaxy-speaking',speaking);const indicator=document.getElementById('speaking-indicator-'+userRef.current?.id);if(indicator)indicator.style.display=speaking?'flex':'none'},[speaking]);"
+          s = s.replace(old_speaking_effect, new_speaking_effect, 1)
+
+          old_local = "const label=document.createElement('div');label.className='absolute bottom-0 left-0 right-0 bg-black/60 p-3 text-sm font-bold';label.textContent=userRef.current.username+' · Vous';card.append(v,label);slot.append(card)}"
+          new_local = "const label=document.createElement('div');label.className='absolute bottom-0 left-0 right-0 bg-black/60 p-3 text-sm font-bold';label.textContent=userRef.current.username+' · Vous';const indicator=document.createElement('div');indicator.id='speaking-indicator-'+userRef.current.id;indicator.className='speaking-indicator';indicator.textContent='🎙️';indicator.style.display='none';card.append(v,label,indicator);slot.append(card)}"
+          s = s.replace(old_local, new_local, 1)
+
+          old_remote = "const label=document.createElement('div');label.className='absolute bottom-0 left-0 right-0 bg-black/60 p-3 text-sm font-bold';label.textContent=u.username;card.append(v,label);slot.append(card)}"
+          new_remote = "const label=document.createElement('div');label.className='absolute bottom-0 left-0 right-0 bg-black/60 p-3 text-sm font-bold';label.textContent=u.username;const indicator=document.createElement('div');indicator.id='speaking-indicator-'+u.id;indicator.className='speaking-indicator';indicator.textContent='🎙️';indicator.style.display=u.speaking?'flex':'none';card.append(v,label,indicator);slot.append(card)}"
+          s = s.replace(old_remote, new_remote, 1)
+
           p.write_text(s, encoding='utf-8')
 
           css = Path('app/galaxy.css')
           c = css.read_text(encoding='utf-8')
-
-          # The previous negative z-index put the nebula behind the body's background.
-          # Put the animated nebula in the page stacking context, behind the UI but above the body background.
-          nebula_marker = '/* GALAXY NEBULA STACKING FIX */'
-          if nebula_marker not in c:
-              c += '''\n\n/* GALAXY NEBULA STACKING FIX */\nhtml, body { background: #03040b !important; }\nbody { position: relative !important; isolation: isolate !important; }\nbody::before { z-index: 0 !important; opacity: .95 !important; filter: blur(10px) saturate(125%) !important; }\nbody::after { z-index: 0 !important; opacity: .72 !important; }\nbody > * { position: relative; z-index: 1; }\n'''
+          if '/* SPEAKING CAMERA INDICATOR */' not in c:
+              c += '''\n\n/* SPEAKING CAMERA INDICATOR */\n[class*="text-fuchsia"] { color: #c4b5fd !important; }\n[class*="text-emerald"], [class*="text-green"] { color: #67e8f9 !important; }\n.speaking-indicator { position:absolute; top:12px; right:12px; width:34px; height:34px; align-items:center; justify-content:center; border-radius:999px; background:linear-gradient(135deg,#312e81,#7c3aed,#c026d3); border:1px solid rgba(103,232,249,.55); box-shadow:0 0 24px rgba(124,58,237,.55), inset 0 1px rgba(255,255,255,.18); font-size:17px; line-height:1; z-index:20; animation:speaking-pulse 1s ease-in-out infinite; }\n@keyframes speaking-pulse { 0%,100%{transform:scale(1);box-shadow:0 0 18px rgba(124,58,237,.45),inset 0 1px rgba(255,255,255,.18)} 50%{transform:scale(1.08);box-shadow:0 0 30px rgba(236,72,153,.65),inset 0 1px rgba(255,255,255,.18)} }\n'''
               css.write_text(c, encoding='utf-8')
 
           pwa = Path('app/PwaInstall.tsx')
@@ -59,5 +90,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add app/page.tsx app/galaxy.css app/PwaInstall.tsx
           git diff --cached --quiet && exit 0
-          git commit -m 'fix: make galaxy nebula visible above page background'
+          git commit -m 'fix: speaking camera indicator and galaxy palette'
           git push
