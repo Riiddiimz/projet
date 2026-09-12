@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Col'inCall, une expérience sociale audio et vidéo moderne.",
   manifest: "/manifest.webmanifest",
   themeColor: "#07070f",
-  icons: { icon: "/logogcol.png", shortcut: "/logogcol.png", apple: "/logogcol.png" },
+  icons: { icon: "/clogo.png", shortcut: "/clogo.png", apple: "/clogo.png" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
