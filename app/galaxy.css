@@ -107,3 +107,8 @@ button[type="button"][class*="bg-fuchsia-400/10"],button[type="button"][class*="
 button:not(:disabled){transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease} button:not(:disabled):hover{box-shadow:0 0 24px rgba(139,92,246,.2)} button:not(:disabled):active{transform:scale(.97)}
 @media(max-width:640px){body::before{filter:blur(18px) saturate(135%)}.room-card:hover,#roomList article:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){body::before,body::after{animation:none}*,*::before,*::after{scroll-behavior:auto !important;transition:none !important}}
+
+
+/* HARD LOGIN USER BUTTON OVERRIDE */
+button[type="button"][class*="bg-fuchsia-400/10"] { background: linear-gradient(135deg,#312e81,#7c3aed,#c026d3) !important; color:#f5f3ff !important; border-color:rgba(103,232,249,.28) !important; box-shadow:0 8px 30px rgba(124,58,237,.28),inset 0 1px rgba(255,255,255,.12) !important; }
+button[type="button"][class*="bg-fuchsia-400/10"]:hover { background:linear-gradient(135deg,#3730a3,#8b5cf6,#d946ef) !important; }
