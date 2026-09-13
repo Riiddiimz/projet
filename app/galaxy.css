@@ -38,8 +38,20 @@ body::after { opacity: .025 !important; }
   background:
     linear-gradient(rgba(7,7,15,.38), rgba(7,7,15,.48)),
     url('/background.png') center / cover fixed no-repeat !important;
+  background-color: transparent !important;
   position: relative !important;
   overflow: hidden !important;
+}
+/* Final high-specificity guard: never let a global/Tailwind rule paint an opaque login background over the image. */
+html body main.login-page {
+  background-color: transparent !important;
+  background-image:
+    linear-gradient(rgba(7,7,15,.38), rgba(7,7,15,.48)),
+    url('/background.png') !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
 }
 .login-page::before {
   content: "";
