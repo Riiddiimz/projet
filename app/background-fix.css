@@ -1,0 +1,27 @@
+/* Background image fix */
+html, body {
+  min-height: 100%;
+}
+
+body {
+  background-image:
+    linear-gradient(rgba(7, 7, 15, 0.48), rgba(7, 7, 15, 0.58)),
+    url('/background.jpg') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+  background-color: #07070f !important;
+}
+
+/* Let the real image remain visible behind the application. */
+main,
+main:has(#userUsernameInput) {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Keep the login panel readable without hiding the nebula. */
+main:has(#userUsernameInput) > section {
+  background-color: rgba(10, 10, 20, 0.46) !important;
+}
