@@ -26,9 +26,9 @@ main:has(#userUsernameInput) > section {
   background-color: rgba(10, 10, 20, 0.46) !important;
 }
 
-/* Admin modal: keep its panel dark, but don't darken the whole background. */
-main > div.fixed.inset-0[class*="bg-black/"] {
-  background-color: rgba(0, 0, 0, 0.12) !important;
+/* Admin modal: remove the fullscreen dark scrim, keep the modal itself unchanged. */
+main .fixed.inset-0[class*="bg-black"] {
+  background-color: transparent !important;
 }
 
 /* Login: add the small Col'inCall logo directly above the Galaxy logo. */
