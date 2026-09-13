@@ -3,8 +3,6 @@ name: Fix lobby header
 on:
   push:
     branches: [main]
-    paths:
-      - ".github/workflows/fix-lobby-header.yml"
   workflow_dispatch:
 
 permissions:
