@@ -30,3 +30,13 @@ main:has(#userUsernameInput) > section {
 main > div.fixed.inset-0[class*="bg-black/"] {
   background-color: rgba(0, 0, 0, 0.12) !important;
 }
+
+/* Login: add the small Col'inCall logo directly above the Galaxy logo. */
+main:has(.login-logo) > section::before {
+  content: "";
+  display: block;
+  width: 6rem;
+  height: 6rem;
+  margin: 0 auto 0.5rem;
+  background: url('/clogo.png') center / contain no-repeat;
+}
