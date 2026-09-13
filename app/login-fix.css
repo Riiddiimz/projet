@@ -55,3 +55,16 @@ html body .login-page button.login-user-choice:hover {
 html body .login-page button.login-user-choice:hover::after {
   color: #e9d5ff !important;
 }
+
+/* Explicitly neutralize the legacy green login selector. */
+html body main.login-page:has(#userUsernameInput) > section > button[aria-label="Utilisateur"],
+html body main.login-page:has(#userUsernameInput) > section > button[aria-label="Utilisateur"]:hover,
+html body main.login-page:has(#userUsernameInput) > section > button[aria-label="Utilisateur"]:focus,
+html body main.login-page:has(#userUsernameInput) > section > button[aria-label="Utilisateur"]:active {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #f5f3ff !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
