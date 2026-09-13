@@ -41,15 +41,20 @@ main:has(.login-logo) > section::before {
   background: url('/clogo.png') center / contain no-repeat;
 }
 
-/* Login buttons: remove the green-looking aura from the user submit button. */
+/* Login buttons: same clean outline, without the green aura. */
 #userLoginButton {
-  box-shadow: none !important;
+  border: 1px solid rgba(232, 121, 249, 0.55) !important;
+  box-shadow: 0 0 0 1px rgba(232, 121, 249, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
 }
 #userLoginButton::before {
   display: none !important;
 }
+#userLoginButton:hover {
+  border-color: rgba(232, 121, 249, 0.8) !important;
+  box-shadow: 0 0 0 1px rgba(232, 121, 249, 0.12), 0 8px 28px rgba(217, 70, 239, 0.10) !important;
+}
 
-/* Admin submit: give it a clean visible outline without a glow. */
+/* Admin submit: same visible outline. */
 #adminLoginButton {
   border: 1px solid rgba(232, 121, 249, 0.55) !important;
   box-shadow: 0 0 0 1px rgba(232, 121, 249, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
