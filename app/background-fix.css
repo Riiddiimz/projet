@@ -25,3 +25,8 @@ main:has(#userUsernameInput) {
 main:has(#userUsernameInput) > section {
   background-color: rgba(10, 10, 20, 0.46) !important;
 }
+
+/* Admin modal: keep its panel dark, but don't darken the whole background. */
+main > div.fixed.inset-0[class*="bg-black/"] {
+  background-color: rgba(0, 0, 0, 0.12) !important;
+}
