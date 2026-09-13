@@ -1,0 +1,56 @@
+name: Update login modes
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update login UI
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('app/page.tsx')
+          s = p.read_text(encoding='utf-8')
+
+          old_state = "const [user,setUser]=useState<User|null>(null),[name,setName]=useState(''),[code,setCode]=useState(''),[error,setError]=useState('');"
+          new_state = old_state + "\n const [loginMode,setLoginMode]=useState<'user'|'admin'>('user');"
+          if "loginMode" not in s:
+              s = s.replace(old_state, new_state, 1)
+
+          start = " if(!user)return "
+          end = "\n if(room)return "
+          a = s.find(start)
+          b = s.find(end, a)
+          if a < 0 or b < 0:
+              raise SystemExit('login block not found')
+
+          block = ''' if(!user)return <main className="login-page relative flex min-h-screen items-center justify-center px-5 text-zinc-50"><section className="login-card relative z-10 w-full max-w-md rounded-[2rem] border p-8"><div className="mb-8 text-center"><img src="/clogo-galaxy.svg" alt="Col'inCall" className="login-logo mx-auto mb-5 h-auto w-full max-w-[310px] object-contain"/><p className="mt-2 text-sm text-zinc-400">Parle. Rencontre. Passe un bon moment.</p></div><div className="mb-6 grid grid-cols-2 gap-3"><button type="button" aria-label="Utilisateur" onClick={()=>{setLoginMode('user');setError('')}} className={`login-mode-button ${loginMode==='user'?'login-mode-active':''}`}><Users size={18}/> Utilisateur</button><button type="button" aria-label="Admin" onClick={()=>{setLoginMode('admin');setError('')}} className={`login-mode-button ${loginMode==='admin'?'login-mode-active':''}`}><Shield size={18}/> Admin</button></div>{loginMode==='user'?<div className="space-y-3"><input id="userUsernameInput" value={name} onChange={e=>setName(e.target.value)} placeholder="Nom d'utilisateur" aria-label="Nom d'utilisateur" className="login-input w-full rounded-2xl px-4 py-3 outline-none"/><input id="passwordInput" type="password" value={code} onChange={e=>setCode(e.target.value)} placeholder="Code (facultatif)" aria-label="Code" className="login-input w-full rounded-2xl px-4 py-3 outline-none"/><button id="userLoginButton" onClick={()=>{const n=name.trim();if(!n){setError("Entrez un nom d'utilisateur.");return}send({type:'login',username:n,password:code,isAdmin:false})}} className="login-button flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 font-black">Se connecter <ArrowRight size={18}/></button></div>:<div className="space-y-3"><input id="adminUsernameInput" value={name} onChange={e=>setName(e.target.value)} placeholder="Identifiant administrateur" aria-label="Identifiant administrateur" autoComplete="username" className="login-input w-full rounded-2xl px-4 py-3 outline-none"/><input id="adminPasswordInput" type="password" value={code} onChange={e=>setCode(e.target.value)} placeholder="Mot de passe administrateur" aria-label="Mot de passe administrateur" autoComplete="current-password" className="login-input w-full rounded-2xl px-4 py-3 outline-none"/><button id="adminLoginButton" onClick={()=>{const n=name.trim();if(!n){setError("Entrez l'identifiant administrateur.");return}if(!code){setError("Entrez le mot de passe administrateur.");return}send({type:'login',username:n,password:code,isAdmin:true})}} className="login-button login-admin-submit flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 font-black"><Shield size={18}/> Se connecter en Admin</button></div>}{error&&<div id="userLoginError" className="login-error mt-3 rounded-xl p-3 text-sm">{error}</div>}</section></main>;'''
+          s = s[:a] + block + s[b:]
+          p.write_text(s, encoding='utf-8')
+
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/page.tsx
+          git diff --cached --quiet && exit 0
+          git commit -m 'feat: add user and admin login modes'
+          git push
+
+      - name: Remove one-time workflow
+        if: success()
+        shell: bash
+        run: |
+          git rm .github/workflows/update-login-modes.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: remove one-time login workflow'
+          git push
